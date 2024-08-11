@@ -39,15 +39,16 @@ class Config_Netprobe():
     # get all environment variables that match the pattern DNS_NAMESERVER_\d{1,}
     # and create a list of tuples with the nameserver and the IP
     nameservers = []
-    match_pattern = r'/^DNS_NAMESERVER_(\d{1,})$/gmi'
+    match_pattern = r'^DNS_NAMESERVER_(\d{1,})$'
     for key, value in os.environ.items():
         print(f'key: {key}, value: {value}')
-        m = re.match(match_pattern, key)
+        m = re.match(match_pattern, key, re.IGNORECASE | re.DOTALL | re.MULTILINE)
         if m:
-            
             # get the nameserver number from the match
             nameserver = m.group(1)
             nameservers.append((value, os.getenv(f'DNS_NAMESERVER_{nameserver}_IP', f'DNS NAMESERVER {nameserver}')))
+        else:
+            print(f'No match for {key}')
 
     NP_LOCAL_DNS = os.getenv('NP_LOCAL_DNS', None)
     NP_LOCAL_DNS_IP = os.getenv('NP_LOCAL_DNS_IP', None)
