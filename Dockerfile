@@ -15,14 +15,17 @@ WORKDIR /netprobe_lite
 COPY src/ /netprobe_lite/
 FROM python:3.11-slim-bookworm
 
-COPY requirements.txt /netprobe_lite/requirements.txt
-
 # Install python/pip
 ENV PYTHONUNBUFFERED=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=on
 
-RUN apt-get update && apt-get install -y iputils-ping && apt-get install -y traceroute && apt-get clean \
-    && pip install -r /netprobe_lite/requirements.txt --break-system-packages && rm -rf /root/.cache/pip \
-    && chmod +x /netprobe_lite/entrypoint.sh
+RUN apt-get update \
+    && apt-get install -y iputils-ping \
+    && apt-get install -y traceroute \
+    && apt-get clean \
+    && pip install -r /netprobe_lite/setup/requirements.txt --break-system-packages \
+    && rm -rf /root/.cache/pip \
+    && chmod +x /netprobe_lite/entrypoint.sh \
+    && rm -rf /netprobe_lite/setup
 
 ENTRYPOINT [ "/bin/bash", "/netprobe_lite/entrypoint.sh" ]
