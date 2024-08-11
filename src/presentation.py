@@ -61,11 +61,11 @@ class CustomCollector(object):
             total_loss += float(item['loss'])
             total_jitter += float(item['jitter'])
 
-        # This shouldn't be here, as grafana can calculate this
-        # average_latency = total_latency / len(stats_netprobe['stats'])
-        # average_loss = total_loss / len(stats_netprobe['stats'])
-        # average_jitter = total_jitter / len(stats_netprobe['stats'])
+        average_latency = total_latency / len(stats_netprobe['stats'])
+        average_loss = total_loss / len(stats_netprobe['stats'])
+        average_jitter = total_jitter / len(stats_netprobe['stats'])
 
+        # This shouldn't be here, as grafana can calculate this
         # g.add_metric(['latency', 'all'], average_latency)
         # g.add_metric(['loss', 'all'], average_loss)
         # g.add_metric(['jitter', 'all'], average_jitter)
