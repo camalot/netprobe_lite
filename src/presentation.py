@@ -10,27 +10,25 @@ from config import Config_Presentation
 
 # Logging config
 
-logger = setup_logging("logs/presentation.log")
+log_path = Config_Presentation.log_path
+logger = setup_logging(f"{log_path}/presentation.log")
 
 class CustomCollector(object):
     def __init__(self):
         pass
 
     def collect(self):
-
         # Connect to Redis
-
         try:
             cache = RedisConnect()
         except Exception as e:
-            logger.error("Could not connect to Redis")
+            logger.error('Could not connect to Redis')
             logger.error(e)
 
         if not cache:
             return
 
         # Retrieve Netprobe data
-
         results_netprobe = cache.redis_read('netprobe') # Get the latest results from Redis
 
         if results_netprobe:
@@ -38,17 +36,20 @@ class CustomCollector(object):
         else:
             return
 
-        g = GaugeMetricFamily("Network_Stats", 'Network statistics for latency and loss from the probe to the destination', labels=['type','target'])
+        g = GaugeMetricFamily(
+            "Network_Stats", 
+            'Network statistics for latency and loss from the probe to the destination', 
+            labels=['type','target']
+        )
 
         total_latency = 0 # Calculate these in presentation rather than prom to reduce cardinality
         total_loss = 0
         total_jitter = 0
 
         for item in stats_netprobe['stats']: # Expose each individual latency / loss metric for each site tested
-
             g.add_metric(['latency',item['site']],item['latency'])
             g.add_metric(['loss',item['site']],item['loss'])
-            g.add_metric(['jitter',item['site']],item['jitter'])            
+            g.add_metric(['jitter',item['site']],item['jitter'])
 
         for item in stats_netprobe['stats']: # Aggregate all latency / loss metrics into one
 
@@ -62,11 +63,13 @@ class CustomCollector(object):
 
         g.add_metric(['latency','all'],average_latency)
         g.add_metric(['loss','all'],average_loss)
-        g.add_metric(['jitter','all'],average_jitter)        
+        g.add_metric(['jitter','all'],average_jitter)
 
         yield g
 
-        h = GaugeMetricFamily("DNS_Stats", 'DNS performance statistics for various DNS servers', labels=['server'])
+        h = GaugeMetricFamily(
+            'DNS_Stats', 'DNS performance statistics for various DNS servers', labels=['server']
+        )
 
         for item in stats_netprobe['dns_stats']:
             h.add_metric([item['nameserver']],item['latency'])
@@ -83,7 +86,9 @@ class CustomCollector(object):
         if results_speedtest: # Speed test is optional
             stats_speedtest = json.loads(json.loads(results_speedtest))
 
-            s = GaugeMetricFamily("Speed_Stats", 'Speedtest performance statistics from speedtest.net', labels=['direction'])
+            s = GaugeMetricFamily(
+                'Speed_Stats', 'Speedtest performance statistics from speedtest.net', labels=['direction']
+            )
 
             for key in stats_speedtest['speed_stats'].keys():
                 if stats_speedtest['speed_stats'][key]:
@@ -125,19 +130,30 @@ class CustomCollector(object):
             eval_dns_latency = my_dns_latency / threshold_dns_latency
 
         # Master scoring function
+        score = (
+            (1 - weight_loss * eval_loss) - 
+            (weight_jitter * eval_jitter) - 
+            (weight_latency * eval_latency) - 
+            (weight_dns_latency * eval_dns_latency)
+        )
 
-        score = 1 - weight_loss * (eval_loss) - weight_jitter * (eval_jitter) - weight_latency * (eval_latency) - weight_dns_latency * (eval_dns_latency)
-
-        i = GaugeMetricFamily("Health_Stats", 'Overall internet health function')
+        i = GaugeMetricFamily('Health_Stats', 'Overall internet health function')
         i.add_metric(['health'],score)
 
         yield i
 
+class NetprobePresenation():
+    def __init__(self):
+        pass
+
+    def run(self):
+        print('Starting presentation service')
+        start_http_server(Config_Presentation.presentation_port,addr=Config_Presentation.presentation_interface)
+        print(f'Presentation service started on {Config_Presentation.presentation_interface}:{Config_Presentation.presentation_port}')
+        REGISTRY.register(CustomCollector())
+        while True:
+            time.sleep(15)
 
 if __name__ == '__main__':
-
-    start_http_server(Config_Presentation.presentation_port,addr=Config_Presentation.presentation_interface)
-    
-    REGISTRY.register(CustomCollector())
-    while True:
-        time.sleep(15)
+    presentation = NetprobePresenation()
+    presentation.run()

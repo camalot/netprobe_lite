@@ -1,14 +1,11 @@
 # Redis helper
 # 
 # Functions to help read and write from Redis
-
-
 from config import Config_Redis
 import redis
 import json
 
 class RedisConnect():
-
     def __init__(self):
 
         # Load global variables

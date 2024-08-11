@@ -7,8 +7,7 @@ import speedtest
 
 
 class NetworkCollector(object): # Main network collection class
-
-    def __init__(self,sites,count,dns_test_site,nameservers_external):
+    def __init__(self, sites: list[str], count: int, dns_test_site: str, nameservers_external: list[tuple[str,str]]):
         self.sites = sites # List of sites to ping
         self.count = str(count) # Number of pings
         self.stats = [] # List of stat dicts
@@ -17,10 +16,8 @@ class NetworkCollector(object): # Main network collection class
         self.nameservers = []
         self.nameservers = nameservers_external
 
-
-    def pingtest(self,count,site):
-
-        ping = subprocess.getoutput(f"ping -n -i 0.1 -c {count} {site} | grep 'rtt\|loss'")
+    def pingtest(self, count, site):
+        ping = subprocess.getoutput(f"ping -n -i 0.1 -c {count} {site} | grep 'rtt\\|loss'")
 
         try:
             loss = ping.split(' ')[5].strip('%')
@@ -42,19 +39,14 @@ class NetworkCollector(object): # Main network collection class
 
         return True
 
-    def dnstest(self,site,nameserver):
-        
+    def dnstest(self, site, nameserver):
         my_resolver = dns.resolver.Resolver()
-
         server = [] # Resolver needs a list
         server.append(nameserver[1])
 
-
         try:
-
             my_resolver.nameservers = server
             my_resolver.timeout = 10
-
             answers = my_resolver.query(site,'A')
 
             dns_latency = round(answers.response.time * 1000,2)
@@ -82,7 +74,6 @@ class NetworkCollector(object): # Main network collection class
         return True
 
     def collect(self):
-
         # Empty preveious results
         self.stats = []
         self.dnsstats = []
@@ -105,7 +96,7 @@ class NetworkCollector(object): # Main network collection class
         for item in self.nameservers:
             s = Thread(target=self.dnstest, args=(self.dns_test_site,item,))
             threads.append(s)
-            s.start()            
+            s.start()
 
         # Wait for threads to complete
         for s in threads:
@@ -120,12 +111,10 @@ class NetworkCollector(object): # Main network collection class
 
 
 class Netprobe_Speedtest(object): # Speed test class
-
     def __init__(self):
         self.speedtest_stats = {"download": None, "upload": None}
 
     def netprobe_speedtest(self):
-
         s = speedtest.Speedtest()
         s.get_best_server()
         download = s.download()
@@ -137,7 +126,6 @@ class Netprobe_Speedtest(object): # Speed test class
         }
 
     def collect(self):
-
         self.speedtest_stats = {"download": None, "upload": None}
         self.netprobe_speedtest()
 
@@ -146,10 +134,3 @@ class Netprobe_Speedtest(object): # Speed test class
         })
 
         return results
-
-
-
-
-
-
-

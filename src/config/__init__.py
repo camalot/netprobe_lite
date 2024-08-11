@@ -1,13 +1,12 @@
 import os
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
+
 
 # Load configs from env
-
 try: # Try to load env vars from file, if fails pass
-    load_dotenv()
+    load_dotenv(find_dotenv())
 except:
     pass
-
 
 # Create class for each
 
@@ -18,6 +17,8 @@ class Config_Netprobe():
     dns_test_site = os.getenv('DNS_TEST_SITE')
     speedtest_enabled = os.getenv("SPEEDTEST_ENABLED", 'False').lower() in ('true', '1', 't')
     speedtest_interval = int(os.getenv('SPEEDTEST_INTERVAL'))
+
+    log_path = os.getenv('LOG_PATH', './logs')
 
     DNS_NAMESERVER_1 = os.getenv('DNS_NAMESERVER_1')
     DNS_NAMESERVER_1_IP = os.getenv('DNS_NAMESERVER_1_IP')
@@ -38,12 +39,14 @@ class Config_Netprobe():
 class Config_Redis():
     redis_url = os.getenv('REDIS_URL')
     redis_port = os.getenv('REDIS_PORT')
-    redis_password = os.getenv('REDIS_PASSWORD')    
+    redis_password = os.getenv('REDIS_PASSWORD')
+    log_path = os.getenv('LOG_PATH', './logs')
 
 class Config_Presentation():
     presentation_port = int(os.getenv('PRESENTATION_PORT'))
     presentation_interface = os.getenv('PRESENTATION_INTERFACE')
     device_id = os.getenv('DEVICE_ID')
+    log_path = os.getenv('LOG_PATH', './logs')
 
     weight_loss = float(os.getenv('weight_loss'))
     weight_latency = float(os.getenv('weight_latency'))

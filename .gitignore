@@ -122,6 +122,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.env*
+!.env.sample
 
 # Spyder project settings
 .spyderproject
@@ -155,4 +157,3 @@ cython_debug/
 #.idea/
 
 # Log files
-
