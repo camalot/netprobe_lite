@@ -1,0 +1,62 @@
+---
+netprobe:
+  probe:
+    interval: 30
+    count: 50
+  sites:
+    - name: google
+      url: https://www.google.com
+    - name: yahoo
+      url: https://www.yahoo.com
+    - name: bing
+      url: https://www.bing.com
+  dns:
+    test: google.com
+    nameservers:
+      - name: Google
+        ip: 8.8.8.8
+      - name: Cloudflare
+        ip: 1.1.1.1
+      - name: Quad9
+        ip: 9.9.9.9
+      - name: OpenDNS
+        ip: 208.67.222.222
+    local:
+      - name: Router
+        ip: 192.168.2.1
+      - name: pihole
+        ip: 192.168.2.7
+      - name: congus
+        ip: 192.168.2.4
+  health:
+    # Health Score Weights
+    # - These are the relative weights used to calculate your 'Internet Quality Score', they can be modified but must add up to 1.0
+    weights:
+      loss: 0.6 # Loss is 60% of score
+      latency: 0.15 # Latency is 15% of score
+      jitter: 0.2 # Jitter is 20% of score
+      dns_latency: 0.05 # DNS latency is 5% of score
+    # Health Score Thresholds
+    # - These threshold values are used in the calculation of your 'Internet Quality Score', they can be modified if required
+    thresholds:
+      loss: 5 # 5% loss threshold as max
+      latency: 100 # 100ms latency threshold as max
+      jitter: 30 # 30ms jitter threshold as max
+      dns_latency: 100 # 100ms dns latency threshold as max
+# Speetest configuration (be very careful when running on a metered connection!)
+# - This configuration is for setting up a "speed test" or rather a test of your internet bandwidth.
+# - In order to test your upload and download bandwidth we use speedtest.net as source. So your client will connect there and upload and download some data.
+# - That also means that a random server is selected for the test (usually the nearest one)
+# - Setting the SPEEDTEST_INTERVAL too agressively will cause speedtest.net to block your requests, recommend 15 minutes (900 seconds) and above
+speedtest:
+  enabled: no # set this to "True" to enable speed test function
+  interval: 937 # interval on which the speedtest will run, in seconds - note using a prime number helps reduce the number of collisions between netprobe and speed tests
+
+presentation:
+  port: 5000
+  interface: 0.0.0.0
+
+redis:
+  host: lb.bit13.local
+  port: 6379
+  password: "password"

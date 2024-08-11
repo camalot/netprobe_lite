@@ -52,6 +52,10 @@ class CustomCollector(object):
         total_loss = 0
         total_jitter = 0
 
+        average_jitter = 0
+        average_loss = 0
+        average_latency = 0
+
         for item in stats_netprobe['stats']: # Expose each individual latency / loss metric for each site tested
             g.add_metric(['latency', item['site']], item['latency'])
             g.add_metric(['loss', item['site']], item['loss'])
@@ -118,6 +122,11 @@ class CustomCollector(object):
         threshold_jitter = Config_Presentation.threshold_jitter # 30ms jitter threshold as max
         threshold_dns_latency = Config_Presentation.threshold_dns_latency # 100ms dns latency threshold as max
 
+
+        # eval_loss = 1 if average_loss / threshold_loss >= 1 else average_loss / threshold_loss
+        # eval_latency = 1 if average_latency / threshold_latency >= 1 else average_latency / threshold_latency
+        # eval_jitter = 1 if average_jitter / threshold_jitter >= 1 else average_jitter / threshold_jitter
+        # eval_dns_latency = 1 if my_dns_latency / threshold_dns_latency >= 1 else my_dns_latency / threshold_dns_latency
 
         if average_loss / threshold_loss >= 1:
             eval_loss = 1
