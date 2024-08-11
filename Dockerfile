@@ -18,7 +18,7 @@ WORKDIR /netprobe_lite
 COPY ./src/ /app/
 
 RUN \
-    apk update && \
+    apk update \
     && apk add --no-cache git curl build-base tcl tk \
     && mkdir -p /app /data \
     && pip install --no-cache-dir --upgrade pip \
@@ -26,6 +26,13 @@ RUN \
     && apk del git build-base \
     && chmod +x /app/setup/entrypoint.sh \
     && rm -rf /app/setup
+
+EXPOSE 5000
+
+VOLUME [ "/data" ]
+VOLUME [ "/config" ]
+VOLUME [ "/logs" ]
+
 
 # RUN apt-get update \
 #     && apt-get install -y iputils-ping \
