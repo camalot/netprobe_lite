@@ -4,6 +4,7 @@ import time
 from prometheus_client.core import GaugeMetricFamily, REGISTRY
 from prometheus_client import start_http_server
 import json
+import os
 from helpers.redis_helper import *
 from helpers.logging_helper import *
 from config import Config_Presentation
@@ -11,7 +12,7 @@ from config import Config_Presentation
 # Logging config
 
 log_path = Config_Presentation.log_path
-logger = setup_logging(f"{log_path}/presentation.log")
+logger = setup_logging(os.path.join(log_path, "presentation.log"))
 
 class CustomCollector(object):
     def __init__(self):
@@ -19,7 +20,7 @@ class CustomCollector(object):
         pass
 
     def metric_safe_name(self, name):
-        safe_name = name.replace(' ','_').replace('.','_').replace('-','_').lower()
+        safe_name = name.replace(' ', '_').replace('.', '_').replace('-', '_').lower()
         return f'{self.namespace}_{safe_name}'
 
     def collect(self):
@@ -44,7 +45,7 @@ class CustomCollector(object):
         g = GaugeMetricFamily(
             self.metric_safe_name('network_stats'), 
             'Network statistics for latency and loss from the probe to the destination', 
-            labels=['type','target']
+            labels=['type', 'target']
         )
 
         total_latency = 0 # Calculate these in presentation rather than prom to reduce cardinality
@@ -52,23 +53,22 @@ class CustomCollector(object):
         total_jitter = 0
 
         for item in stats_netprobe['stats']: # Expose each individual latency / loss metric for each site tested
-            g.add_metric(['latency',item['site']],item['latency'])
-            g.add_metric(['loss',item['site']],item['loss'])
-            g.add_metric(['jitter',item['site']],item['jitter'])
-
-        for item in stats_netprobe['stats']: # Aggregate all latency / loss metrics into one
+            g.add_metric(['latency', item['site']], item['latency'])
+            g.add_metric(['loss', item['site']], item['loss'])
+            g.add_metric(['jitter', item['site']], item['jitter'])
 
             total_latency += float(item['latency'])
             total_loss += float(item['loss'])
             total_jitter += float(item['jitter'])
 
-        average_latency = total_latency / len(stats_netprobe['stats'])
-        average_loss = total_loss / len(stats_netprobe['stats'])
-        average_jitter = total_jitter / len(stats_netprobe['stats'])
+        # This shouldn't be here, as grafana can calculate this
+        # average_latency = total_latency / len(stats_netprobe['stats'])
+        # average_loss = total_loss / len(stats_netprobe['stats'])
+        # average_jitter = total_jitter / len(stats_netprobe['stats'])
 
-        g.add_metric(['latency','all'],average_latency)
-        g.add_metric(['loss','all'],average_loss)
-        g.add_metric(['jitter','all'],average_jitter)
+        # g.add_metric(['latency', 'all'], average_latency)
+        # g.add_metric(['loss', 'all'], average_loss)
+        # g.add_metric(['jitter', 'all'], average_jitter)
 
         yield g
 
@@ -80,7 +80,7 @@ class CustomCollector(object):
 
         my_dns_latency = 0
         for item in stats_netprobe['dns_stats']:
-            h.add_metric([item['nameserver']],item['latency'])
+            h.add_metric([item['nameserver']], item['latency'])
 
             if item['nameserver'] == Config_Presentation.local_dns_name:
                 my_dns_latency = float(item['latency']) # Grab the current DNS latency of the probe's DNS resolver
@@ -102,7 +102,7 @@ class CustomCollector(object):
 
             for key in stats_speedtest['speed_stats'].keys():
                 if stats_speedtest['speed_stats'][key]:
-                    s.add_metric([key],stats_speedtest['speed_stats'][key])
+                    s.add_metric([key], stats_speedtest['speed_stats'][key])
         
             yield s
 
@@ -147,8 +147,8 @@ class CustomCollector(object):
             (weight_dns_latency * eval_dns_latency)
         )
 
-        i = GaugeMetricFamily(self.metric_safe_name('health_stats'), 'Overall internet health function')
-        i.add_metric(['health'],score)
+        i = GaugeMetricFamily(self.metric_safe_name('health_score'), 'Overall internet health function')
+        i.add_metric(['health'], score)
 
         yield i
 
