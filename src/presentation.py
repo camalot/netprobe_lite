@@ -79,12 +79,12 @@ class CustomCollector(object):
         h = GaugeMetricFamily(
             self.metric_safe_name('dns_stats'), 
             'DNS performance statistics for various DNS servers', 
-            labels=['server'],
+            labels=['server', 'ip'],
         )
 
         my_dns_latency = 0
         for item in stats_netprobe['dns_stats']:
-            h.add_metric([item['nameserver']], item['latency'])
+            h.add_metric([item['nameserver'], item['nameserver_ip']], item['latency'])
 
             if item['nameserver'] == Config_Presentation.local_dns_name:
                 my_dns_latency = float(item['latency']) # Grab the current DNS latency of the probe's DNS resolver

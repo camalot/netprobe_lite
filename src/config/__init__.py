@@ -41,7 +41,6 @@ class Config_Netprobe():
     nameservers = []
     match_pattern = r'^DNS_NAMESERVER_(\d{1,})$'
     for key, value in os.environ.items():
-        print(f'key: {key}, value: {value}')
         m = re.match(match_pattern, key, re.IGNORECASE | re.DOTALL | re.MULTILINE)
         if m:
             # get the nameserver number from the match

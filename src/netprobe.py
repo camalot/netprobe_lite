@@ -20,7 +20,7 @@ class Netprobe():
         dns_test_site = Config_Netprobe.dns_test_site
         nameservers_external = Config_Netprobe.nameservers
 
-        collector = NetworkCollector(sites,probe_count, dns_test_site, nameservers_external)
+        collector = NetworkCollector(sites, probe_count, dns_test_site, nameservers_external)
 
         # Logging Config
         log_path = Config_Netprobe.log_path
@@ -47,7 +47,7 @@ class Netprobe():
                 cache = RedisConnect()
                 # Save Data to Redis
                 cache_interval = probe_interval + 15 # Set the redis cache TTL slightly longer than the probe interval
-                cache.redis_write('netprobe',json.dumps(stats),cache_interval)
+                cache.redis_write('netprobe', json.dumps(stats), cache_interval)
                 #logger.info(f"Stats successfully written to Redis from device ID for Netprobe")
             except Exception as e:
                 logger.error("Could not connect to Redis")
