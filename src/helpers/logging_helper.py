@@ -4,32 +4,34 @@
 
 import logging
 from logging.handlers import RotatingFileHandler
+import sys
 
 def setup_logging(filename):
-
     # Logging config
-
     # Create logger
-    logger = logging.getLogger("logs")
+    logger = logging.getLogger("netprobe")
     logger.setLevel(level=logging.DEBUG)
 
     # Set formatter
-    logFileFormatter = logging.Formatter(
-        fmt=f"%(asctime)s %(levelname)s %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S"
-    )
+    logFileFormatter = logging.Formatter(fmt=f"%(asctime)s %(levelname)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
     # Set the handler
-    fileHandler = logging.handlers.RotatingFileHandler(
-        filename=filename,
-        maxBytes=5_000_000,
-        backupCount=3,
-    )
+    fileHandler = RotatingFileHandler(filename=filename, maxBytes=5_000_000, backupCount=3)
 
-    # Set the logger
+    stdoutHandler = logging.StreamHandler(sys.stdout)
+    stderrHandler = logging.StreamHandler(sys.stderr)
 
     fileHandler.setFormatter(logFileFormatter)
+    stdoutHandler.setFormatter(logFileFormatter)
+    stderrHandler.setFormatter(logFileFormatter)
+
     fileHandler.setLevel(level=logging.DEBUG)
+    stdoutHandler.setLevel(level=logging.DEBUG)
+    stderrHandler.setLevel(level=logging.ERROR)
+
+    # Set the logger
     logger.addHandler(fileHandler)
+    logger.addHandler(stdoutHandler)
+    logger.addHandler(stderrHandler)
 
     return logger
