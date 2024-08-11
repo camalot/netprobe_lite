@@ -71,10 +71,11 @@ class CustomCollector(object):
             'DNS_Stats', 'DNS performance statistics for various DNS servers', labels=['server']
         )
 
+        my_dns_latency = 0
         for item in stats_netprobe['dns_stats']:
             h.add_metric([item['nameserver']],item['latency'])
 
-            if item['nameserver'] == 'My_DNS_Server':
+            if item['nameserver'] == Config_Presentation.local_dns_name:
                 my_dns_latency = float(item['latency']) # Grab the current DNS latency of the probe's DNS resolver
     
         yield h

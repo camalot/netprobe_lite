@@ -27,13 +27,17 @@ class Config_Netprobe():
     DNS_NAMESERVER_3 = os.getenv('DNS_NAMESERVER_3')
     DNS_NAMESERVER_3_IP = os.getenv('DNS_NAMESERVER_3_IP')
     DNS_NAMESERVER_4 = os.getenv('DNS_NAMESERVER_4')
-    DNS_NAMESERVER_4_IP = os.getenv('DNS_NAMESERVER_4_IP')    
+    DNS_NAMESERVER_4_IP = os.getenv('DNS_NAMESERVER_4_IP')
+
+    NP_LOCAL_DNS = os.getenv('NP_LOCAL_DNS')
+    NP_LOCAL_DNS_IP = os.getenv('NP_LOCAL_DNS_IP')
 
     nameservers = [
-        (DNS_NAMESERVER_1,DNS_NAMESERVER_1_IP),
-        (DNS_NAMESERVER_2,DNS_NAMESERVER_2_IP),
-        (DNS_NAMESERVER_3,DNS_NAMESERVER_3_IP),
-        (DNS_NAMESERVER_4,DNS_NAMESERVER_4_IP),        
+        (DNS_NAMESERVER_1, DNS_NAMESERVER_1_IP),
+        (DNS_NAMESERVER_2, DNS_NAMESERVER_2_IP),
+        (DNS_NAMESERVER_3, DNS_NAMESERVER_3_IP),
+        (DNS_NAMESERVER_4, DNS_NAMESERVER_4_IP),
+        (NP_LOCAL_DNS, NP_LOCAL_DNS_IP),
     ]
 
 class Config_Redis():
@@ -47,6 +51,8 @@ class Config_Presentation():
     presentation_interface = os.getenv('PRESENTATION_INTERFACE')
     device_id = os.getenv('DEVICE_ID')
     log_path = os.getenv('LOG_PATH', './logs')
+
+    local_dns_name = os.getenv('NP_LOCAL_DNS')
 
     weight_loss = float(os.getenv('weight_loss'))
     weight_latency = float(os.getenv('weight_latency'))
