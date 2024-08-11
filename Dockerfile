@@ -28,7 +28,7 @@ COPY ./src/ /app/
 
 RUN \
     apk update \
-    && apk add --no-cache git curl build-base tcl tk iputils-ping \
+    && apk add --no-cache bash git curl build-base tcl tk iputils-ping \
     && mkdir -p /data /logs /config \
     && pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r /app/setup/requirements.txt \
