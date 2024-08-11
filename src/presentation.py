@@ -15,7 +15,12 @@ logger = setup_logging(f"{log_path}/presentation.log")
 
 class CustomCollector(object):
     def __init__(self):
+        self.namespace = 'netprobe'
         pass
+
+    def metric_safe_name(self, name):
+        safe_name = name.replace(' ','_').replace('.','_').replace('-','_').lower()
+        return f'{self.namespace}_{safe_name}'
 
     def collect(self):
         # Connect to Redis
@@ -37,7 +42,7 @@ class CustomCollector(object):
             return
 
         g = GaugeMetricFamily(
-            "Network_Stats", 
+            self.metric_safe_name('network_stats'), 
             'Network statistics for latency and loss from the probe to the destination', 
             labels=['type','target']
         )
@@ -68,7 +73,9 @@ class CustomCollector(object):
         yield g
 
         h = GaugeMetricFamily(
-            'DNS_Stats', 'DNS performance statistics for various DNS servers', labels=['server']
+            self.metric_safe_name('dns_stats'), 
+            'DNS performance statistics for various DNS servers', 
+            labels=['server'],
         )
 
         my_dns_latency = 0
@@ -88,7 +95,9 @@ class CustomCollector(object):
             stats_speedtest = json.loads(json.loads(results_speedtest))
 
             s = GaugeMetricFamily(
-                'Speed_Stats', 'Speedtest performance statistics from speedtest.net', labels=['direction']
+                self.metric_safe_name('speed_stats'), 
+                'Speedtest performance statistics from speedtest.net', 
+                labels=['direction'],
             )
 
             for key in stats_speedtest['speed_stats'].keys():
@@ -138,7 +147,7 @@ class CustomCollector(object):
             (weight_dns_latency * eval_dns_latency)
         )
 
-        i = GaugeMetricFamily('Health_Stats', 'Overall internet health function')
+        i = GaugeMetricFamily(self.metric_safe_name('health_stats'), 'Overall internet health function')
         i.add_metric(['health'],score)
 
         yield i
