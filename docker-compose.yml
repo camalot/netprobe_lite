@@ -24,7 +24,7 @@ services:
     image: "plaintextpackets/netprobe:latest"
     pull_policy: always
     environment:
-      MODULE: "NETPROBE"
+      NP_MODULE: "NETPROBE"
     networks:
       - netprobe-net
     dns:
@@ -37,7 +37,7 @@ services:
     image: "plaintextpackets/netprobe:latest"
     pull_policy: always
     environment:
-      MODULE: "SPEEDTEST"
+      NP_MODULE: "SPEEDTEST"
     networks:
       - netprobe-net
     dns:
@@ -50,7 +50,7 @@ services:
     image: "plaintextpackets/netprobe:latest"
     pull_policy: always
     environment:
-      MODULE: "PRESENTATION"
+      NP_MODULE: "PRESENTATION"
     networks:
       - netprobe-net
     dns:
