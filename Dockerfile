@@ -33,7 +33,7 @@ RUN \
     && pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r /app/setup/requirements.txt \
     && apk del git build-base \
-    && chmod +x /app/setup/entrypoint.sh \
+    && chmod +x /app/entrypoint.sh \
     && rm -rf /app/setup \
     && ln -s /app/logs /logs
 
