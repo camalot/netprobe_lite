@@ -21,6 +21,8 @@ LABEL VERSION="${BUILD_VERSION}"
 LABEL BRANCH="${BRANCH}"
 LABEL PROJECT_NAME="${PROJECT_NAME}"
 
+USER root:root
+
 WORKDIR /app
 
 # Copy application code
@@ -29,18 +31,21 @@ COPY ./src/ /app/
 RUN \
     apk update \
     && apk add --no-cache bash git curl build-base tcl tk iputils-ping \
-    && mkdir -p /data /logs /config \
+    && mkdir -p /data /config /app/logs \
     && pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r /app/setup/requirements.txt \
     && apk del git build-base \
     && chmod +x /app/entrypoint.sh \
     && rm -rf /app/setup \
-    && ln -s /app/logs /logs
+    && ln -s /app/logs /logs \
+    && chown -R 1000:1000 /app /data /logs /config
 
 EXPOSE 5000
 
 VOLUME [ "/data" ]
 VOLUME [ "/config" ]
 VOLUME [ "/logs" ]
+
+USER 1000:1000
 
 ENTRYPOINT [ "/bin/bash", "/app/entrypoint.sh" ]
