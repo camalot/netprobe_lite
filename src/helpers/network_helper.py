@@ -1,9 +1,10 @@
 # Network tests
 import subprocess
 import json
-from threading import Thread
 import dns.resolver
 import speedtest
+import traceback
+from threading import Thread
 
 
 class NetworkCollector(object): # Main network collection class
@@ -20,6 +21,7 @@ class NetworkCollector(object): # Main network collection class
         ping = subprocess.getoutput(f"ping -n -i 0.1 -c {count} {site} | grep 'rtt\\|loss'")
 
         try:
+            print(ping)
             loss = ping.split(' ')[5].strip('%')
             latency=ping.split('/')[4]
             jitter=ping.split('/')[6].split(' ')[0]
@@ -33,8 +35,10 @@ class NetworkCollector(object): # Main network collection class
 
             self.stats.append(netdata)
 
-        except:
+        except Exception as e:
             print(f"Error pinging {site}")
+            print(e)
+            print(traceback.format_exc())
             return False
 
         return True
@@ -62,6 +66,7 @@ class NetworkCollector(object): # Main network collection class
         except Exception as e:
             print(f"Error performing DNS resolution on {nameserver}")
             print(e)
+            print(traceback.format_exc())
 
             dnsdata = {
                 "nameserver":nameserver[0],
