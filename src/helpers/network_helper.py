@@ -8,14 +8,13 @@ from threading import Thread
 
 
 class NetworkCollector(object): # Main network collection class
-    def __init__(self, sites: list[str], count: int, dns_test_site: str, nameservers_external: list[tuple[str,str]]):
+    def __init__(self, sites: list[str], count: int, dns_test_site: str, nameservers: list[tuple[str,str,str]]):
         self.sites = sites # List of sites to ping
         self.count = str(count) # Number of pings
         self.stats = [] # List of stat dicts
         self.dnsstats = [] # List of stat dicts
         self.dns_test_site = dns_test_site # Site used to test DNS response times
-        self.nameservers = []
-        self.nameservers = nameservers_external
+        self.nameservers = nameservers
 
     def pingtest(self, count, site):
         ping = subprocess.getoutput(f"ping -n -i 0.1 -c {count} {site} | grep 'rtt\\|loss'")
