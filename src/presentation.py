@@ -41,7 +41,7 @@ class CustomCollector(object):
             return
 
         # Retrieve Netprobe data
-        results_netprobe = cache.redis_read('netprobe') # Get the latest results from Redis
+        results_netprobe = cache.redis_read(Config_Presentation.device_id) # Get the latest results from Redis
 
         if results_netprobe:
             stats_netprobe = json.loads(json.loads(results_netprobe))

@@ -33,6 +33,7 @@ class Config_Netprobe():
     dns_test_site = os.getenv('NP_DNS_TEST_SITE', 'google.com')
     speedtest_enabled = bool(os.getenv("NP_SPEEDTEST_ENABLED", 'FALSE').lower() in ('true', '1', 't', 'y', 'yes'))
     speedtest_interval = int(os.getenv('NP_SPEEDTEST_INTERVAL', '937'))
+    device_id = os.getenv('NP_DEVICE_ID', 'netprobe').replace(' ', '_').replace('.', '_').replace('-', '_').lower()
 
     log_path = os.getenv('NP_LOGS_PATH', './logs')
 

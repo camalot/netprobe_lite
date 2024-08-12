@@ -1,5 +1,6 @@
 ---
 netprobe:
+  device_id: "netprobe"
   probe:
     interval: 30
     count: 50
