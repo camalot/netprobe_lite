@@ -8,7 +8,7 @@ from config import Config_Presentation
 from helpers.logging_helper import setup_logging
 from helpers.redis_helper import RedisConnect
 from prometheus_client import start_http_server
-from prometheus_client.core import GaugeMetricFamily, REGISTRY
+from prometheus_client.core import REGISTRY, GaugeMetricFamily
 
 # Logging config
 log_path = Config_Presentation.log_path
@@ -49,8 +49,8 @@ class CustomCollector(object):
             return
 
         g = GaugeMetricFamily(
-            self.metric_safe_name('network_stats'), 
-            'Network statistics for latency and loss from the probe to the destination', 
+            self.metric_safe_name('network_stats'),
+            'Network statistics for latency and loss from the probe to the destination',
             labels=['type', 'target'],
         )
 
@@ -102,8 +102,8 @@ class CustomCollector(object):
             stats_speedtest = json.loads(json.loads(results_speedtest))
 
             s = GaugeMetricFamily(
-                self.metric_safe_name('speed_stats'), 
-                'Speedtest performance statistics from speedtest.net', 
+                self.metric_safe_name('speed_stats'),
+                'Speedtest performance statistics from speedtest.net',
                 labels=['direction'],
             )
 
@@ -163,7 +163,7 @@ class CustomCollector(object):
         yield i
 
 
-class NetprobePresenation():
+class NetprobePresenation:
     def __init__(self):
         pass
 
