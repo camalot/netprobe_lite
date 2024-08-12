@@ -26,12 +26,7 @@ class NetworkCollector(object): # Main network collection class
             latency=ping.split('/')[4]
             jitter=ping.split('/')[6].split(' ')[0]
 
-            netdata = {
-                "site":site,
-                "latency":latency,
-                "loss":loss,
-                "jitter":jitter
-            }
+            netdata = {"site": site, "latency": latency, "loss": loss, "jitter": jitter}
 
             self.stats.append(netdata)
 
@@ -51,14 +46,15 @@ class NetworkCollector(object): # Main network collection class
         try:
             my_resolver.nameservers = server
             my_resolver.timeout = 10
-            answers = my_resolver.query(site,'A')
+            answers = my_resolver.query(site, 'A')
 
-            dns_latency = round(answers.response.time * 1000,2)
+            dns_latency = round(answers.response.time * 1000, 2)
 
             dnsdata = {
-                "nameserver":nameserver[0],
-                "nameserver_ip":nameserver[1],
-                "latency":dns_latency
+                "nameserver": nameserver[0],
+                "nameserver_ip": nameserver[1],
+                "type": nameserver[2] if len(nameserver) == 3 else "external",
+                "latency": dns_latency
             }
 
             self.dnsstats.append(dnsdata)
@@ -69,9 +65,10 @@ class NetworkCollector(object): # Main network collection class
             print(traceback.format_exc())
 
             dnsdata = {
-                "nameserver":nameserver[0],
-                "nameserver_ip":nameserver[1],
-                "latency":5000
+                "nameserver": nameserver[0],
+                "nameserver_ip": nameserver[1],
+                "type": nameserver[2] if len(nameserver) == 3 else "external",
+                "latency": 5000
             }
             
             self.dnsstats.append(dnsdata)
@@ -87,7 +84,7 @@ class NetworkCollector(object): # Main network collection class
         threads = []
 
         for item in self.sites:
-            t = Thread(target=self.pingtest, args=(self.count,item,))
+            t = Thread(target=self.pingtest, args=(self.count, item))
             threads.append(t)
             t.start()
 
@@ -107,10 +104,7 @@ class NetworkCollector(object): # Main network collection class
         for s in threads:
             s.join()
 
-        results = json.dumps({
-            "stats":self.stats,
-            "dns_stats":self.dnsstats
-        })
+        results = json.dumps({"stats": self.stats, "dns_stats": self.dnsstats})
 
         return results
 
@@ -125,17 +119,12 @@ class Netprobe_Speedtest(object): # Speed test class
         download = s.download()
         upload = s.upload()
 
-        self.speedtest_stats = {
-            "download": download,
-            "upload": upload
-        }
+        self.speedtest_stats = {"download": download, "upload": upload}
 
     def collect(self):
         self.speedtest_stats = {"download": None, "upload": None}
         self.netprobe_speedtest()
 
-        results = json.dumps({
-            "speed_stats":self.speedtest_stats
-        })
+        results = json.dumps({"speed_stats": self.speedtest_stats})
 
         return results

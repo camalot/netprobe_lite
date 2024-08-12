@@ -5,6 +5,7 @@ from prometheus_client.core import GaugeMetricFamily, REGISTRY
 from prometheus_client import start_http_server
 import json
 import os
+import traceback
 from helpers.redis_helper import *
 from helpers.logging_helper import *
 from config import Config_Presentation
@@ -16,11 +17,15 @@ logger = setup_logging(os.path.join(log_path, "presentation.log"))
 
 class CustomCollector(object):
     def __init__(self):
-        self.namespace = 'netprobe'
+        # Namespace for the metrics
+        self.namespace = self.safe_name(Config_Presentation.device_id)
         pass
 
+    def safe_name(self, name):
+        return name.replace(' ', '_').replace('.', '_').replace('-', '_').lower()
+
     def metric_safe_name(self, name):
-        safe_name = name.replace(' ', '_').replace('.', '_').replace('-', '_').lower()
+        safe_name = self.safe_name(name)
         return f'{self.namespace}_{safe_name}'
 
     def collect(self):
@@ -30,6 +35,7 @@ class CustomCollector(object):
         except Exception as e:
             logger.error('Could not connect to Redis')
             logger.error(e)
+            logger.error(traceback.format_exc())
 
         if not cache:
             return
@@ -68,27 +74,25 @@ class CustomCollector(object):
         average_latency = total_latency / len(stats_netprobe['stats'])
         average_loss = total_loss / len(stats_netprobe['stats'])
         average_jitter = total_jitter / len(stats_netprobe['stats'])
-
-        # This shouldn't be here, as grafana can calculate this
-        # g.add_metric(['latency', 'all'], average_latency)
-        # g.add_metric(['loss', 'all'], average_loss)
-        # g.add_metric(['jitter', 'all'], average_jitter)
-
         yield g
 
         h = GaugeMetricFamily(
             self.metric_safe_name('dns_stats'), 
             'DNS performance statistics for various DNS servers', 
-            labels=['server', 'ip'],
+            labels=['server', 'ip', 'type'],
         )
 
-        my_dns_latency = 0
+        
+        local_dns_latency = 0
+        local_dns = []
         for item in stats_netprobe['dns_stats']:
-            h.add_metric([item['nameserver'], item['nameserver_ip']], item['latency'])
+            h.add_metric([item['nameserver'], item['nameserver_ip']], item['type'], item['latency'])
 
-            if item['nameserver'] == Config_Presentation.local_dns_name:
-                my_dns_latency = float(item['latency']) # Grab the current DNS latency of the probe's DNS resolver
-    
+            # find them by type, and then get the average of the latency
+            if item['type'].lower() == 'internal':
+                local_dns.append(float(item['latency']))
+                
+        local_dns_latency = sum(local_dns) / len(local_dns)
         yield h
 
         # Retrieve Speedtest data
@@ -107,7 +111,7 @@ class CustomCollector(object):
             for key in stats_speedtest['speed_stats'].keys():
                 if stats_speedtest['speed_stats'][key]:
                     s.add_metric([key], stats_speedtest['speed_stats'][key])
-        
+
             yield s
 
         # Calculate overall health score
@@ -143,10 +147,10 @@ class CustomCollector(object):
         else:
             eval_jitter = average_jitter / threshold_jitter
 
-        if my_dns_latency / threshold_dns_latency >= 1:
+        if local_dns_latency / threshold_dns_latency >= 1:
             eval_dns_latency = 1
         else:
-            eval_dns_latency = my_dns_latency / threshold_dns_latency
+            eval_dns_latency = local_dns_latency / threshold_dns_latency
 
         # Master scoring function
         score = (
@@ -166,9 +170,9 @@ class NetprobePresenation():
         pass
 
     def run(self):
-        print('Starting presentation service')
+        logger.debug('Starting presentation service')
         start_http_server(Config_Presentation.presentation_port,addr=Config_Presentation.presentation_interface)
-        print(f'Presentation service started on {Config_Presentation.presentation_interface}:{Config_Presentation.presentation_port}')
+        logger.info(f'Presentation service started on {Config_Presentation.presentation_interface}:{Config_Presentation.presentation_port}')
         REGISTRY.register(CustomCollector())
         while True:
             time.sleep(15)

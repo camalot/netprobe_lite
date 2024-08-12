@@ -4,12 +4,14 @@ netprobe:
     interval: 30
     count: 50
   sites:
-    - name: google
-      url: https://www.google.com
-    - name: yahoo
-      url: https://www.yahoo.com
-    - name: bing
-      url: https://www.bing.com
+    - name: Google
+      url: https://google.com
+    - name: Youtube
+      url: https://youtube.com
+    - name: Facebook
+      url: https://facebook.com
+    - name: Twitter
+      url: https://twitter.com
   dns:
     test: google.com
     nameservers:
@@ -24,9 +26,9 @@ netprobe:
     local:
       - name: Router
         ip: 192.168.2.1
-      - name: pihole
+      - name: Bataal
         ip: 192.168.2.7
-      - name: congus
+      - name: Congus
         ip: 192.168.2.4
   health:
     # Health Score Weights
@@ -57,6 +59,6 @@ presentation:
   interface: 0.0.0.0
 
 redis:
-  host: lb.bit13.local
+  host: netprobe-redis
   port: 6379
   password: "password"
