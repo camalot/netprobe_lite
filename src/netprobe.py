@@ -45,9 +45,8 @@ class Netprobe:
             try:
                 cache = RedisConnect()
                 # Save Data to Redis
-                cache_interval = probe_interval + 15 # Set the redis cache TTL slightly longer than the probe interval
+                cache_interval = probe_interval + 15  # Set the redis cache TTL slightly longer than the probe interval
                 cache.redis_write(device_id, json.dumps(stats), cache_interval)
-                #logger.info(f"Stats successfully written to Redis from device ID for Netprobe")
             except Exception as e:
                 logger.error("Could not connect to Redis")
                 logger.error(e)

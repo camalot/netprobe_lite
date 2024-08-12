@@ -15,7 +15,6 @@ load_dotenv(find_dotenv())
 
 def sighandler(signum, frame):
     print('<SIGTERM received>')
-    # print(Colors.colorize(Colors.FGYELLOW, "<SIGTERM received>"))
     exit(0)
 
 def presentation():
@@ -25,7 +24,6 @@ def presentation():
         presentation.run()
     except KeyboardInterrupt:
         print('<KeyboardInterrupt received>')
-        # print(Colors.colorize(Colors.FGYELLOW, "<KeyboardInterrupt received>"))
         exit(0)
 
 def speedtest():
@@ -35,7 +33,6 @@ def speedtest():
         speedtest.run()
     except KeyboardInterrupt:
         print('<KeyboardInterrupt received>')
-        # print(Colors.colorize(Colors.FGYELLOW, "<KeyboardInterrupt received>"))
         exit(0)
 
 def probe():
@@ -45,7 +42,6 @@ def probe():
         probe.run()
     except KeyboardInterrupt:
         print('<KeyboardInterrupt received>')
-        # print(Colors.colorize(Colors.FGYELLOW, "<KeyboardInterrupt received>"))
         exit(0)
 
 
