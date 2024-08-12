@@ -46,12 +46,18 @@ class Config_Netprobe():
         m = re.match(match_pattern_external, key, re.IGNORECASE | re.DOTALL | re.MULTILINE)
         if m:
             # get the nameserver number from the match
-            nameserver = m.group(1)
-            nameservers.append((value, os.getenv(f'NP_DNS_NAMESERVER_{nameserver}_IP', f'DNS NAMESERVER {nameserver}'), "external"))
+            index = m.group(1)
+            label = value if value else f"EXTERNAL DNS NAMESERVER {index}"
+            ip = os.getenv(f'NP_DNS_NAMESERVER_{index}_IP', None)
+            if ip and label:
+                nameservers.append((label, ip, 'external'))
         m = re.match(match_pattern_local, key, re.IGNORECASE | re.DOTALL | re.MULTILINE)
         if m:
-            nameserver = m.group(1)
-            nameservers.append((value, os.getenv(f'NP_LOCAL_DNS_{nameserver}_IP', f'LOCAL DNS NAMESERVER {nameserver}'), "internal"))
+            index = m.group(1)
+            label = value if value else f"INTERNAL DNS NAMESERVER {index}"
+            ip = os.getenv(f'NP_LOCAL_DNS_NAMESERVER_{index}_IP', None)
+            if ip and label:
+                nameservers.append((label, ip, 'internal'))
 
     # singular local dns
     NP_LOCAL_DNS = os.getenv('NP_LOCAL_DNS', None)
