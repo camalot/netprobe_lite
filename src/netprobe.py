@@ -1,6 +1,8 @@
 # Netprobe Service
 
 import time
+import json
+import traceback
 from helpers.network_helper import NetworkCollector
 from helpers.http_helper import *
 from helpers.redis_helper import *
@@ -27,11 +29,10 @@ class Netprobe():
         logger = setup_logging(f"{log_path}/netprobe.log")
 
         # Logging each nameserver
-        for nameserver, ip in Config_Netprobe.nameservers:
-            logger.info(f"Nameserver: {nameserver}, IP: {ip}")
+        for nameserver, ip, type in Config_Netprobe.nameservers:
+            logger.info(f"NAMESERVER: {nameserver} IP: {ip} TYPE: {type}")
 
         while True:
-            
             try:
                 stats = collector.collect()
                 current_time = datetime.now()
@@ -40,6 +41,7 @@ class Netprobe():
                 print("Error testing network")
                 logger.error("Error testing network")
                 logger.error(e)
+                logger.error(traceback.format_exc())
                 continue
 
             # Connect to Redis
