@@ -86,7 +86,8 @@ class CustomCollector(object):
         local_dns_latency = 0
         local_dns = []
         for item in stats_netprobe['dns_stats']:
-            h.add_metric([item['nameserver'], item['nameserver_ip']], item['type'], item['latency'])
+            labels = [item['nameserver'], item['nameserver_ip'], item['type']]
+            h.add_metric(labels, item['latency'])
 
             # find them by type, and then get the average of the latency
             if item['type'].lower() == 'internal':
