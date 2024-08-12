@@ -1,16 +1,14 @@
-# Netprobe Service
-
-import time
-import json
-import traceback
-from helpers.network_helper import NetworkCollector
-from helpers.http_helper import *
-from helpers.redis_helper import *
-from config import Config_Netprobe
 from datetime import datetime
-from helpers.logging_helper import *
+import json
+import time
+import traceback
 
-class Netprobe():
+from helpers.network_helper import NetworkCollector
+from helpers.redis_helper import RedisConnect
+from config import Config_Netprobe
+from helpers.logging_helper import setup_logging
+
+class Netprobe:
     def __init__(self):
         pass
 
@@ -36,8 +34,6 @@ class Netprobe():
         while True:
             try:
                 stats = collector.collect()
-                current_time = datetime.now()
-
             except Exception as e:
                 print("Error testing network")
                 logger.error("Error testing network")
@@ -55,8 +51,10 @@ class Netprobe():
             except Exception as e:
                 logger.error("Could not connect to Redis")
                 logger.error(e)
+                logger.error(traceback.format_exc())
             
             time.sleep(probe_interval)
+
 
 if __name__ == '__main__':
     netprobe = Netprobe()
