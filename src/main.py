@@ -8,7 +8,6 @@ from netprobe import Netprobe
 from netprobe_speedtest import NetprobeSpeedTest
 from presentation import NetprobePresenation
 
-
 load_dotenv(find_dotenv())
 
 
