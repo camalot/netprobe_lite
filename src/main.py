@@ -1,14 +1,13 @@
 import asyncio
-import os
 import signal
 from concurrent.futures import ProcessPoolExecutor
 
+# from bot.lib.colors import Colors
+from dotenv import find_dotenv, load_dotenv
 from netprobe import Netprobe
 from netprobe_speedtest import NetprobeSpeedTest
 from presentation import NetprobePresenation
 
-# from bot.lib.colors import Colors
-from dotenv import find_dotenv, load_dotenv
 
 load_dotenv(find_dotenv())
 
@@ -16,6 +15,7 @@ load_dotenv(find_dotenv())
 def sighandler(signum, frame):
     print('<SIGTERM received>')
     exit(0)
+
 
 def presentation():
     try:
@@ -26,6 +26,7 @@ def presentation():
         print('<KeyboardInterrupt received>')
         exit(0)
 
+
 def speedtest():
     try:
         print('Starting speedtest service')
@@ -34,6 +35,7 @@ def speedtest():
     except KeyboardInterrupt:
         print('<KeyboardInterrupt received>')
         exit(0)
+
 
 def probe():
     try:

@@ -1,4 +1,3 @@
-from datetime import datetime
 import json
 import time
 import traceback
@@ -7,6 +6,7 @@ from helpers.network_helper import NetworkCollector
 from helpers.redis_helper import RedisConnect
 from config import Config_Netprobe
 from helpers.logging_helper import setup_logging
+
 
 class Netprobe:
     def __init__(self):
@@ -20,7 +20,6 @@ class Netprobe:
         dns_test_site = Config_Netprobe.dns_test_site
         nameservers = Config_Netprobe.nameservers
         device_id = Config_Netprobe.device_id
-
         collector = NetworkCollector(sites, probe_count, dns_test_site, nameservers)
 
         # Logging Config
@@ -40,7 +39,6 @@ class Netprobe:
                 logger.error(e)
                 logger.error(traceback.format_exc())
                 continue
-
             # Connect to Redis
             try:
                 cache = RedisConnect()
@@ -51,7 +49,6 @@ class Netprobe:
                 logger.error("Could not connect to Redis")
                 logger.error(e)
                 logger.error(traceback.format_exc())
-            
             time.sleep(probe_interval)
 
 
