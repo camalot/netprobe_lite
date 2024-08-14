@@ -1,12 +1,13 @@
 # Netprobe Service
-
+import json
 import time
-from helpers.network_helper import Netprobe_Speedtest
-from helpers.http_helper import *
-from helpers.redis_helper import *
+import traceback
+
 from config import Config_Netprobe
-from datetime import datetime
-from helpers.logging_helper import *
+from helpers.logging_helper import setup_logging
+from helpers.network_helper import Netprobe_Speedtest
+from helpers.redis_helper import RedisConnect
+
 
 class NetprobeSpeedTest():
     def __init__(self):
@@ -25,31 +26,29 @@ class NetprobeSpeedTest():
             while True:
                 try:
                     stats = collector.collect()
-                    current_time = datetime.now()
-
                 except Exception as e:
                     print("Error running speedtest")
                     logger.error("Error running speedtest")
                     logger.error(e)
+                    logger.error(traceback.format_exc())
                     time.sleep(speedtest_interval)  # Pause before retrying
                     continue
-
                 # Connect to Redis
                 try:
                     cache = RedisConnect()
                     # Save Data to Redis
-                    cache_interval = speedtest_interval*2 # Set the redis cache 2x longer than the speedtest interval
-                    cache.redis_write('speedtest',json.dumps(stats),cache_interval)
+                    cache_interval = speedtest_interval * 2  # Set the redis cache 2x longer than the speedtest interval
+                    cache.redis_write('speedtest', json.dumps(stats), cache_interval)
                     logger.info(f"Stats successfully written to Redis for Speed Test")
-
                 except Exception as e:
                     logger.error("Could not connect to Redis")
                     logger.error(e)
+                    logger.error(traceback.format_exc())
                 
                 time.sleep(speedtest_interval)
-
         else:
             pass
+
 
 if __name__ == '__main__':
     speedtest = NetprobeSpeedTest()
