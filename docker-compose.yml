@@ -90,8 +90,7 @@ services:
     dns:
       - 8.8.8.8
       - 8.8.4.4
-      
+
 volumes:
   prometheus_data:
   grafana_data:
-  

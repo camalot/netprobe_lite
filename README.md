@@ -101,11 +101,13 @@ To do so, modify this line in .env:
 DNS_NAMESERVER_4_IP="8.8.8.8" # Replace this IP with the DNS server you use at home
 ```
 
-Change 8.8.8.8 to the IP of the DNS server you use, then restart the application (docker compose down / docker compose up)
+Change 8.8.8.8 to the IP of the DNS server you use, then restart the application
+(docker compose down / docker compose up)
 
 ### Use external Grafana
 
-Some users have their own Grafana instance running and would like to ingest Netprobe statistics there rather than running Grafana in Docker. To do this:
+Some users have their own Grafana instance running and would like to ingest Netprobe statistics there
+rather than running Grafana in Docker. To do this:
 
 1. In the compose.yaml file, add a port mapping to the Prometheus deployment config:
 
@@ -120,7 +122,8 @@ Some users have their own Grafana instance running and would like to ingest Netp
 
 1. Remove all of the Grafana configuration from the compose.yaml file
 
-1. Run Netprobe and then add a datasource to your existing Grafana as `http://x.x.x.x:XXXX` where x.x.x.x = IP of the probe machine running Docker
+1. Run Netprobe and then add a datasource to your existing Grafana as `http://x.x.x.x:XXXX`
+where x.x.x.x = IP of the probe machine running Docker
 
 ### Data storage - default method
 
@@ -145,14 +148,16 @@ When started again the old data should be wiped out.
 
 ### Data storage - bind mount method
 
-Using the default method, the data is stored within Docker volumes which you cannot easily access from the host itself. If you'd prefer storing data in mapped folders from the host, follow these instructions (thank you @Jeppedy):
+Using the default method, the data is stored within Docker volumes which you cannot easily access from the
+host itself. If you'd prefer storing data in mapped folders from the host, follow these instructions
+(thank you @Jeppedy):
 
 1. Clone the repository
 
 1. Inside the folder create two directories:
 
 ``` shell
-mkdir -p data/grafana data/prometheus 
+mkdir -p data/grafana data/prometheus
 ```
 
 1. Modify the compose.yml as follows (volume path as well as adding user ID):
@@ -193,7 +198,9 @@ mkdir -p data/grafana data/prometheus
 
 ### Run on startup
 
-Netprobe will automatically restart itself after the host system is rebooted, provided that Docker is also launched on startup. If you want to disable this behavior, modify the 'restart' variables in the compose.yaml file to this:
+Netprobe will automatically restart itself after the host system is rebooted, provided that Docker
+is also launched on startup. If you want to disable this behavior, modify the 'restart' variables in
+the compose.yaml file to this:
 
 ``` yaml
 restart: never
@@ -222,10 +229,12 @@ docker volume rm netprobe_grafana_data
 Q. I am running Pihole and when I enter my host IP under 'DNS_NAMESERVER_4_IP=' I receive this error:
 
 ``` text
-The resolution lifetime expired after 5.138 seconds: Server Do53:192.168.0.91@53 answered got a response from ('172.21.0.1', 53) instead of ('192.168.0.91', 53)
+The resolution lifetime expired after 5.138 seconds: Server Do53:192.168.0.91@53 answered got a response from
+('172.21.0.1', 53) instead of ('192.168.0.91', 53)
 ```
 
-A. This is a limitation of Docker. If you are running another DNS server in Docker and want to test it in Netprobe, you need to specify the Docker network gateway IP:
+A. This is a limitation of Docker. If you are running another DNS server in Docker and want to test it in
+Netprobe, you need to specify the Docker network gateway IP:
 
 1. Stop netprobe but don't wipe it (docker compose down)
 1. Find the gateway IP of your netprobe-probe container:
@@ -235,15 +244,19 @@ $ docker inspect netprobe-probe | grep Gateway
             "Gateway": "",
             "IPv6Gateway": "",
                     "Gateway": "192.168.208.1",
-                    "IPv6Gateway": "", 
+                    "IPv6Gateway": "",
 ```
 
 1. Enter that IP (e.g. 182.168.208.1) into your .env file for `DNS_NAMESERVER_4_IP=`
 
 Q. I constantly see one of my DNS servers at 5s latency, is this normal?
 
-A. 5s is the timeout for DNS queries in Netprobe Lite. If you see this happening for one specific IP, likely your machine is having issues using that DNS server (and so you shouldn't use it for home use).
+A. 5s is the timeout for DNS queries in Netprobe Lite. If you see this happening for one specific IP,
+likely your machine is having issues using that DNS server (and so you shouldn't use it for home use).
 
 ## License
 
-This project is released under a custom license that restricts commercial use. You are free to use, modify, and distribute the software for non-commercial purposes. Commercial use of this software is strictly prohibited without prior permission. If you have any questions or wish to use this software commercially, please contact [plaintextpackets@gmail.com].
+This project is released under a custom license that restricts commercial use. You are free to use, modify,
+and distribute the software for non-commercial purposes. Commercial use of this software is strictly prohibited
+without prior permission. If you have any questions or wish to use this software commercially, please contact
+[plaintextpackets@gmail.com](mailto:plaintextpackets@gmail.com).
