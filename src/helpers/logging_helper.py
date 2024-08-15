@@ -1,10 +1,10 @@
 # Logging helper
-# 
 # - Sets up logging config
 
 import logging
-from logging.handlers import RotatingFileHandler
 import sys
+from logging.handlers import RotatingFileHandler
+
 
 def setup_logging(filename):
     # Logging config
@@ -13,7 +13,7 @@ def setup_logging(filename):
     logger.setLevel(level=logging.DEBUG)
 
     # Set formatter
-    logFileFormatter = logging.Formatter(fmt=f"%(asctime)s %(levelname)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    logFileFormatter = logging.Formatter(fmt="%(asctime)s %(levelname)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
     # Set the handler
     fileHandler = RotatingFileHandler(filename=filename, maxBytes=5_000_000, backupCount=3)

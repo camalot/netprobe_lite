@@ -2,10 +2,10 @@ import json
 import time
 import traceback
 
-from helpers.network_helper import NetworkCollector
-from helpers.redis_helper import RedisConnect
 from config import Config_Netprobe
 from helpers.logging_helper import setup_logging
+from helpers.network_helper import NetworkCollector
+from helpers.redis_helper import RedisConnect
 
 
 class Netprobe:

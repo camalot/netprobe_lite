@@ -1,32 +1,30 @@
 import os
 import re
 import typing
+
 import yaml
 from dotenv import find_dotenv, load_dotenv
 
-
 # Load configs from env
-try: # Try to load env vars from file, if fails pass
+try:  # Try to load env vars from file, if fails pass
     load_dotenv(find_dotenv())
-except:
+except: # noqa: E722
     pass
 
-class Configuration():
+class Configuration:
     def __init__(self, file_path: typing.Optional[str] = None):
 
         # if file_path exists and is not none, load the file
         if file_path and os.path.exists(file_path):
             with open(file_path, 'r') as file:
                 self.config = yaml.safe_load(file)
-            
 
         self.netprobe = Config_Netprobe()
         self.redis = Config_Redis()
         self.presentation = Config_Presentation()
 
 # Create class for each
-
-class Config_Netprobe():
+class Config_Netprobe:
     probe_interval = int(os.getenv('NP_PROBE_INTERVAL', '30'))
     probe_count = int(os.getenv('NP_PROBE_COUNT', '50'))
     sites = os.getenv('NP_SITES', 'google.com,facebook.com,twitter.com,youtube.com').split(',')
@@ -67,13 +65,13 @@ class Config_Netprobe():
         nameservers.append((NP_LOCAL_DNS, NP_LOCAL_DNS_IP, "internal"))
 
 
-class Config_Redis():
+class Config_Redis:
     redis_url = os.getenv('NP_REDIS_URL', 'localhost')
     redis_port = os.getenv('NP_REDIS_PORT', '6379')
     redis_password = os.getenv('NP_REDIS_PASSWORD', 'password')
     log_path = os.getenv('NP_LOGS_PATH', './logs')
 
-class Config_Presentation():
+class Config_Presentation:
     presentation_port = int(os.getenv('NP_PRESENTATION_PORT', '5000'))
     presentation_interface = os.getenv('NP_PRESENTATION_INTERFACE', '0.0.0.0')
     device_id = os.getenv('NP_DEVICE_ID', 'netprobe')

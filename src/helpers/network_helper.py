@@ -1,19 +1,20 @@
 # Network tests
-import subprocess
 import json
-import dns.resolver
-import speedtest
+import subprocess
 import traceback
 from threading import Thread
 
+import dns.resolver
+import speedtest
 
-class NetworkCollector(object): # Main network collection class
-    def __init__(self, sites: list[str], count: int, dns_test_site: str, nameservers: list[tuple[str,str,str]]):
-        self.sites = sites # List of sites to ping
-        self.count = str(count) # Number of pings
-        self.stats = [] # List of stat dicts
-        self.dnsstats = [] # List of stat dicts
-        self.dns_test_site = dns_test_site # Site used to test DNS response times
+
+class NetworkCollector(object):  # Main network collection class
+    def __init__(self, sites: list[str], count: int, dns_test_site: str, nameservers: list[tuple[str, str, str]]):
+        self.sites = sites  # List of sites to ping
+        self.count = str(count)  # Number of pings
+        self.stats = []  # List of stat dicts
+        self.dnsstats = []  # List of stat dicts
+        self.dns_test_site = dns_test_site  # Site used to test DNS response times
         self.nameservers = nameservers
 
     def pingtest(self, count, site):
@@ -22,8 +23,8 @@ class NetworkCollector(object): # Main network collection class
         try:
             print(ping)
             loss = ping.split(' ')[5].strip('%')
-            latency=ping.split('/')[4]
-            jitter=ping.split('/')[6].split(' ')[0]
+            latency = ping.split('/')[4]
+            jitter = ping.split('/')[6].split(' ')[0]
 
             netdata = {"site": site, "latency": latency, "loss": loss, "jitter": jitter}
 
@@ -39,7 +40,7 @@ class NetworkCollector(object): # Main network collection class
 
     def dnstest(self, site, nameserver):
         my_resolver = dns.resolver.Resolver()
-        server = [] # Resolver needs a list
+        server = []  # Resolver needs a list
         server.append(nameserver[1])
 
         try:
@@ -53,7 +54,7 @@ class NetworkCollector(object): # Main network collection class
                 "nameserver": nameserver[0],
                 "nameserver_ip": nameserver[1],
                 "type": nameserver[2] if len(nameserver) == 3 else "external",
-                "latency": dns_latency
+                "latency": dns_latency,
             }
 
             self.dnsstats.append(dnsdata)
@@ -67,9 +68,9 @@ class NetworkCollector(object): # Main network collection class
                 "nameserver": nameserver[0],
                 "nameserver_ip": nameserver[1],
                 "type": nameserver[2] if len(nameserver) == 3 else "external",
-                "latency": 5000
+                "latency": 5000,
             }
-            
+
             self.dnsstats.append(dnsdata)
 
         return True
@@ -92,10 +93,10 @@ class NetworkCollector(object): # Main network collection class
             t.join()
 
         # Create threads, start them
-        threads = []            
+        threads = []
 
         for item in self.nameservers:
-            s = Thread(target=self.dnstest, args=(self.dns_test_site,item,))
+            s = Thread(target=self.dnstest, args=(self.dns_test_site, item))
             threads.append(s)
             s.start()
 
@@ -108,7 +109,7 @@ class NetworkCollector(object): # Main network collection class
         return results
 
 
-class Netprobe_Speedtest(object): # Speed test class
+class Netprobe_Speedtest(object):  # Speed test class
     def __init__(self):
         self.speedtest_stats = {"download": None, "upload": None}
 

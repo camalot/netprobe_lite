@@ -9,7 +9,7 @@ from helpers.network_helper import Netprobe_Speedtest
 from helpers.redis_helper import RedisConnect
 
 
-class NetprobeSpeedTest():
+class NetprobeSpeedTest:
     def __init__(self):
         pass
 
@@ -20,15 +20,14 @@ class NetprobeSpeedTest():
         collector = Netprobe_Speedtest()
         # Logging Config
         log_path = Config_Netprobe.log_path
-        logger = setup_logging(f"{log_path}/speedtest.log")
-        
-        if speedtest_enabled == True:
+        logger = setup_logging(f'{log_path}/speedtest.log')
+
+        if speedtest_enabled:
             while True:
                 try:
                     stats = collector.collect()
                 except Exception as e:
-                    print("Error running speedtest")
-                    logger.error("Error running speedtest")
+                    logger.error('Error running speedtest')
                     logger.error(e)
                     logger.error(traceback.format_exc())
                     time.sleep(speedtest_interval)  # Pause before retrying
@@ -39,12 +38,12 @@ class NetprobeSpeedTest():
                     # Save Data to Redis
                     cache_interval = speedtest_interval * 2  # Set the redis cache 2x longer than the speedtest interval
                     cache.redis_write('speedtest', json.dumps(stats), cache_interval)
-                    logger.info(f"Stats successfully written to Redis for Speed Test")
+                    logger.info('Stats successfully written to Redis for Speed Test')
                 except Exception as e:
-                    logger.error("Could not connect to Redis")
+                    logger.error('Could not connect to Redis')
                     logger.error(e)
                     logger.error(traceback.format_exc())
-                
+
                 time.sleep(speedtest_interval)
         else:
             pass

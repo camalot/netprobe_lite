@@ -4,16 +4,11 @@ Simple and effective tool for measuring ISP performance at home. The tool measur
 
 ## Support the Project
 
-If you'd like to support the development of this project, feel free to buy me a coffee!
-
-https://buymeacoffee.com/plaintextpm
+If you'd like to support the development of this project, feel free to [buy me a coffee](https://buymeacoffee.com/plaintextpm)!
 
 ## Full Tutorial
 
-Visit YouTube for a full tutorial on how to install and use Netprobe:
-
-https://youtu.be/Wn31husi6tc
-
+Visit [YouTube](https://youtu.be/Wn31husi6tc) for a full tutorial on how to install and use Netprobe:
 
 ## Requirements and Setup
 
@@ -21,13 +16,13 @@ To run Netprobe, you'll need a PC running Docker connected directly to your ISP 
 
 1. Netprobe requires the latest version of Docker. For instructions on installing Docker, see YouTube, it's super easy.
 
-2. Netprobe should be installed on a machine (the 'probe') which has a wired Ethernet connection to your primary ISP router. This ensures the tests are accurately measuring your ISP performance and excluding and interference from your home network. An old PC with Linux installed is a great option for this.
+1. Netprobe should be installed on a machine (the 'probe') which has a wired Ethernet connection to your primary ISP router. This ensures the tests are accurately measuring your ISP performance and excluding and interference from your home network. An old PC with Linux installed is a great option for this.
 
 ## Installation
 
 ### First-time Install
 
-1. Clone the repo locally to the probe machine:
+1. Clone the repository locally to the probe machine:
 
 ``` shell
 git clone https://github.com/plaintextpackets/netprobe_lite.git
@@ -55,7 +50,7 @@ When upgrading between versions, it is best to delete the deployment altogether 
 docker compose down -v
 ```
 
-1. Clone the latest code (or download manually from Github and replace the current files):
+1. Clone the latest code (or download manually from GitHub and replace the current files):
 
 ``` shell
 git clone https://github.com/plaintextpackets/netprobe_lite.git
@@ -69,7 +64,7 @@ docker compose up
 
 ## How to use
 
-1. Navigate to: http://x.x.x.x:3001/d/app/netprobe where x.x.x.x = IP of the probe machine running Docker.
+1. Navigate to: `http://x.x.x.x:3001/d/app/netprobe` where x.x.x.x = IP of the probe machine running Docker.
 
 1. Default user / pass is 'admin/admin'. Login to Grafana and set a custom password.
 
@@ -118,14 +113,14 @@ Some users have their own Grafana instance running and would like to ingest Netp
   prometheus:
     ...
     ports:
-      - 'XXXX:9090'    
+      - 'XXXX:9090'
 ```
 
 ... where XXXX is the port you wish to expose Prometheus on your host machine
 
 1. Remove all of the Grafana configuration from the compose.yaml file
 
-1. Run Netprobe and then add a datasource to your existing Grafana as http://x.x.x.x:XXXX where x.x.x.x = IP of the probe machine running Docker
+1. Run Netprobe and then add a datasource to your existing Grafana as `http://x.x.x.x:XXXX` where x.x.x.x = IP of the probe machine running Docker
 
 ### Data storage - default method
 
@@ -152,7 +147,7 @@ When started again the old data should be wiped out.
 
 Using the default method, the data is stored within Docker volumes which you cannot easily access from the host itself. If you'd prefer storing data in mapped folders from the host, follow these instructions (thank you @Jeppedy):
 
-1. Clone the repo
+1. Clone the repository
 
 1. Inside the folder create two directories:
 
@@ -198,7 +193,7 @@ mkdir -p data/grafana data/prometheus
 
 ### Run on startup
 
-Netprobe will automatically restart itself after the host system is rebooted, provided that Docker is also launched on startup. If you want to disable this behavior, modify the 'restart' variables in the compose.yaml file to this: 
+Netprobe will automatically restart itself after the host system is rebooted, provided that Docker is also launched on startup. If you want to disable this behavior, modify the 'restart' variables in the compose.yaml file to this:
 
 ``` yaml
 restart: never
@@ -211,6 +206,7 @@ To wipe all stored data and remove the Docker volumes, use this command:
 ``` shell
 docker compose down -v
 ```
+
 This will delete all containers and volumes related to Netprobe.
 
 ## FAQ & Troubleshooting
@@ -242,7 +238,7 @@ $ docker inspect netprobe-probe | grep Gateway
                     "IPv6Gateway": "", 
 ```
 
-1. Enter that IP (e.g. 182.168.208.1) into your .env file for 'DNS_NAMESERVER_4_IP='
+1. Enter that IP (e.g. 182.168.208.1) into your .env file for `DNS_NAMESERVER_4_IP=`
 
 Q. I constantly see one of my DNS servers at 5s latency, is this normal?
 
