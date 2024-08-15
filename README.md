@@ -7,7 +7,8 @@ connection.
 
 ## Support the Project
 
-If you'd like to support the development of this project, feel free to [buy me a coffee](https://buymeacoffee.com/plaintextpm)!
+If you'd like to support the development of this project, feel free to
+[buy me a coffee](https://buymeacoffee.com/plaintextpm)!
 
 ## Full Tutorial
 
@@ -19,9 +20,9 @@ To run Netprobe, you'll need a PC running Docker connected directly to your ISP 
 
 1. Netprobe requires the latest version of Docker. For instructions on installing Docker, see YouTube, it's super easy.
 
-1. Netprobe should be installed on a machine (the 'probe') which has a wired Ethernet connection to your primary ISP router.
-This ensures the tests are accurately measuring your ISP performance and excluding and interference from your home network.
-An old PC with Linux installed is a great option for this.
+1. Netprobe should be installed on a machine (the 'probe') which has a wired Ethernet connection to your primary ISP
+router. This ensures the tests are accurately measuring your ISP performance and excluding and interference from your
+home network. An old PC with Linux installed is a great option for this.
 
 ## Installation
 
