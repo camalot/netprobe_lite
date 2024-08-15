@@ -1,6 +1,9 @@
 # Netprobe
 
-Simple and effective tool for measuring ISP performance at home. The tool measures several performance metrics including packet loss, latency, jitter, and DNS performance. It also has an optional speed test to measure bandwidth. Netprobe aggregates these metrics into a common score, which you can use to monitor overall health of your internet connection.
+Simple and effective tool for measuring ISP performance at home. The tool measures several performance metrics
+including packet loss, latency, jitter, and DNS performance. It also has an optional speed test to measure bandwidth.
+Netprobe aggregates these metrics into a common score, which you can use to monitor overall health of your internet
+connection.
 
 ## Support the Project
 
@@ -16,7 +19,9 @@ To run Netprobe, you'll need a PC running Docker connected directly to your ISP 
 
 1. Netprobe requires the latest version of Docker. For instructions on installing Docker, see YouTube, it's super easy.
 
-1. Netprobe should be installed on a machine (the 'probe') which has a wired Ethernet connection to your primary ISP router. This ensures the tests are accurately measuring your ISP performance and excluding and interference from your home network. An old PC with Linux installed is a great option for this.
+1. Netprobe should be installed on a machine (the 'probe') which has a wired Ethernet connection to your primary ISP router.
+This ensures the tests are accurately measuring your ISP performance and excluding and interference from your home network.
+An old PC with Linux installed is a great option for this.
 
 ## Installation
 
@@ -42,7 +47,8 @@ docker compose down
 
 ### Upgrading Between Versions
 
-When upgrading between versions, it is best to delete the deployment altogether and restart with the new code. The process is described below.
+When upgrading between versions, it is best to delete the deployment altogether and restart with the new code.
+The process is described below.
 
 1. Stop Netprobe in Docker and use the -v flag to delete all volumes (warning this deletes old data):
 
@@ -72,13 +78,15 @@ docker compose up
 
 ### Enable Speedtest
 
-By default the speed test feature is disabled as many users pay for bandwidth usage (e.g. cellular connections). To enable it, edit the .env file to set the option to 'True':
+By default the speed test feature is disabled as many users pay for bandwidth usage (e.g. cellular connections). To
+enable it, edit the .env file to set the option to 'True':
 
 ``` shell
 SPEEDTEST_ENABLED="True"
 ```
 
-Note: speedtest.net has a limit on how frequently you can connection and run the test. If you set the test to run too frequently, you will receive errors. Recommend leaving the 'SPEEEDTEST_INTERVAL' unchanged.
+Note: speedtest.net has a limit on how frequently you can connection and run the test. If you set the test to run too
+frequently, you will receive errors. Recommend leaving the 'SPEEEDTEST_INTERVAL' unchanged.
 
 ### Change Netprobe port
 
