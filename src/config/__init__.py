@@ -8,8 +8,9 @@ from dotenv import find_dotenv, load_dotenv
 # Load configs from env
 try:  # Try to load env vars from file, if fails pass
     load_dotenv(find_dotenv())
-except: # noqa: E722
+except:  # noqa: E722
     pass
+
 
 class Configuration:
     def __init__(self, file_path: typing.Optional[str] = None):
@@ -22,6 +23,7 @@ class Configuration:
         self.netprobe = Config_Netprobe()
         self.redis = Config_Redis()
         self.presentation = Config_Presentation()
+
 
 # Create class for each
 class Config_Netprobe:
@@ -70,6 +72,7 @@ class Config_Redis:
     redis_port = os.getenv('NP_REDIS_PORT', '6379')
     redis_password = os.getenv('NP_REDIS_PASSWORD', 'password')
     log_path = os.getenv('NP_LOGS_PATH', './logs')
+
 
 class Config_Presentation:
     presentation_port = int(os.getenv('NP_PRESENTATION_PORT', '5000'))
