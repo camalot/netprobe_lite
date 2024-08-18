@@ -12,7 +12,7 @@ from prometheus_client.core import REGISTRY, GaugeMetricFamily
 
 # Logging config
 log_path = Config_Presentation.log_path
-logger = setup_logging(os.path.join(log_path, "presentation.log"))
+logger = setup_logging()
 
 
 class CustomCollector(object):

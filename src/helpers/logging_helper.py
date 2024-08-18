@@ -36,7 +36,7 @@ class ColorFormatter(logging.Formatter):
 
     def format(self, record):
         if record.levelno == logging.DEBUG:
-            log_color = f'{self.colors["FGBLUE"]}'
+            log_color = f'{self.colors["FGCYAN"]}'
         elif record.levelno == logging.INFO:
             log_color = f'{self.colors["FGGREEN"]}'
         elif record.levelno == logging.WARNING:
@@ -51,34 +51,25 @@ class ColorFormatter(logging.Formatter):
         return super().format(record)
 
 
-def setup_logging(filename):
+def setup_logging():
     # Logging config
     # Create logger
     logger = logging.getLogger("netprobe")
     logger.setLevel(level=logging.DEBUG)
 
     # Set formatter
-    logFileFormatter = logging.Formatter(fmt="%(asctime)s %(levelname)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-
     logColorFormatter = ColorFormatter(fmt="%(asctime)s %(levelname)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-
-
-    # Set the handler
-    fileHandler = RotatingFileHandler(filename=filename, maxBytes=5_000_000, backupCount=3)
 
     stdoutHandler = logging.StreamHandler(sys.stdout)
     stderrHandler = logging.StreamHandler(sys.stderr)
 
-    fileHandler.setFormatter(logFileFormatter)
     stdoutHandler.setFormatter(logColorFormatter)
     stderrHandler.setFormatter(logColorFormatter)
 
-    fileHandler.setLevel(level=logging.INFO)
     stdoutHandler.setLevel(level=logging.DEBUG)
     stderrHandler.setLevel(level=logging.ERROR)
 
     # Set the logger
-    # logger.addHandler(fileHandler)
     logger.addHandler(stdoutHandler)
     logger.addHandler(stderrHandler)
 

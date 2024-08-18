@@ -19,8 +19,7 @@ class NetprobeSpeedTest:
         speedtest_interval = Config_Netprobe.speedtest_interval
         collector = Netprobe_Speedtest()
         # Logging Config
-        log_path = Config_Netprobe.log_path
-        logger = setup_logging(f'{log_path}/speedtest.log')
+        logger = setup_logging()
 
         if speedtest_enabled:
             while True:

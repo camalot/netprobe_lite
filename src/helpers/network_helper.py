@@ -5,8 +5,10 @@ import traceback
 from threading import Thread
 
 import dns.resolver
+from helpers.logging_helper import setup_logging
 import speedtest
 
+logger = setup_logging()
 
 class NetworkCollector(object):  # Main network collection class
     def __init__(self, sites: list[str], count: int, dns_test_site: str, nameservers: list[tuple[str, str, str]]):
@@ -21,7 +23,7 @@ class NetworkCollector(object):  # Main network collection class
         ping = subprocess.getoutput(f"ping -n -i 0.1 -c {count} {site} | grep 'rtt\\|loss'")
 
         try:
-            print(ping)
+            logger.debug(ping)
             loss = ping.split(' ')[5].strip('%')
             latency = ping.split('/')[4]
             jitter = ping.split('/')[6].split(' ')[0]
@@ -31,9 +33,9 @@ class NetworkCollector(object):  # Main network collection class
             self.stats.append(netdata)
 
         except Exception as e:
-            print(f"Error pinging {site}")
-            print(e)
-            print(traceback.format_exc())
+            logger.error(f"Error pinging {site}")
+            logger.error(e)
+            logger.error(traceback.format_exc())
             return False
 
         return True
@@ -60,10 +62,10 @@ class NetworkCollector(object):  # Main network collection class
             self.dnsstats.append(dnsdata)
 
         except Exception as e:
-            print(f"Error performing DNS resolution on {nameserver}")
-            print(e)
-            print(traceback.format_exc())
-
+            logger.error(f"Error performing DNS resolution on {nameserver}")
+            logger.error(e)
+            logger.error(traceback.format_exc())
+            
             dnsdata = {
                 "nameserver": nameserver[0],
                 "nameserver_ip": nameserver[1],

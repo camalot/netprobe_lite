@@ -23,8 +23,7 @@ class Netprobe:
         collector = NetworkCollector(sites, probe_count, dns_test_site, nameservers)
 
         # Logging Config
-        log_path = Config_Netprobe.log_path
-        logger = setup_logging(f"{log_path}/netprobe.log")
+        logger = setup_logging()
 
         # Logging each nameserver
         for nameserver, ip, type in Config_Netprobe.nameservers:
@@ -34,7 +33,6 @@ class Netprobe:
             try:
                 stats = collector.collect()
             except Exception as e:
-                print("Error testing network")
                 logger.error("Error testing network")
                 logger.error(e)
                 logger.error(traceback.format_exc())
