@@ -15,7 +15,7 @@ class RedisConnect:
         self.db = Config_Redis.redis_db
 
         # Connect to Redis
-        self.r = redis.Redis(host=self.host, port=int(self.port), db=int(self.db), password=self.password)
+        self.r = redis.Redis(host=self.host, port=int(self.port), db=int(self.db))
 
     def read(self, key):  # Read data from Redis
         results = self.r.get(key)  # Get the latest results from Redis for a given key
