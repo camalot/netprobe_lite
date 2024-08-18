@@ -35,7 +35,6 @@ RUN \
     && pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r /app/setup/requirements.txt \
     && apk del git build-base \
-    && chmod +x /app/entrypoint.sh \
     && rm -rf /app/setup \
     && ln -s /app/logs /logs \
     && chown -R 1000:1000 /app /data /logs /config
