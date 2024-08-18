@@ -5,7 +5,7 @@ import traceback
 from threading import Thread
 
 import dns.resolver
-from helpers.logging_helper import setup_logging
+from helpers.logging import setup_logging
 import speedtest
 
 logger = setup_logging()
@@ -65,7 +65,7 @@ class NetworkCollector(object):  # Main network collection class
             logger.error(f"Error performing DNS resolution on {nameserver}")
             logger.error(e)
             logger.error(traceback.format_exc())
-            
+
             dnsdata = {
                 "nameserver": nameserver[0],
                 "nameserver_ip": nameserver[1],

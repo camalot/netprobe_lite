@@ -3,16 +3,16 @@
 import json
 
 import redis
-from config import Config_Redis
+from config import RedisConfiguration
 
 
 class RedisConnect:
     def __init__(self):
         # Load global variables
-        self.host = Config_Redis.redis_host
-        self.port = Config_Redis.redis_port
-        self.password = Config_Redis.redis_password
-        self.db = Config_Redis.redis_db
+        self.host = RedisConfiguration.redis_host
+        self.port = RedisConfiguration.redis_port
+        self.password = RedisConfiguration.redis_password
+        self.db = RedisConfiguration.redis_db
 
         # Connect to Redis
         self.r = redis.Redis(host=self.host, port=int(self.port), db=int(self.db))

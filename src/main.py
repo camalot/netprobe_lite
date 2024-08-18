@@ -4,7 +4,7 @@ from concurrent.futures import ProcessPoolExecutor
 
 # from bot.lib.colors import Colors
 from dotenv import find_dotenv, load_dotenv
-from helpers.logging_helper import setup_logging
+from helpers.logging import setup_logging
 from netprobe import Netprobe
 from netprobe_speedtest import NetprobeSpeedTest
 from presentation import NetprobePresenation

@@ -4,9 +4,9 @@ import os
 import time
 import traceback
 
-from config import Config_Presentation
-from helpers.logging_helper import setup_logging
-from helpers.redis_helper import RedisConnect
+from config import PresentationConfiguration
+from helpers.logging import setup_logging
+from helpers.redis import RedisConnect
 from prometheus_client import start_http_server
 from prometheus_client.core import REGISTRY, GaugeMetricFamily
 
@@ -17,7 +17,7 @@ class CustomCollector(object):
         # Namespace for the metrics
         self.logger = setup_logging()
 
-        self.namespace = self.safe_name(Config_Presentation.device_id)
+        self.namespace = self.safe_name(PresentationConfiguration.device_id)
         pass
 
     def safe_name(self, name):
@@ -40,7 +40,7 @@ class CustomCollector(object):
             return
 
         # Retrieve Netprobe data
-        results_netprobe = cache.read(Config_Presentation.device_id)  # Get the latest results from Redis
+        results_netprobe = cache.read(PresentationConfiguration.device_id)  # Get the latest results from Redis
 
         if results_netprobe:
             stats_netprobe = json.loads(json.loads(results_netprobe))
@@ -113,15 +113,15 @@ class CustomCollector(object):
             yield s
 
         # Calculate overall health score
-        weight_loss = Config_Presentation.weight_loss  # Loss is 60% of score
-        weight_latency = Config_Presentation.weight_latency  # Latency is 15% of score
-        weight_jitter = Config_Presentation.weight_jitter  # Jitter is 20% of score
-        weight_dns_latency = Config_Presentation.weight_dns_latency  # DNS latency is 0.05 of score
+        weight_loss = PresentationConfiguration.weight_loss  # Loss is 60% of score
+        weight_latency = PresentationConfiguration.weight_latency  # Latency is 15% of score
+        weight_jitter = PresentationConfiguration.weight_jitter  # Jitter is 20% of score
+        weight_dns_latency = PresentationConfiguration.weight_dns_latency  # DNS latency is 0.05 of score
 
-        threshold_loss = Config_Presentation.threshold_loss  # 5% loss threshold as max
-        threshold_latency = Config_Presentation.threshold_latency  # 100ms latency threshold as max
-        threshold_jitter = Config_Presentation.threshold_jitter  # 30ms jitter threshold as max
-        threshold_dns_latency = Config_Presentation.threshold_dns_latency  # 100ms dns latency threshold as max
+        threshold_loss = PresentationConfiguration.threshold_loss  # 5% loss threshold as max
+        threshold_latency = PresentationConfiguration.threshold_latency  # 100ms latency threshold as max
+        threshold_jitter = PresentationConfiguration.threshold_jitter  # 30ms jitter threshold as max
+        threshold_dns_latency = PresentationConfiguration.threshold_dns_latency  # 100ms dns latency threshold as max
 
         # eval_loss = 1 if average_loss / threshold_loss >= 1 else average_loss / threshold_loss
         # eval_latency = 1 if average_latency / threshold_latency >= 1 else average_latency / threshold_latency
@@ -168,9 +168,9 @@ class NetprobePresenation:
 
     def run(self):
         self.logger.debug('Starting presentation service')
-        start_http_server(Config_Presentation.presentation_port, addr=Config_Presentation.presentation_interface)
+        start_http_server(PresentationConfiguration.presentation_port, addr=PresentationConfiguration.presentation_interface)
         self.logger.info(
-            f'Presentation service started on {Config_Presentation.presentation_interface}:{Config_Presentation.presentation_port}'
+            f'Presentation service started on {PresentationConfiguration.presentation_interface}:{PresentationConfiguration.presentation_port}'
         )
         REGISTRY.register(CustomCollector())
         while True:

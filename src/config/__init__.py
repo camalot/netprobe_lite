@@ -20,13 +20,13 @@ class Configuration:
             with open(file_path, 'r') as file:
                 self.config = yaml.safe_load(file)
 
-        self.netprobe = Config_Netprobe()
-        self.redis = Config_Redis()
-        self.presentation = Config_Presentation()
+        self.netprobe = NetprobeConifguration()
+        self.redis = RedisConfiguration()
+        self.presentation = PresentationConfiguration()
 
 
 # Create class for each
-class Config_Netprobe:
+class NetprobeConifguration:
     probe_interval = int(os.getenv('NP_PROBE_INTERVAL', '30'))
     probe_count = int(os.getenv('NP_PROBE_COUNT', '50'))
     sites = os.getenv('NP_SITES', 'google.com,facebook.com,twitter.com,youtube.com').split(',')
@@ -34,8 +34,6 @@ class Config_Netprobe:
     speedtest_enabled = bool(os.getenv("NP_SPEEDTEST_ENABLED", 'FALSE').lower() in ('true', '1', 't', 'y', 'yes'))
     speedtest_interval = int(os.getenv('NP_SPEEDTEST_INTERVAL', '937'))
     device_id = os.getenv('NP_DEVICE_ID', 'netprobe').replace(' ', '_').replace('.', '_').replace('-', '_').lower()
-
-    log_path = os.getenv('NP_LOGS_PATH', './logs')
 
     # get all environment variables that match the pattern DNS_NAMESERVER_\d{1,}
     # and create a list of tuples with the nameserver and the IP
@@ -67,19 +65,17 @@ class Config_Netprobe:
         nameservers.append((NP_LOCAL_DNS, NP_LOCAL_DNS_IP, "internal"))
 
 
-class Config_Redis:
+class RedisConfiguration:
     redis_host = os.getenv('NP_REDIS_URL', os.getenv('NP_REDIS_HOST', 'localhost'))
     redis_port = os.getenv('NP_REDIS_PORT', '6379')
     redis_password = os.getenv('NP_REDIS_PASSWORD', 'password')
     redis_db = os.getenv('NP_REDIS_DB', '0')
-    log_path = os.getenv('NP_LOGS_PATH', './logs')
 
 
-class Config_Presentation:
+class PresentationConfiguration:
     presentation_port = int(os.getenv('NP_PRESENTATION_PORT', '5000'))
     presentation_interface = os.getenv('NP_PRESENTATION_INTERFACE', '0.0.0.0')
     device_id = os.getenv('NP_DEVICE_ID', 'netprobe')
-    log_path = os.getenv('NP_LOGS_PATH', './logs')
 
     local_dns_name = os.getenv('NP_LOCAL_DNS', None)
 

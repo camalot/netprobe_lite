@@ -2,10 +2,10 @@ import json
 import time
 import traceback
 
-from config import Config_Netprobe
-from helpers.logging_helper import setup_logging
-from helpers.network_helper import NetworkCollector
-from helpers.redis_helper import RedisConnect
+from config import NetprobeConifguration
+from helpers.logging import setup_logging
+from helpers.network import NetworkCollector
+from helpers.redis import RedisConnect
 
 
 class Netprobe:
@@ -44,5 +44,5 @@ class Netprobe:
                 self.logger.error("Could not connect to Redis")
                 self.logger.error(e)
                 self.logger.error(traceback.format_exc())
-            self.logger.info(f'Probe sleeping for {self.probe_interval} seconds')
+            self.logger.debug(f'Probe sleeping for {self.probe_interval} seconds')
             time.sleep(self.probe_interval)

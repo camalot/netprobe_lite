@@ -3,16 +3,16 @@ import json
 import time
 import traceback
 
-from config import Config_Netprobe
-from helpers.logging_helper import setup_logging
-from helpers.network_helper import Netprobe_Speedtest
-from helpers.redis_helper import RedisConnect
+from config import NetprobeConifguration
+from helpers.logging import setup_logging
+from helpers.network import Netprobe_Speedtest
+from helpers.redis import RedisConnect
 
 
 class NetprobeSpeedTest:
     def __init__(self):
-        self.speedtest_enabled = Config_Netprobe.speedtest_enabled
-        self.speedtest_interval = Config_Netprobe.speedtest_interval
+        self.speedtest_enabled = NetprobeConifguration.speedtest_enabled
+        self.speedtest_interval = NetprobeConifguration.speedtest_interval
         self.collector = Netprobe_Speedtest()
         # Logging Config
         self.logger = setup_logging()
