@@ -50,7 +50,7 @@ if __name__ == '__main__':
         loop = asyncio.get_event_loop()
         signal.signal(signal.SIGTERM, sighandler)
         try:
-            executor = ProcessPoolExecutor(3)
+            executor = ProcessPoolExecutor()
 
             loop.run_in_executor(executor, probe)
             loop.run_in_executor(executor, presentation)
