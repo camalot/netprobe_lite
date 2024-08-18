@@ -48,4 +48,4 @@ VOLUME [ "/logs" ]
 
 USER 1000:1000
 
-ENTRYPOINT [ "/bin/bash", "/app/entrypoint.sh" ]
+ENTRYPOINT [ "python3", "/app/main.py" ]

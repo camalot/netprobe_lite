@@ -33,7 +33,6 @@ home network. An old PC with Linux installed is a great option for this.
 
 | NAME | DESCRIPTION | DEFAULT |
 | ---- | ----------- | ------- |
-| `NP_MODULE` | Sets the entry point of the python application. | `FULL` |
 | `NP_SITES` | Comma-separated list of domains to test | `google.com,facebook.com,twitter.com,youtube.com` |
 | `NP_DNS_TEST_SITE` | A single site to test DNS | `google.com` |
 | `NP_DNS_NAMESERVER_<N>` | A DNS nameserver name to test with. `<N>` is an index/number of the entry. | `Google` |

@@ -177,7 +177,3 @@ class NetprobePresenation:
         while True:
             time.sleep(15)
 
-
-if __name__ == '__main__':
-    presentation = NetprobePresenation()
-    presentation.run()

@@ -46,8 +46,3 @@ class NetprobeSpeedTest:
                 time.sleep(speedtest_interval)
         else:
             pass
-
-
-if __name__ == '__main__':
-    speedtest = NetprobeSpeedTest()
-    speedtest.run()

@@ -48,8 +48,3 @@ class Netprobe:
                 logger.error(e)
                 logger.error(traceback.format_exc())
             time.sleep(probe_interval)
-
-
-if __name__ == '__main__':
-    netprobe = Netprobe()
-    netprobe.run()
