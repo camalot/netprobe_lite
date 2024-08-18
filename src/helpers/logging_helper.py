@@ -78,7 +78,7 @@ def setup_logging(filename):
     stderrHandler.setLevel(level=logging.ERROR)
 
     # Set the logger
-    logger.addHandler(fileHandler)
+    # logger.addHandler(fileHandler)
     logger.addHandler(stdoutHandler)
     logger.addHandler(stderrHandler)
 
