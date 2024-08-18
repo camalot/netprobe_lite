@@ -3,7 +3,7 @@
 
 import logging
 import sys
-from logging.handlers import RotatingFileHandler
+# from logging.handlers import RotatingFileHandler
 
 class ColorFormatter(logging.Formatter):
     def __init__(self, fmt=None, datefmt=None, validate=True):
@@ -61,16 +61,16 @@ def setup_logging():
     logColorFormatter = ColorFormatter(fmt="%(asctime)s %(levelname)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
     stdoutHandler = logging.StreamHandler(sys.stdout)
-    stderrHandler = logging.StreamHandler(sys.stderr)
+    # stderrHandler = logging.StreamHandler(sys.stderr)
 
     stdoutHandler.setFormatter(logColorFormatter)
-    stderrHandler.setFormatter(logColorFormatter)
+    # stderrHandler.setFormatter(logColorFormatter)
 
     stdoutHandler.setLevel(level=logging.DEBUG)
-    stderrHandler.setLevel(level=logging.ERROR)
+    # stderrHandler.setLevel(level=logging.ERROR)
 
     # Set the logger
     logger.addHandler(stdoutHandler)
-    logger.addHandler(stderrHandler)
+    # logger.addHandler(stderrHandler)
 
     return logger

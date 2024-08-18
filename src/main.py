@@ -57,6 +57,8 @@ if __name__ == '__main__':
             loop.run_in_executor(executor, speedtest)
 
             loop.run_forever()
+        except DeprecationWarning:
+            pass
         except KeyboardInterrupt:
             pass
         finally:
