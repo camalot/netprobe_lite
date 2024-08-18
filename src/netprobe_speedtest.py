@@ -37,7 +37,7 @@ class NetprobeSpeedTest:
                     cache = RedisConnect()
                     # Save Data to Redis
                     cache_interval = speedtest_interval * 2  # Set the redis cache 2x longer than the speedtest interval
-                    cache.redis_write('speedtest', json.dumps(stats), cache_interval)
+                    cache.write('speedtest', json.dumps(stats), cache_interval)
                     logger.info('Stats successfully written to Redis for Speed Test')
                 except Exception as e:
                     logger.error('Could not connect to Redis')
