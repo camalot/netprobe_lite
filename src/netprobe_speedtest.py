@@ -11,38 +11,35 @@ from helpers.redis_helper import RedisConnect
 
 class NetprobeSpeedTest:
     def __init__(self):
-        pass
+        self.speedtest_enabled = Config_Netprobe.speedtest_enabled
+        self.speedtest_interval = Config_Netprobe.speedtest_interval
+        self.collector = Netprobe_Speedtest()
+        # Logging Config
+        self.logger = setup_logging()
 
     def run(self):
-        # Global Variables
-        speedtest_enabled = Config_Netprobe.speedtest_enabled
-        speedtest_interval = Config_Netprobe.speedtest_interval
-        collector = Netprobe_Speedtest()
-        # Logging Config
-        logger = setup_logging()
-
-        if speedtest_enabled:
+        if self.speedtest_enabled:
+            self.logger.info('Speedtest enabled')
             while True:
                 try:
-                    stats = collector.collect()
+                    stats = self.collector.collect()
                 except Exception as e:
-                    logger.error('Error running speedtest')
-                    logger.error(e)
-                    logger.error(traceback.format_exc())
-                    time.sleep(speedtest_interval)  # Pause before retrying
+                    self.logger.error('Error running speedtest')
+                    self.logger.error(e)
+                    self.logger.error(traceback.format_exc())
+                    time.sleep(self.speedtest_interval)  # Pause before retrying
                     continue
                 # Connect to Redis
                 try:
                     cache = RedisConnect()
                     # Save Data to Redis
-                    cache_interval = speedtest_interval * 2  # Set the redis cache 2x longer than the speedtest interval
+                    cache_interval = self.speedtest_interval * 2  # Set the redis cache 2x longer than the speedtest interval
                     cache.write('speedtest', json.dumps(stats), cache_interval)
-                    logger.info('Stats successfully written to Redis for Speed Test')
+                    self.logger.info('Stats successfully written to Redis for Speed Test')
                 except Exception as e:
-                    logger.error('Could not connect to Redis')
-                    logger.error(e)
-                    logger.error(traceback.format_exc())
+                    self.logger.error('Could not connect to Redis')
+                    self.logger.error(e)
+                    self.logger.error(traceback.format_exc())
 
-                time.sleep(speedtest_interval)
-        else:
-            pass
+                self.logger.info(f'Speedtest sleeping for {self.speedtest_interval} seconds')
+                time.sleep(self.speedtest_interval)

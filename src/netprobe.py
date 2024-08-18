@@ -10,41 +10,39 @@ from helpers.redis_helper import RedisConnect
 
 class Netprobe:
     def __init__(self):
-        pass
-
-    def run(self):
-        # Global Variables
-        probe_interval = Config_Netprobe.probe_interval
+        self.probe_interval = Config_Netprobe.probe_interval
         probe_count = Config_Netprobe.probe_count
         sites = Config_Netprobe.sites
         dns_test_site = Config_Netprobe.dns_test_site
         nameservers = Config_Netprobe.nameservers
-        device_id = Config_Netprobe.device_id
-        collector = NetworkCollector(sites, probe_count, dns_test_site, nameservers)
+        self.device_id = Config_Netprobe.device_id
+        self.collector = NetworkCollector(sites, probe_count, dns_test_site, nameservers)
 
         # Logging Config
-        logger = setup_logging()
+        self.logger = setup_logging()
 
         # Logging each nameserver
         for nameserver, ip, type in Config_Netprobe.nameservers:
-            logger.info(f"NAMESERVER: {nameserver} IP: {ip} TYPE: {type}")
+            self.logger.info(f"NAMESERVER: {nameserver} IP: {ip} TYPE: {type}")
 
+    def run(self):
         while True:
             try:
-                stats = collector.collect()
+                stats = self.collector.collect()
             except Exception as e:
-                logger.error("Error testing network")
-                logger.error(e)
-                logger.error(traceback.format_exc())
+                self.logger.error("Error testing network")
+                self.logger.error(e)
+                self.logger.error(traceback.format_exc())
                 continue
             # Connect to Redis
             try:
                 cache = RedisConnect()
                 # Save Data to Redis
-                cache_interval = probe_interval + 15  # Set the redis cache TTL slightly longer than the probe interval
-                cache.write(device_id, json.dumps(stats), cache_interval)
+                cache_interval = self.probe_interval + 15  # Set the redis cache TTL slightly longer than the probe interval
+                cache.write(self.device_id, json.dumps(stats), cache_interval)
             except Exception as e:
-                logger.error("Could not connect to Redis")
-                logger.error(e)
-                logger.error(traceback.format_exc())
-            time.sleep(probe_interval)
+                self.logger.error("Could not connect to Redis")
+                self.logger.error(e)
+                self.logger.error(traceback.format_exc())
+            self.logger.info(f'Probe sleeping for {self.probe_interval} seconds')
+            time.sleep(self.probe_interval)

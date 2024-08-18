@@ -10,14 +10,13 @@ from helpers.redis_helper import RedisConnect
 from prometheus_client import start_http_server
 from prometheus_client.core import REGISTRY, GaugeMetricFamily
 
-# Logging config
-log_path = Config_Presentation.log_path
-logger = setup_logging()
 
 
 class CustomCollector(object):
     def __init__(self):
         # Namespace for the metrics
+        self.logger = setup_logging()
+
         self.namespace = self.safe_name(Config_Presentation.device_id)
         pass
 
@@ -33,9 +32,9 @@ class CustomCollector(object):
         try:
             cache = RedisConnect()
         except Exception as e:
-            logger.error('Could not connect to Redis')
-            logger.error(e)
-            logger.error(traceback.format_exc())
+            self.logger.error('Could not connect to Redis')
+            self.logger.error(e)
+            self.logger.error(traceback.format_exc())
 
         if not cache:
             return
@@ -165,15 +164,14 @@ class CustomCollector(object):
 
 class NetprobePresenation:
     def __init__(self):
-        pass
+        self.logger = setup_logging()
 
     def run(self):
-        logger.debug('Starting presentation service')
+        self.logger.debug('Starting presentation service')
         start_http_server(Config_Presentation.presentation_port, addr=Config_Presentation.presentation_interface)
-        logger.info(
+        self.logger.info(
             f'Presentation service started on {Config_Presentation.presentation_interface}:{Config_Presentation.presentation_port}'
         )
         REGISTRY.register(CustomCollector())
         while True:
             time.sleep(15)
-

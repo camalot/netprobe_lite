@@ -21,6 +21,7 @@ def sighandler(signum, frame):
 def presentation():
     try:
         presentation = NetprobePresenation()
+        logger.debug('Starting presentation')
         presentation.run()
     except KeyboardInterrupt:
         logger.warn('<KeyboardInterrupt received>')
@@ -30,6 +31,7 @@ def presentation():
 def speedtest():
     try:
         speedtest = NetprobeSpeedTest()
+        logger.debug('Starting speedtest')
         speedtest.run()
     except KeyboardInterrupt:
         logger.warn('<KeyboardInterrupt received>')
@@ -39,6 +41,7 @@ def speedtest():
 def probe():
     try:
         probe = Netprobe()
+        logger.debug('Starting probe')
         probe.run()
     except KeyboardInterrupt:
         logger.warn('<KeyboardInterrupt received>')
