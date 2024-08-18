@@ -49,15 +49,16 @@ def probe():
 
 
 if __name__ == '__main__':
+    print('Starting main')
     try:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.new_event_loop()
         signal.signal(signal.SIGTERM, sighandler)
         try:
-            executor = ProcessPoolExecutor()
+            executor = ProcessPoolExecutor(3)
 
-            loop.run_in_executor(executor, probe)
             loop.run_in_executor(executor, presentation)
             loop.run_in_executor(executor, speedtest)
+            loop.run_in_executor(executor, probe)
 
             loop.run_forever()
         except DeprecationWarning:

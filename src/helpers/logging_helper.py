@@ -52,8 +52,6 @@ class ColorFormatter(logging.Formatter):
 
 
 def setup_logging():
-    # Logging config
-    # Create logger
     logger = logging.getLogger("netprobe")
     logger.setLevel(level=logging.DEBUG)
 
@@ -61,16 +59,19 @@ def setup_logging():
     logColorFormatter = ColorFormatter(fmt="%(asctime)s %(levelname)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
     stdoutHandler = logging.StreamHandler(sys.stdout)
-    # stderrHandler = logging.StreamHandler(sys.stderr)
-
+    stdoutHandler.name = "stdout"
     stdoutHandler.setFormatter(logColorFormatter)
-    # stderrHandler.setFormatter(logColorFormatter)
-
     stdoutHandler.setLevel(level=logging.DEBUG)
-    # stderrHandler.setLevel(level=logging.ERROR)
 
-    # Set the logger
-    logger.addHandler(stdoutHandler)
-    # logger.addHandler(stderrHandler)
+    active_handlers = [stdoutHandler]
+
+    if not logger.handlers:
+        # check if stdoutHandler is already added
+        # check if a handler with the name is already added
+        for handler in active_handlers:
+            if not logger.hasHandlers():
+                logger.addHandler(handler)
+            elif not any([handler.name == h.name for h in logger.handlers]):
+                logger.addHandler(handler)
 
     return logger
