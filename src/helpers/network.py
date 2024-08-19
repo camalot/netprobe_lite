@@ -1,5 +1,7 @@
 # Network tests
 import json
+import os
+import re
 import subprocess
 import traceback
 from threading import Thread
@@ -20,20 +22,68 @@ class NetworkCollector(object):  # Main network collection class
         self.nameservers = nameservers
 
     def pingtest(self, count, site):
-        ping = subprocess.getoutput(f"ping -n -i 0.1 -c {count} {site} | grep 'rtt\\|loss'")
+        ping = None
+        if os.name != "psoix":
+            # This is only for testing purposes locally.
+            logger.warning("Windows detected, using windows ping")
+            try:
+                ping = """10 packets transmitted, 10 received, 0% packet loss, time 9011ms
+rtt min/avg/max/mdev = 11.487/12.915/14.475/1.095 ms"""
+            except Exception as e:
+                logger.error(f"Error pinging {site}")
+                logger.error(e)
+                logger.error(traceback.format_exc())
+                return False
+        else:
+            try:
+                ping = subprocess.getoutput(f"ping -n -i 0.1 -c {count} {site} | grep 'rtt\\|loss'")
+                # 10 packets transmitted, 10 received, 0% packet loss, time 9011ms
+                # rtt min/avg/max/mdev = 11.487/12.915/14.475/1.095 ms
+
+                # logger.debug(ping)
+                # loss = ping.split(' ')[5].strip('%')
+                # latency = ping.split('/')[4]
+                # jitter = ping.split('/')[6].split(' ')[0]
+
+            except Exception as e:
+                logger.error(f"Error pinging {site}")
+                logger.error(e)
+                logger.error(traceback.format_exc())
+                return False
+
+        if ping is None:
+            logger.error(f"Error pinging {site}. No output from ping command")
+            return False
 
         try:
             logger.debug(ping)
-            loss = ping.split(' ')[5].strip('%')
-            latency = ping.split('/')[4]
-            jitter = ping.split('/')[6].split(' ')[0]
+            loss_regex = re.compile(r"(\d+)% packet loss", re.MULTILINE | re.DOTALL | re.IGNORECASE)
+            latency_regex = re.compile(r"^rtt\s.*?(\d+\.\d+)/(\d+\.\d+)/(\d+\.\d+)/(\d+\.\d+)\sms", re.MULTILINE | re.DOTALL | re.IGNORECASE)
+
+            loss_match = loss_regex.search(ping)
+            latency_match = latency_regex.search(ping)
+            loss = 0
+            latency = 0
+            jitter = 0
+
+            if loss_match:
+                loss = loss_match.group(1)
+            else:
+                loss = 100
+                logger.critical("Ping output did not match expected format")
+            if latency_match:
+                latency = latency_match.group(2)
+                jitter = latency_match.group(4)
+            else:
+                logger.critical("Ping output did not match expected format")
+                latency = -1
+                jitter = -1
 
             netdata = {"site": site, "latency": latency, "loss": loss, "jitter": jitter}
-
+            logger.debug(json.dumps(netdata, indent=4))
             self.stats.append(netdata)
-
         except Exception as e:
-            logger.error(f"Error pinging {site}")
+            logger.error(f"Error parsing ping output for {site}")
             logger.error(e)
             logger.error(traceback.format_exc())
             return False

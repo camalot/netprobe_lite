@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 import typing
@@ -23,7 +24,12 @@ class Configuration:
         self.netprobe = NetprobeConifguration()
         self.redis = RedisConfiguration()
         self.presentation = PresentationConfiguration()
+        self.logging = LoggingConfiguration()
 
+class LoggingConfiguration:
+    def __init__(self):
+        log_level = os.getenv('NP_LOG_LEVEL', 'INFO').upper()
+        self.log_level = getattr(logging, log_level, logging.INFO)
 
 # Create class for each
 class NetprobeConifguration:
