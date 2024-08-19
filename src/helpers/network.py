@@ -23,7 +23,7 @@ class NetworkCollector(object):  # Main network collection class
 
     def pingtest(self, count, site):
         ping = None
-        if os.name != "posix":
+        if os.name == "nt":
             # This is only for testing purposes locally.
             logger.warning("Windows detected, using windows ping")
             try:
