@@ -74,7 +74,7 @@ class NetprobeConifguration:
 class RedisConfiguration:
     redis_host = os.getenv('NP_REDIS_URL', os.getenv('NP_REDIS_HOST', 'localhost'))
     redis_port = os.getenv('NP_REDIS_PORT', '6379')
-    redis_password = os.getenv('NP_REDIS_PASSWORD', 'password')
+    redis_password = os.getenv('NP_REDIS_PASSWORD', '')
     redis_db = os.getenv('NP_REDIS_DB', '0')
 
 
