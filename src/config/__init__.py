@@ -14,22 +14,28 @@ except:  # noqa: E722
 
 
 class Configuration:
-    def __init__(self, file_path: typing.Optional[str] = None):
-
-        # if file_path exists and is not none, load the file
-        if file_path and os.path.exists(file_path):
-            with open(file_path, 'r') as file:
-                self.config = yaml.safe_load(file)
+    def __init__(self, file_path: typing.Optional[str] = '/app/config/netprobe.yaml'):
 
         self.netprobe = NetprobeConifguration()
         self.redis = RedisConfiguration()
         self.presentation = PresentationConfiguration()
         self.logging = LoggingConfiguration()
 
+
+        # if file_path exists and is not none, load the file
+        if file_path and os.path.exists(file_path):
+            with open(file_path, 'r') as file:
+                self.__dict__.update(yaml.safe_load(file))
+
+
 class LoggingConfiguration:
     def __init__(self):
         log_level = os.getenv('NP_LOG_LEVEL', 'INFO').upper()
-        self.log_level = getattr(logging, log_level, logging.INFO)
+        self.level = getattr(logging, log_level, logging.INFO)
+        self.format = os.getenv('NP_LOG_FORMAT', '%(asctime)s %(levelname)s %(message)s')
+
+    def merge(self, config: dict):
+        self.__dict__.update(config)
 
 # Create class for each
 class NetprobeConifguration:

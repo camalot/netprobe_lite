@@ -53,7 +53,7 @@ home network. An old PC with Linux installed is a great option for this.
 | `NP_PRESENTATION_PORT` |  This is the port on which the presentation layer will run | `5000` |
 | `NP_REDIS_HOST` | The hostname/port to connect to redis. | `netprobe-redis` |
 | `NP_REDIS_PORT` | The port to connect to redis. | `6379` |
-| `NP_REDIS_PASSWORD` | The password to connect to redis. | `password` |
+| `NP_REDIS_PASSWORD` | The password to connect to redis. This should only be set if you have a password set for redis. | `""` |
 | `NP_REDIS_DB` | The redis DB index | `0` |
 | `NP_PROBE_COUNT` | The number of checks to run against the tests | `50` |
 | `NP_PROBE_INTERVAL` | The interval at which the system probes | `30` |

@@ -7,22 +7,10 @@ networks:
   netprobe:
 
 services:
-  redis:
-    restart: always
-    container_name: netprobe-redis
-    image: "redis:latest"
-    volumes:
-      - ${CONFIG_PATH}/redis/redis.conf:/etc/redis/redis.conf
-    networks:
-      - netprobe
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
-
   netprobe:
     restart: always
     container_name: netprobe-probe
-    image: "plaintextpackets/netprobe:latest"
+    image: "ghcr.io/camalot/netprobe_lite:latest"
     pull_policy: always
     environment:
       NP_MODULE: "FULL"
@@ -44,10 +32,11 @@ services:
       NP_SPEEDTEST_ENABLED: "false"
       NP_SPEEDTEST_INTERVAL: "937"
 
-      NP_REDIS_HOST: "netprobe-redis"
+      NP_REDIS_HOST: "redis"
       NP_REDIS_PORT: "6379"
       NP_REDIS_DB: "0"
-      NP_REDIS_PASSWORD: "password"
+      # this should only be set if you have a password set on your redis server
+      NP_REDIS_PASSWORD: ""
 
       NP_PRESENTATION_PORT: "5000"
       NP_PRESENTATION_INTERFACE: "0.0.0.0"

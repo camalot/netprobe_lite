@@ -56,7 +56,7 @@ def setup_logging():
     config = Configuration()
     logger = logging.getLogger("netprobe")
 
-    logger.setLevel(level=config.logging.log_level)
+    logger.setLevel(level=config.logging.level)
 
     # Set formatter
     logColorFormatter = ColorFormatter(fmt="%(asctime)s %(levelname)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
@@ -64,7 +64,7 @@ def setup_logging():
     stdoutHandler = logging.StreamHandler(sys.stdout)
     stdoutHandler.name = "stdout"
     stdoutHandler.setFormatter(logColorFormatter)
-    stdoutHandler.setLevel(level=config.logging.log_level)
+    stdoutHandler.setLevel(level=config.logging.level)
 
     active_handlers = [stdoutHandler]
 

@@ -1,6 +1,10 @@
 ---
 netprobe:
   device_id: "netprobe"
+  logging:
+    level: "INFO"
+    format: "%(asctime)s %(levelname)s %(message)s"
+    dateFormat: "%Y-%m-%d %H:%M:%S"
   probe:
     interval: 30
     count: 50
@@ -17,20 +21,20 @@ netprobe:
     test: google.com
     nameservers:
       - name: Google
-        ip: 8.8.8.8
+        ip: '8.8.8.8'
       - name: Cloudflare
-        ip: 1.1.1.1
+        ip: '1.1.1.1'
       - name: Quad9
-        ip: 9.9.9.9
+        ip: '9.9.9.9'
       - name: OpenDNS
-        ip: 208.67.222.222
+        ip: '208.67.222.222'
     local:
       - name: Router
-        ip: 192.168.2.1
+        ip: '192.168.2.1'
       - name: Bataal
-        ip: 192.168.2.7
+        ip: '192.168.2.7'
       - name: Congus
-        ip: 192.168.2.4
+        ip: '192.168.2.4'
   health:
     # Health Score Weights
     # - These are the relative weights used to calculate your 'Internet Quality Score', they can be modified but must add up to 1.0
@@ -57,9 +61,9 @@ speedtest:
 
 presentation:
   port: 5000
-  interface: 0.0.0.0
+  interface: '0.0.0.0'
 
 redis:
   host: netprobe-redis
   port: 6379
-  password: "password"
+  password: ''
