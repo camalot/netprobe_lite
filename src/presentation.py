@@ -188,6 +188,17 @@ class CustomCollector(object):
         else:
             eval_internal_dns_latency = local_dns_latency / threshold_internal_dns_latency
 
+        g_cv = GaugeMetricFamily(
+            self.metric_safe_name('coefficient'),
+            'Network Score Coefficients',
+            labels=['type'],
+        )
+        g_cv.add_metric(['loss'], eval_loss)
+        g_cv.add_metric(['latency'], eval_latency)
+        g_cv.add_metric(['jitter'], eval_jitter)
+        g_cv.add_metric(['internal_dns_latency'], eval_internal_dns_latency)
+        g_cv.add_metric(['external_dns_latency'], eval_external_dns_latency)
+
         # Master scoring function
         score = (
             (1 - weight_loss * eval_loss)
