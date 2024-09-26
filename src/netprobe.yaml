@@ -20,14 +20,14 @@ netprobe:
   dns:
     test: google.com
     nameservers:
-      - name: Google
+      - name: Google (Primary)
         ip: '8.8.8.8'
-      - name: Cloudflare
+      - name: Cloudflare (Primary)
         ip: '1.1.1.1'
-      - name: Quad9
-        ip: '9.9.9.9'
-      - name: OpenDNS
-        ip: '208.67.222.222'
+      - name: Google (Secondary)
+        ip: '8.8.4.4'
+      - name: Cloudflare (Secondary)
+        ip: '1.0.0.1'
     local:
       - name: Router
         ip: '192.168.2.1'
@@ -42,7 +42,9 @@ netprobe:
       loss: 0.6 # Loss is 60% of score
       latency: 0.15 # Latency is 15% of score
       jitter: 0.2 # Jitter is 20% of score
-      dns_latency: 0.05 # DNS latency is 5% of score
+      external_dns_latency: 0.05 # DNS latency is 5% of score
+      internal_dns_latency: 0.0 # Internal DNS latency is 0% of score
+
     # Health Score Thresholds
     # - These threshold values are used in the calculation of your 'Internet Quality Score', they can be modified if required
     thresholds:

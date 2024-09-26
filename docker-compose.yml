@@ -13,20 +13,19 @@ services:
     image: "ghcr.io/camalot/netprobe_lite:latest"
     pull_policy: always
     environment:
-      NP_MODULE: "FULL"
       NP_SITES: "google.com,facebook.com,twitter.com,youtube.com"
       NP_DNS_TEST_SITE: "google.com"
 
-      NP_DNS_NAMESERVER_1: "Google"
+      NP_DNS_NAMESERVER_1: "Google (Primary)"
       NP_DNS_NAMESERVER_1_IP: "8.8.8.8"
-      NP_DNS_NAMESERVER_2: "Quad9"
-      NP_DNS_NAMESERVER_2_IP: "9.9.9.9"
-      NP_DNS_NAMESERVER_3: "CloudFlare"
+      NP_DNS_NAMESERVER_2: "Google (Secondary)"
+      NP_DNS_NAMESERVER_2_IP: "8.8.4.4"
+      NP_DNS_NAMESERVER_3: "Cloudflare (Primary)"
       NP_DNS_NAMESERVER_3_IP: "1.1.1.1"
-      NP_DNS_NAMESERVER_4: "OpenDNS"
-      NP_DNS_NAMESERVER_4_IP: "208.67.222.222"
+      NP_DNS_NAMESERVER_4: "Cloudflare (Secondary)"
+      NP_DNS_NAMESERVER_4_IP: "1.0.0.1"
 
-      NP_LOCAL_DNS_NAMESERVER_1: "Local DNS"
+      NP_LOCAL_DNS_NAMESERVER_1: "Router"
       NP_LOCAL_DNS_NAMESERVER_1_IP: "192.168.2.1"
 
       NP_SPEEDTEST_ENABLED: "false"

@@ -82,7 +82,9 @@ class CustomCollector(object):
         )
 
         local_dns_latency = 0
+        ext_dns_latency = 0
         local_dns = []
+        ext_dns = []
         for item in stats_netprobe['dns_stats']:
             labels = [item['nameserver'], item['nameserver_ip'], item['type']]
             h.add_metric(labels, item['latency'])
@@ -90,8 +92,11 @@ class CustomCollector(object):
             # find them by type, and then get the average of the latency
             if item['type'].lower() == 'internal':
                 local_dns.append(float(item['latency']))
+            else:
+                ext_dns.append(float(item['latency']))
 
         local_dns_latency = sum(local_dns) / len(local_dns)
+        ext_dns_latency = sum(ext_dns) / len(ext_dns)
         yield h
 
         # Retrieve Speedtest data
@@ -116,12 +121,16 @@ class CustomCollector(object):
         weight_loss = PresentationConfiguration.weight_loss  # Loss is 60% of score
         weight_latency = PresentationConfiguration.weight_latency  # Latency is 15% of score
         weight_jitter = PresentationConfiguration.weight_jitter  # Jitter is 20% of score
-        weight_dns_latency = PresentationConfiguration.weight_dns_latency  # DNS latency is 0.05 of score
+        # weight_dns_latency = PresentationConfiguration.weight_dns_latency  # DNS latency is 5% of score
+        weight_internal_dns_latency = PresentationConfiguration.weight_internal_dns_latency  # Internal DNS latency is 2.5% of score
+        weight_external_dns_latency = PresentationConfiguration.weight_external_dns_latency  # External DNS latency is 2.5% of score
 
         threshold_loss = PresentationConfiguration.threshold_loss  # 5% loss threshold as max
         threshold_latency = PresentationConfiguration.threshold_latency  # 100ms latency threshold as max
         threshold_jitter = PresentationConfiguration.threshold_jitter  # 30ms jitter threshold as max
-        threshold_dns_latency = PresentationConfiguration.threshold_dns_latency  # 100ms dns latency threshold as max
+        # threshold_dns_latency = PresentationConfiguration.threshold_dns_latency  # 100ms dns latency threshold as max
+        threshold_internal_dns_latency = PresentationConfiguration.threshold_internal_dns_latency  # 100ms internal dns latency threshold as max
+        threshold_external_dns_latency = PresentationConfiguration.threshold_external_dns_latency  # 100ms external dns latency threshold as max
 
         # eval_loss = 1 if average_loss / threshold_loss >= 1 else average_loss / threshold_loss
         # eval_latency = 1 if average_latency / threshold_latency >= 1 else average_latency / threshold_latency
@@ -143,17 +152,23 @@ class CustomCollector(object):
         else:
             eval_jitter = average_jitter / threshold_jitter
 
-        if local_dns_latency / threshold_dns_latency >= 1:
-            eval_dns_latency = 1
+        if ext_dns_latency / threshold_external_dns_latency >= 1:
+            eval_external_dns_latency = 1
         else:
-            eval_dns_latency = local_dns_latency / threshold_dns_latency
+            eval_external_dns_latency = ext_dns_latency / threshold_external_dns_latency
+
+        if local_dns_latency / threshold_internal_dns_latency >= 1:
+            eval_internal_dns_latency = 1
+        else:
+            eval_internal_dns_latency = local_dns_latency / threshold_internal_dns_latency
 
         # Master scoring function
         score = (
             (1 - weight_loss * eval_loss)
             - (weight_jitter * eval_jitter)
             - (weight_latency * eval_latency)
-            - (weight_dns_latency * eval_dns_latency)
+            - (weight_internal_dns_latency * eval_internal_dns_latency)
+            - (weight_external_dns_latency * eval_external_dns_latency)
         )
 
         i = GaugeMetricFamily(self.metric_safe_name('health_score'), 'Overall internet health function')
