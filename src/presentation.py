@@ -8,7 +8,7 @@ from config import PresentationConfiguration
 from helpers.logging import setup_logging
 from helpers.redis import RedisConnect
 from prometheus_client import start_http_server
-from prometheus_client.core import REGISTRY, GaugeMetricFamily
+from prometheus_client.core import REGISTRY, GaugeMetricFamily, InfoMetricFamily
 
 
 
@@ -125,12 +125,38 @@ class CustomCollector(object):
         weight_internal_dns_latency = PresentationConfiguration.weight_internal_dns_latency  # Internal DNS latency is 2.5% of score
         weight_external_dns_latency = PresentationConfiguration.weight_external_dns_latency  # External DNS latency is 2.5% of score
 
+        g_score_weight = GaugeMetricFamily(
+            self.metric_safe_name('weight'),
+            'Network Score Weights',
+            labels=['type'],
+        )
+
+        g_score_weight.add_metric(['loss'], weight_loss)
+        g_score_weight.add_metric(['latency'], weight_latency)
+        g_score_weight.add_metric(['jitter'], weight_jitter)
+        g_score_weight.add_metric(['internal_dns_latency'], weight_internal_dns_latency)
+        g_score_weight.add_metric(['external_dns_latency'], weight_external_dns_latency)
+        yield g_score_weight
+
         threshold_loss = PresentationConfiguration.threshold_loss  # 5% loss threshold as max
         threshold_latency = PresentationConfiguration.threshold_latency  # 100ms latency threshold as max
         threshold_jitter = PresentationConfiguration.threshold_jitter  # 30ms jitter threshold as max
         # threshold_dns_latency = PresentationConfiguration.threshold_dns_latency  # 100ms dns latency threshold as max
         threshold_internal_dns_latency = PresentationConfiguration.threshold_internal_dns_latency  # 100ms internal dns latency threshold as max
         threshold_external_dns_latency = PresentationConfiguration.threshold_external_dns_latency  # 100ms external dns latency threshold as max
+
+        g_score_thresholds = GaugeMetricFamily(
+            self.metric_safe_name('threshold'),
+            'Network Score Thresholds',
+            labels=['type'],
+        )
+
+        g_score_thresholds.add_metric(['loss'], threshold_loss)
+        g_score_thresholds.add_metric(['latency'], threshold_latency)
+        g_score_thresholds.add_metric(['jitter'], threshold_jitter)
+        g_score_thresholds.add_metric(['internal_dns_latency'], threshold_internal_dns_latency)
+        g_score_thresholds.add_metric(['external_dns_latency'], threshold_external_dns_latency)
+        yield g_score_thresholds
 
         # eval_loss = 1 if average_loss / threshold_loss >= 1 else average_loss / threshold_loss
         # eval_latency = 1 if average_latency / threshold_latency >= 1 else average_latency / threshold_latency

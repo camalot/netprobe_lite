@@ -21,7 +21,7 @@ class Netprobe:
         # Logging Config
         self.logger = setup_logging()
 
-        self.logger.info(f"PROBE INTERVAL: {self.probe_interval}")
+        self.logger.info(f"PROBE INTERVAL: {self.probe_interval}s")
         self.logger.info(f"PROBE COUNT: {probe_count}")
         self.logger.info(f"SITES: {sites}")
         self.logger.info(f"DNS TEST SITE: {dns_test_site}")
