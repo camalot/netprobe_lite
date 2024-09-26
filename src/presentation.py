@@ -125,6 +125,9 @@ class CustomCollector(object):
         weight_internal_dns_latency = PresentationConfiguration.weight_internal_dns_latency  # Internal DNS latency is 2.5% of score
         weight_external_dns_latency = PresentationConfiguration.weight_external_dns_latency  # External DNS latency is 2.5% of score
 
+        weight_speedtest_download = PresentationConfiguration.weight_speedtest_download
+        weight_speedtest_upload = PresentationConfiguration.weight_speedtest_upload
+
         g_score_weight = GaugeMetricFamily(
             self.metric_safe_name('weight'),
             'Network Score Weights',
@@ -136,6 +139,8 @@ class CustomCollector(object):
         g_score_weight.add_metric(['jitter'], weight_jitter)
         g_score_weight.add_metric(['internal_dns_latency'], weight_internal_dns_latency)
         g_score_weight.add_metric(['external_dns_latency'], weight_external_dns_latency)
+        g_score_weight.add_metric(['speedtest_download'], weight_speedtest_download)
+        g_score_weight.add_metric(['speedtest_upload'], weight_speedtest_upload)
         yield g_score_weight
 
         threshold_loss = PresentationConfiguration.threshold_loss  # 5% loss threshold as max
@@ -144,6 +149,9 @@ class CustomCollector(object):
         # threshold_dns_latency = PresentationConfiguration.threshold_dns_latency  # 100ms dns latency threshold as max
         threshold_internal_dns_latency = PresentationConfiguration.threshold_internal_dns_latency  # 100ms internal dns latency threshold as max
         threshold_external_dns_latency = PresentationConfiguration.threshold_external_dns_latency  # 100ms external dns latency threshold as max
+
+        threshold_speedtest_download = PresentationConfiguration.threshold_speedtest_download
+        threshold_speedtest_upload = PresentationConfiguration.threshold_speedtest_upload
 
         g_score_thresholds = GaugeMetricFamily(
             self.metric_safe_name('threshold'),
@@ -156,12 +164,22 @@ class CustomCollector(object):
         g_score_thresholds.add_metric(['jitter'], threshold_jitter)
         g_score_thresholds.add_metric(['internal_dns_latency'], threshold_internal_dns_latency)
         g_score_thresholds.add_metric(['external_dns_latency'], threshold_external_dns_latency)
+        g_score_thresholds.add_metric(['speedtest_download'], threshold_speedtest_download)
+        g_score_thresholds.add_metric(['speedtest_upload'], threshold_speedtest_upload)
+
         yield g_score_thresholds
 
-        # eval_loss = 1 if average_loss / threshold_loss >= 1 else average_loss / threshold_loss
-        # eval_latency = 1 if average_latency / threshold_latency >= 1 else average_latency / threshold_latency
-        # eval_jitter = 1 if average_jitter / threshold_jitter >= 1 else average_jitter / threshold_jitter
-        # eval_dns_latency = 1 if my_dns_latency / threshold_dns_latency >= 1 else my_dns_latency / threshold_dns_latency
+        eval_loss = 1 if average_loss / threshold_loss >= 1 else average_loss / threshold_loss
+        eval_latency = 1 if average_latency / threshold_latency >= 1 else average_latency / threshold_latency
+        eval_jitter = 1 if average_jitter / threshold_jitter >= 1 else average_jitter / threshold_jitter
+        eval_external_dns_latency = (
+            1 if ext_dns_latency / threshold_external_dns_latency >= 1
+            else ext_dns_latency / threshold_external_dns_latency
+        )
+        eval_internal_dns_latency = (
+            1 if local_dns_latency / threshold_internal_dns_latency >= 1
+            else local_dns_latency / threshold_internal_dns_latency
+        )
 
         if average_loss / threshold_loss >= 1:
             eval_loss = 1

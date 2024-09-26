@@ -97,9 +97,33 @@ class PresentationConfiguration:
     weight_external_dns_latency = float(os.getenv('NP_WEIGHT_INTERNAL_DNS_LATENCY', '.025'))
     weight_internal_dns_latency = float(os.getenv('NP_WEIGHT_EXTERNAL_DNS_LATENCY', '.025'))
 
+    total_weight = sum([weight_loss, weight_latency, weight_jitter, weight_external_dns_latency, weight_internal_dns_latency])
+
+    speedtest_weight_rebalance = os.getenv('NP_WEIGHT_SPEEDTEST_REBALANCE', 'TRUE').lower() in ('true', '1', 't', 'y', 'yes')
+
+    if NetprobeConifguration.speedtest_enabled:
+        weight_speedtest_download = float(os.getenv('NP_WEIGHT_SPEEDTEST_DOWNLOAD', '.5'))
+        weight_speedtest_upload = float(os.getenv('NP_WEIGHT_SPEEDTEST_UPLOAD', '.5'))
+    else:
+        t_wstd = float(os.getenv('NP_WEIGHT_SPEEDTEST_DOWNLOAD', '.5'))
+        t_wstu = float(os.getenv('NP_WEIGHT_SPEEDTEST_UPLOAD', '.5'))
+        if total_weight < 1 and (total_weight + t_wstd + t_wstu) <= 1 and speedtest_weight_rebalance:
+            # add this weight to the "loss" weight
+            weight_loss += t_wstd + t_wstu
+
+        weight_speedtest_download = 0
+        weight_speedtest_upload = 0
+
     threshold_loss = int(os.getenv('NP_THRESHOLD_LOSS', '5'))
     threshold_latency = int(os.getenv('NP_THRESHOLD_LATENCY', '100'))
     threshold_jitter = int(os.getenv('NP_THRESHOLD_JITTER', '30'))
     # threshold_dns_latency = int(os.getenv('NP_THRESHOLD_DNS_LATENCY', '100'))
     threshold_internal_dns_latency = int(os.getenv('NP_THRESHOLD_INTERNAL_DNS_LATENCY', '100'))
     threshold_external_dns_latency = int(os.getenv('NP_THRESHOLD_EXTERNAL_DNS_LATENCY', '100'))
+
+    if NetprobeConifguration.speedtest_enabled:
+        threshold_speedtest_download = int(os.getenv('NP_THRESHOLD_SPEEDTEST_DOWNLOAD', '200'))
+        threshold_speedtest_upload = int(os.getenv('NP_THRESHOLD_SPEEDTEST_UPLOAD', '200'))
+    else:
+        threshold_speedtest_download = 0
+        threshold_speedtest_upload = 0
