@@ -199,6 +199,8 @@ class CustomCollector(object):
         g_cv.add_metric(['internal_dns_latency'], eval_internal_dns_latency)
         g_cv.add_metric(['external_dns_latency'], eval_external_dns_latency)
 
+        yield g_cv
+
         # Master scoring function
         score = (
             (1 - weight_loss * eval_loss)
