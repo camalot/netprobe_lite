@@ -123,7 +123,7 @@ class PresentationConfiguration:
     threshold_internal_dns_latency = int(os.getenv('NP_THRESHOLD_INTERNAL_DNS_LATENCY', '100'))
     threshold_external_dns_latency = int(os.getenv('NP_THRESHOLD_EXTERNAL_DNS_LATENCY', '100'))
 
-    if NetprobeConifguration.speedtest_enabled:
+    if speedtest_enforce_or_enabled:
         threshold_speedtest_download = int(os.getenv('NP_THRESHOLD_SPEEDTEST_DOWNLOAD', '200'))
         threshold_speedtest_upload = int(os.getenv('NP_THRESHOLD_SPEEDTEST_UPLOAD', '200'))
     else:
