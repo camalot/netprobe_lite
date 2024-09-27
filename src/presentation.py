@@ -34,21 +34,29 @@ class CustomCollector(object):
 
         data_store = None
 
-        if self.presentation.speedtest.cache_type == SpeedTestCacheTypes.REDIS:
-            try:
-                data_store = RedisDataStore()
-                data_store_topic = "speedtest"
-            except Exception as e:
-                self.logger.error('Could not connect to Redis')
-                self.logger.error(e)
-                self.logger.error(traceback.format_exc())
-        elif self.presentation.speedtest.cache_type == SpeedTestCacheTypes.MQTT:
-            try:
-                data_store = MqttDataStore()
-            except Exception as e:
-                self.logger.error('Could not connect to MQTT')
-                self.logger.error(e)
-                self.logger.error(traceback.format_exc())
+        try:
+            data_store = RedisDataStore()
+            data_store_topic = "speedtest"
+        except Exception as e:
+            self.logger.error('Could not connect to Redis')
+            self.logger.error(e)
+            self.logger.error(traceback.format_exc())
+
+        # if self.presentation.speedtest.cache_type == SpeedTestCacheTypes.REDIS:
+        #     try:
+        #         data_store = RedisDataStore()
+        #         data_store_topic = "speedtest"
+        #     except Exception as e:
+        #         self.logger.error('Could not connect to Redis')
+        #         self.logger.error(e)
+        #         self.logger.error(traceback.format_exc())
+        # elif self.presentation.speedtest.cache_type == SpeedTestCacheTypes.MQTT:
+        #     try:
+        #         data_store = MqttDataStore()
+        #     except Exception as e:
+        #         self.logger.error('Could not connect to MQTT')
+        #         self.logger.error(e)
+        #         self.logger.error(traceback.format_exc())
         if not data_store:
             return
 
@@ -195,30 +203,30 @@ class CustomCollector(object):
             else local_dns_latency / threshold_internal_dns_latency
         )
 
-        # if average_loss / threshold_loss >= 1:
-        #     eval_loss = 1
-        # else:
-        #     eval_loss = average_loss / threshold_loss
+        if average_loss / threshold_loss >= 1:
+            eval_loss = 1
+        else:
+            eval_loss = average_loss / threshold_loss
 
-        # if average_latency / threshold_latency >= 1:
-        #     eval_latency = 1
-        # else:
-        #     eval_latency = average_latency / threshold_latency
+        if average_latency / threshold_latency >= 1:
+            eval_latency = 1
+        else:
+            eval_latency = average_latency / threshold_latency
 
-        # if average_jitter / threshold_jitter >= 1:
-        #     eval_jitter = 1
-        # else:
-        #     eval_jitter = average_jitter / threshold_jitter
+        if average_jitter / threshold_jitter >= 1:
+            eval_jitter = 1
+        else:
+            eval_jitter = average_jitter / threshold_jitter
 
-        # if ext_dns_latency / threshold_external_dns_latency >= 1:
-        #     eval_external_dns_latency = 1
-        # else:
-        #     eval_external_dns_latency = ext_dns_latency / threshold_external_dns_latency
+        if ext_dns_latency / threshold_external_dns_latency >= 1:
+            eval_external_dns_latency = 1
+        else:
+            eval_external_dns_latency = ext_dns_latency / threshold_external_dns_latency
 
-        # if local_dns_latency / threshold_internal_dns_latency >= 1:
-        #     eval_internal_dns_latency = 1
-        # else:
-        #     eval_internal_dns_latency = local_dns_latency / threshold_internal_dns_latency
+        if local_dns_latency / threshold_internal_dns_latency >= 1:
+            eval_internal_dns_latency = 1
+        else:
+            eval_internal_dns_latency = local_dns_latency / threshold_internal_dns_latency
 
         g_cv = GaugeMetricFamily(
             self.metric_safe_name('coefficient'),
