@@ -63,6 +63,7 @@ class NetProbe:
     def run(self):
         while True:
             try:
+                self.logger.debug("Testing network")
                 stats = self.collector.collect()
             except Exception as e:
                 self.logger.error("Error testing network")
