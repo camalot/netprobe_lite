@@ -6,18 +6,18 @@ import redis
 from config import RedisConfiguration
 
 
-class RedisConnect:
+class RedisDataStore:
     def __init__(self):
+        self.config = RedisConfiguration()
         # Load global variables
-        self.host = RedisConfiguration.redis_host
-        self.port = RedisConfiguration.redis_port
+        self.host = self.config.host
+        self.port = self.config.port
         # this isn't even used. It's just set to a value that is never used
         # need to identify in the redis configuration where this is used
         # when it should be used to auth to the redis server
         # default should be "". If it is set to a value, it should be used
-        self.password = RedisConfiguration.redis_password
-        self.db = RedisConfiguration.redis_db
-
+        self.password = self.config.password
+        self.db = self.config.db
         # Connect to Redis
         if self.password:
             self.r = redis.Redis(host=self.host, port=int(self.port), db=int(self.db), password=self.password)

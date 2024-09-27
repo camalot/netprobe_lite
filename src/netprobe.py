@@ -2,20 +2,22 @@ import json
 import time
 import traceback
 
-from config import NetprobeConifguration, PresentationConfiguration
+from config import NetProbeConfiguration, PresentationConfiguration
 from helpers.logging import setup_logging
 from helpers.network import NetworkCollector
-from helpers.redis import RedisConnect
+from helpers.redis import RedisDataStore
 
 
-class Netprobe:
+class NetProbe:
     def __init__(self):
-        self.probe_interval = NetprobeConifguration.probe_interval
-        probe_count = NetprobeConifguration.probe_count
-        sites = NetprobeConifguration.sites
-        dns_test_site = NetprobeConifguration.dns_test_site
-        nameservers = NetprobeConifguration.nameservers
-        self.device_id = NetprobeConifguration.device_id
+        config = NetProbeConfiguration()
+        presentation_config = PresentationConfiguration()
+        self.probe_interval = config.probe_interval
+        probe_count = config.probe_count
+        sites = config.sites
+        dns_test_site = config.dns_test_site
+        nameservers = config.nameservers
+        self.device_id = config.device_id
         self.collector = NetworkCollector(sites, probe_count, dns_test_site, nameservers)
 
         # Logging Config
@@ -29,34 +31,34 @@ class Netprobe:
 
         # Logging each nameserver
         self.logger.info("NAMESERVERS:")
-        for nameserver, ip, type in NetprobeConifguration.nameservers:
+        for nameserver, ip, type in config.nameservers:
             self.logger.info(f"NAMESERVER: {nameserver} IP: {ip} TYPE: {type}")
 
         # log weight information
         self.logger.info("NETWORK SCORE:")
         self.logger.info("WEIGHTS:")
-        self.logger.info(f"JITTER WEIGHT: {PresentationConfiguration.weight_jitter * 100}%")
-        self.logger.info(f"LOSS WEIGHT: {PresentationConfiguration.weight_loss * 100}%")
-        self.logger.info(f"LATENCY WEIGHT: {PresentationConfiguration.weight_latency * 100}%")
-        self.logger.info(f"EXTERNAL DNS LATENCY WEIGHT: {PresentationConfiguration.weight_external_dns_latency * 100}%")
-        self.logger.info(f"INTERNAL DNS LATENCY WEIGHT: {PresentationConfiguration.weight_internal_dns_latency * 100}%")
+        self.logger.info(f"JITTER WEIGHT: {presentation_config.weight_jitter * 100}%")
+        self.logger.info(f"LOSS WEIGHT: {presentation_config.weight_loss * 100}%")
+        self.logger.info(f"LATENCY WEIGHT: {presentation_config.weight_latency * 100}%")
+        self.logger.info(f"EXTERNAL DNS LATENCY WEIGHT: {presentation_config.weight_external_dns_latency * 100}%")
+        self.logger.info(f"INTERNAL DNS LATENCY WEIGHT: {presentation_config.weight_internal_dns_latency * 100}%")
         total_weight = sum(
             [
-                PresentationConfiguration.weight_jitter,
-                PresentationConfiguration.weight_loss,
-                PresentationConfiguration.weight_latency,
-                PresentationConfiguration.weight_external_dns_latency,
-                PresentationConfiguration.weight_internal_dns_latency
+                presentation_config.weight_jitter,
+                presentation_config.weight_loss,
+                presentation_config.weight_latency,
+                presentation_config.weight_external_dns_latency,
+                presentation_config.weight_internal_dns_latency
             ]
         )
         self.logger.info(f"TOTAL WEIGHT: {total_weight * 100}%")
 
         self.logger.info("THRESHOLDS:")
-        self.logger.info(f"JITTER THRESHOLD: {PresentationConfiguration.threshold_jitter}ms")
-        self.logger.info(f"LOSS THRESHOLD: {PresentationConfiguration.threshold_loss}%")
-        self.logger.info(f"LATENCY THRESHOLD: {PresentationConfiguration.threshold_latency}ms")
-        self.logger.info(f"EXTERNAL DNS LATENCY THRESHOLD: {PresentationConfiguration.threshold_external_dns_latency}ms")
-        self.logger.info(f"INTERNAL DNS LATENCY THRESHOLD: {PresentationConfiguration.threshold_internal_dns_latency}ms")
+        self.logger.info(f"JITTER THRESHOLD: {presentation_config.threshold_jitter}ms")
+        self.logger.info(f"LOSS THRESHOLD: {presentation_config.threshold_loss}%")
+        self.logger.info(f"LATENCY THRESHOLD: {presentation_config.threshold_latency}ms")
+        self.logger.info(f"EXTERNAL DNS LATENCY THRESHOLD: {presentation_config.threshold_external_dns_latency}ms")
+        self.logger.info(f"INTERNAL DNS LATENCY THRESHOLD: {presentation_config.threshold_internal_dns_latency}ms")
 
     def run(self):
         while True:
@@ -69,7 +71,7 @@ class Netprobe:
                 continue
             # Connect to Redis
             try:
-                cache = RedisConnect()
+                cache = RedisDataStore()
                 # Save Data to Redis
                 cache_interval = self.probe_interval + 15  # Set the redis cache TTL slightly longer than the probe interval
                 cache.write(self.device_id, json.dumps(stats), cache_interval)

@@ -161,11 +161,11 @@ rtt min/avg/max/mdev = 11.487/12.915/14.475/1.095 ms"""
         return results
 
 
-class Netprobe_Speedtest(object):  # Speed test class
+class NetProbe_SpeedTest(object):  # Speed test class
     def __init__(self):
         self.speedtest_stats = {"download": None, "upload": None}
 
-    def netprobe_speedtest(self):
+    def run(self):
         s = speedtest.Speedtest()
         s.get_best_server()
         download = s.download()
@@ -175,7 +175,7 @@ class Netprobe_Speedtest(object):  # Speed test class
 
     def collect(self):
         self.speedtest_stats = {"download": None, "upload": None}
-        self.netprobe_speedtest()
+        self.run()
 
         results = json.dumps({"speed_stats": self.speedtest_stats})
 

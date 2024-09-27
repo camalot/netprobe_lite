@@ -5,8 +5,10 @@ import time
 import traceback
 
 from config import PresentationConfiguration
+from enums.SpeedTestCacheTypes import SpeedTestCacheTypes
 from helpers.logging import setup_logging
-from helpers.redis import RedisConnect
+from helpers.mqtt import MqttDataStore
+from helpers.redis import RedisDataStore
 from prometheus_client import start_http_server
 from prometheus_client.core import REGISTRY, GaugeMetricFamily, InfoMetricFamily
 
@@ -16,8 +18,9 @@ class CustomCollector(object):
     def __init__(self):
         # Namespace for the metrics
         self.logger = setup_logging()
+        self.presentation = PresentationConfiguration()
 
-        self.namespace = self.safe_name(PresentationConfiguration.device_id)
+        self.namespace = self.safe_name(self.presentation.device_id)
         pass
 
     def safe_name(self, name):
@@ -28,19 +31,29 @@ class CustomCollector(object):
         return f'{self.namespace}_{safe_name}'
 
     def collect(self):
-        # Connect to Redis
-        try:
-            cache = RedisConnect()
-        except Exception as e:
-            self.logger.error('Could not connect to Redis')
-            self.logger.error(e)
-            self.logger.error(traceback.format_exc())
 
-        if not cache:
+        data_store = None
+
+        if self.presentation.speedtest.cache_type == SpeedTestCacheTypes.REDIS:
+            try:
+                data_store = RedisDataStore()
+                data_store_topic = "speedtest"
+            except Exception as e:
+                self.logger.error('Could not connect to Redis')
+                self.logger.error(e)
+                self.logger.error(traceback.format_exc())
+        elif self.presentation.speedtest.cache_type == SpeedTestCacheTypes.MQTT:
+            try:
+                data_store = MqttDataStore()
+            except Exception as e:
+                self.logger.error('Could not connect to MQTT')
+                self.logger.error(e)
+                self.logger.error(traceback.format_exc())
+        if not data_store:
             return
 
         # Retrieve Netprobe data
-        results_netprobe = cache.read(PresentationConfiguration.device_id)  # Get the latest results from Redis
+        results_netprobe = data_store.read(self.presentation.device_id)  # Get the latest results from Redis
 
         if results_netprobe:
             stats_netprobe = json.loads(json.loads(results_netprobe))
@@ -99,8 +112,9 @@ class CustomCollector(object):
         ext_dns_latency = sum(ext_dns) / len(ext_dns)
         yield h
 
+
         # Retrieve Speedtest data
-        results_speedtest = cache.read('speedtest')  # Get the latest results from Redis
+        results_speedtest = data_store.read(data_store_topic)  # Get the latest results from Redis
 
         if results_speedtest:  # Speed test is optional
             stats_speedtest = json.loads(json.loads(results_speedtest))
@@ -118,15 +132,15 @@ class CustomCollector(object):
             yield s
 
         # Calculate overall health score
-        weight_loss = PresentationConfiguration.weight_loss  # Loss is 60% of score
-        weight_latency = PresentationConfiguration.weight_latency  # Latency is 15% of score
-        weight_jitter = PresentationConfiguration.weight_jitter  # Jitter is 20% of score
-        # weight_dns_latency = PresentationConfiguration.weight_dns_latency  # DNS latency is 5% of score
-        weight_internal_dns_latency = PresentationConfiguration.weight_internal_dns_latency  # Internal DNS latency is 2.5% of score
-        weight_external_dns_latency = PresentationConfiguration.weight_external_dns_latency  # External DNS latency is 2.5% of score
+        weight_loss = self.presentation.weight_loss  # Loss is 60% of score
+        weight_latency = self.presentation.weight_latency  # Latency is 15% of score
+        weight_jitter = self.presentation.weight_jitter  # Jitter is 20% of score
+        # weight_dns_latency = presentation.weight_dns_latency  # DNS latency is 5% of score
+        weight_internal_dns_latency = self.presentation.weight_internal_dns_latency  # Internal DNS latency is 2.5% of score
+        weight_external_dns_latency = self.presentation.weight_external_dns_latency  # External DNS latency is 2.5% of score
 
-        weight_speedtest_download = PresentationConfiguration.weight_speedtest_download
-        weight_speedtest_upload = PresentationConfiguration.weight_speedtest_upload
+        weight_speedtest_download = self.presentation.weight_speedtest_download
+        weight_speedtest_upload = self.presentation.weight_speedtest_upload
 
         g_score_weight = GaugeMetricFamily(
             self.metric_safe_name('weight'),
@@ -143,15 +157,15 @@ class CustomCollector(object):
         g_score_weight.add_metric(['speedtest_upload'], weight_speedtest_upload)
         yield g_score_weight
 
-        threshold_loss = PresentationConfiguration.threshold_loss  # 5% loss threshold as max
-        threshold_latency = PresentationConfiguration.threshold_latency  # 100ms latency threshold as max
-        threshold_jitter = PresentationConfiguration.threshold_jitter  # 30ms jitter threshold as max
-        # threshold_dns_latency = PresentationConfiguration.threshold_dns_latency  # 100ms dns latency threshold as max
-        threshold_internal_dns_latency = PresentationConfiguration.threshold_internal_dns_latency  # 100ms internal dns latency threshold as max
-        threshold_external_dns_latency = PresentationConfiguration.threshold_external_dns_latency  # 100ms external dns latency threshold as max
+        threshold_loss = self.presentation.threshold_loss  # 5% loss threshold as max
+        threshold_latency = self.presentation.threshold_latency  # 100ms latency threshold as max
+        threshold_jitter = self.presentation.threshold_jitter  # 30ms jitter threshold as max
+        # threshold_dns_latency = self.presentation.threshold_dns_latency  # 100ms dns latency threshold as max
+        threshold_internal_dns_latency = self.presentation.threshold_internal_dns_latency  # 100ms internal dns latency threshold as max
+        threshold_external_dns_latency = self.presentation.threshold_external_dns_latency  # 100ms external dns latency threshold as max
 
-        threshold_speedtest_download = PresentationConfiguration.threshold_speedtest_download
-        threshold_speedtest_upload = PresentationConfiguration.threshold_speedtest_upload
+        threshold_speedtest_download = self.presentation.threshold_speedtest_download
+        threshold_speedtest_upload = self.presentation.threshold_speedtest_upload
 
         g_score_thresholds = GaugeMetricFamily(
             self.metric_safe_name('threshold'),
@@ -181,30 +195,30 @@ class CustomCollector(object):
             else local_dns_latency / threshold_internal_dns_latency
         )
 
-        if average_loss / threshold_loss >= 1:
-            eval_loss = 1
-        else:
-            eval_loss = average_loss / threshold_loss
+        # if average_loss / threshold_loss >= 1:
+        #     eval_loss = 1
+        # else:
+        #     eval_loss = average_loss / threshold_loss
 
-        if average_latency / threshold_latency >= 1:
-            eval_latency = 1
-        else:
-            eval_latency = average_latency / threshold_latency
+        # if average_latency / threshold_latency >= 1:
+        #     eval_latency = 1
+        # else:
+        #     eval_latency = average_latency / threshold_latency
 
-        if average_jitter / threshold_jitter >= 1:
-            eval_jitter = 1
-        else:
-            eval_jitter = average_jitter / threshold_jitter
+        # if average_jitter / threshold_jitter >= 1:
+        #     eval_jitter = 1
+        # else:
+        #     eval_jitter = average_jitter / threshold_jitter
 
-        if ext_dns_latency / threshold_external_dns_latency >= 1:
-            eval_external_dns_latency = 1
-        else:
-            eval_external_dns_latency = ext_dns_latency / threshold_external_dns_latency
+        # if ext_dns_latency / threshold_external_dns_latency >= 1:
+        #     eval_external_dns_latency = 1
+        # else:
+        #     eval_external_dns_latency = ext_dns_latency / threshold_external_dns_latency
 
-        if local_dns_latency / threshold_internal_dns_latency >= 1:
-            eval_internal_dns_latency = 1
-        else:
-            eval_internal_dns_latency = local_dns_latency / threshold_internal_dns_latency
+        # if local_dns_latency / threshold_internal_dns_latency >= 1:
+        #     eval_internal_dns_latency = 1
+        # else:
+        #     eval_internal_dns_latency = local_dns_latency / threshold_internal_dns_latency
 
         g_cv = GaugeMetricFamily(
             self.metric_safe_name('coefficient'),
@@ -234,15 +248,18 @@ class CustomCollector(object):
         yield i
 
 
-class NetprobePresenation:
+class NetProbePresentation:
     def __init__(self):
         self.logger = setup_logging()
+        self.presentation = PresentationConfiguration()
 
     def run(self):
+        interface=self.presentation.interface
+        port=self.presentation.port
         self.logger.debug('Starting presentation service')
-        start_http_server(PresentationConfiguration.presentation_port, addr=PresentationConfiguration.presentation_interface)
+        start_http_server(port, addr=interface)
         self.logger.info(
-            f'Presentation service started on {PresentationConfiguration.presentation_interface}:{PresentationConfiguration.presentation_port}'
+            f'Listening => {interface}:{port}'
         )
         REGISTRY.register(CustomCollector())
         while True:

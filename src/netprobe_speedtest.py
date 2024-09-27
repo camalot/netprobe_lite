@@ -3,37 +3,38 @@ import json
 import time
 import traceback
 
-from config import NetprobeConifguration
+from config import SpeedTestConfiguration
 from helpers.logging import setup_logging
-from helpers.network import Netprobe_Speedtest
-from helpers.redis import RedisConnect
+from helpers.network import NetProbe_SpeedTest
+from helpers.redis import RedisDataStore
 
 
-class NetprobeSpeedTest:
+class NetProbeSpeedTest:
     def __init__(self):
-        self.speedtest_enabled = NetprobeConifguration.speedtest_enabled
-        self.speedtest_interval = NetprobeConifguration.speedtest_interval
-        self.collector = Netprobe_Speedtest()
+        speedtest_config = SpeedTestConfiguration()
+        self.enabled = speedtest_config.enabled
+        self.interval = speedtest_config.interval
+        self.collector = NetProbe_SpeedTest()
         # Logging Config
         self.logger = setup_logging()
 
     def run(self):
-        if self.speedtest_enabled:
-            self.logger.info('Speedtest enabled')
+        if self.enabled:
+            self.logger.info('Speed Test Enabled')
             while True:
                 try:
                     stats = self.collector.collect()
                 except Exception as e:
-                    self.logger.error('Error running speedtest')
+                    self.logger.error('Error running Speed Test')
                     self.logger.error(e)
                     self.logger.error(traceback.format_exc())
-                    time.sleep(self.speedtest_interval)  # Pause before retrying
+                    time.sleep(self.interval)  # Pause before retrying
                     continue
                 # Connect to Redis
                 try:
-                    cache = RedisConnect()
+                    cache = RedisDataStore()
                     # Save Data to Redis
-                    cache_interval = self.speedtest_interval * 2  # Set the redis cache 2x longer than the speedtest interval
+                    cache_interval = self.interval * 2  # Set the redis cache 2x longer than the speedtest interval
                     cache.write('speedtest', json.dumps(stats), cache_interval)
                     self.logger.info('Stats successfully written to Redis for Speed Test')
                 except Exception as e:
@@ -41,5 +42,5 @@ class NetprobeSpeedTest:
                     self.logger.error(e)
                     self.logger.error(traceback.format_exc())
 
-                self.logger.info(f'Speedtest sleeping for {self.speedtest_interval} seconds')
-                time.sleep(self.speedtest_interval)
+                self.logger.info(f'Speed Test sleeping for {self.interval} seconds')
+                time.sleep(self.interval)
