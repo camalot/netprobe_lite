@@ -100,8 +100,10 @@ class PresentationConfiguration:
     total_weight = sum([weight_loss, weight_latency, weight_jitter, weight_external_dns_latency, weight_internal_dns_latency])
 
     speedtest_weight_rebalance = os.getenv('NP_WEIGHT_SPEEDTEST_REBALANCE', 'TRUE').lower() in ('true', '1', 't', 'y', 'yes')
+    speedtest_enforce_weight = os.getenv('NP_WEIGHT_SPEEDTEST_ENFORCE', 'FALSE').lower() in ('true', '1', 't', 'y', 'yes')
+    speedtest_enforce_or_enabled = speedtest_enforce_weight or NetprobeConifguration.speedtest_enabled
 
-    if NetprobeConifguration.speedtest_enabled:
+    if speedtest_enforce_or_enabled:
         weight_speedtest_download = float(os.getenv('NP_WEIGHT_SPEEDTEST_DOWNLOAD', '.5'))
         weight_speedtest_upload = float(os.getenv('NP_WEIGHT_SPEEDTEST_UPLOAD', '.5'))
     else:
