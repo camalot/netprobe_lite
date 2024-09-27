@@ -1,7 +1,6 @@
 from enum import Enum
 
 class SpeedTestCacheTypes(Enum):
-    NONE = "NONE"
     FILE = "FILE"
     REDIS = "REDIS"
     MQTT = "MQTT"
@@ -13,4 +12,4 @@ class SpeedTestCacheTypes(Enum):
         try:
             return SpeedTestCacheTypes[label.upper()]
         except KeyError:
-            return SpeedTestCacheTypes.NONE
+            return SpeedTestCacheTypes.REDIS
