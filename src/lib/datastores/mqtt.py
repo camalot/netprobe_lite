@@ -15,7 +15,19 @@ class MqttDataStore(DataStore):
         self.logger.info(f"Initializing MQTT Data Store with broker {self.config.host}:{self.config.port}")
         self.client = self.create()
         self.client.loop_start()
-        time.sleep(5)
+        count = 0
+        found = 0
+        # Wait for all topics to be subscribed to and received or timeout after 3 seconds
+        while count < 3:
+            for topic in self.config.topics:
+                if topic in self.messages:
+                    found += 1
+            if found == len(self.config.topics):
+                break
+
+            count += 1
+            found = 0
+            time.sleep(1)
         self.client.loop_stop()
 
     def create(self) -> mqtt.Client:
