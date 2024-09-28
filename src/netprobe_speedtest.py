@@ -3,18 +3,18 @@ import json
 import time
 import traceback
 
-from config import SpeedTestConfiguration
+from config import Configuration
 from helpers.logging import setup_logging
-from helpers.network import NetProbe_SpeedTest
-from helpers.redis import RedisDataStore
+from helpers.network import SpeedTestCollector
+from lib.datastores.factory import DatastoreFactory
 
 
 class NetProbeSpeedTest:
     def __init__(self):
-        speedtest_config = SpeedTestConfiguration()
-        self.enabled = speedtest_config.enabled
-        self.interval = speedtest_config.interval
-        self.collector = NetProbe_SpeedTest()
+        self.config = Configuration()
+        self.enabled = self.config.speedtest.enabled
+        self.interval = self.config.speedtest.interval
+        self.collector = SpeedTestCollector()
         # Logging Config
         self.logger = setup_logging()
 
@@ -32,13 +32,14 @@ class NetProbeSpeedTest:
                     continue
                 # Connect to Redis
                 try:
-                    cache = RedisDataStore()
-                    # Save Data to Redis
+                    data_store = DatastoreFactory().create(self.config.datastore.type)
+                    # Save Data to Datastore
                     cache_interval = self.interval * 2  # Set the redis cache 2x longer than the speedtest interval
-                    cache.write('speedtest', json.dumps(stats), cache_interval)
-                    self.logger.info('Stats successfully written to Redis for Speed Test')
+                    topic = self.config.datastore.topics.get('speedtest', 'speedtest')
+                    data_store.write(topic, stats, cache_interval)
+                    self.logger.info('Stats successfully written to Datastore for Speed Test')
                 except Exception as e:
-                    self.logger.error('Could not connect to Redis')
+                    self.logger.error('Could not connect to Datastore')
                     self.logger.error(e)
                     self.logger.error(traceback.format_exc())
 

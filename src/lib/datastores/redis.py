@@ -1,14 +1,17 @@
 # Redis helper
 # Functions to help read and write from Redis
 import json
+import typing
 
 import redis
-from config import RedisConfiguration
+from config import RedisDataStoreConfiguration
+from lib.datastores.datastore import DataStore
 
 
-class RedisDataStore:
+class RedisDataStore(DataStore):
     def __init__(self):
-        self.config = RedisConfiguration()
+        super().__init__()
+        self.config = RedisDataStoreConfiguration()
         # Load global variables
         self.host = self.config.host
         self.port = self.config.port
@@ -23,8 +26,9 @@ class RedisDataStore:
             self.r = redis.Redis(host=self.host, port=int(self.port), db=int(self.db), password=self.password)
         else:
             self.r = redis.Redis(host=self.host, port=int(self.port), db=int(self.db))
+        self.logger.info(f"Initializing Redis Data Store with host {self.host} and port {self.port}")
 
-    def read(self, key):  # Read data from Redis
+    def read(self, key) -> typing.Any:  # Read data from Redis
         results = self.r.get(key)  # Get the latest results from Redis for a given key
         if results:
             data = json.loads(results)
@@ -32,6 +36,7 @@ class RedisDataStore:
             data = ""
         return data
 
-    def write(self, key, data, ttl):  # Write data to Redis
+    def write(self, key, data, ttl) -> bool:  # Write data to Redis
+        self.logger.debug(f"Writing to Redis: {key} - {ttl}")
         write = self.r.set(key, json.dumps(data), ttl)  # Store data with a given TTL
-        return write
+        return True if write else False

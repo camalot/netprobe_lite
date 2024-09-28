@@ -2,27 +2,31 @@ import json
 import time
 import traceback
 
-from config import NetProbeConfiguration, PresentationConfiguration
+from config import Configuration
+from enums.DataStoreTypes import DataStoreTypes
 from helpers.logging import setup_logging
 from helpers.network import NetworkCollector
-from helpers.redis import RedisDataStore
+
+from lib.datastores.factory import DatastoreFactory
 
 
 class NetProbe:
     def __init__(self):
-        config = NetProbeConfiguration()
-        presentation_config = PresentationConfiguration()
-        self.probe_interval = config.probe_interval
-        probe_count = config.probe_count
-        sites = config.sites
-        dns_test_site = config.dns_test_site
-        nameservers = config.nameservers
-        self.device_id = config.device_id
+        self.config = Configuration()
+        presentation_config = self.config.presentation
+        probe_config = self.config.probe
+        self.probe_interval = probe_config.interval
+        probe_count = probe_config.count
+        sites = probe_config.sites
+        dns_test_site = probe_config.dns_test_site
+        nameservers = probe_config.nameservers
+        self.device_id = probe_config.device_id
         self.collector = NetworkCollector(sites, probe_count, dns_test_site, nameservers)
 
         # Logging Config
         self.logger = setup_logging()
 
+        self.logger.info(f"DATASTORE TYPE: {self.config.datastore.type}")
         self.logger.info(f"PROBE INTERVAL: {self.probe_interval}s")
         self.logger.info(f"PROBE COUNT: {probe_count}")
         self.logger.info(f"SITES: {sites}")
@@ -31,7 +35,7 @@ class NetProbe:
 
         # Logging each nameserver
         self.logger.info("NAMESERVERS:")
-        for nameserver, ip, type in config.nameservers:
+        for nameserver, ip, type in probe_config.nameservers:
             self.logger.info(f"NAMESERVER: {nameserver} IP: {ip} TYPE: {type}")
 
         # log weight information
@@ -70,14 +74,15 @@ class NetProbe:
                 self.logger.error(e)
                 self.logger.error(traceback.format_exc())
                 continue
-            # Connect to Redis
+            # Connect to Datastore
             try:
-                cache = RedisDataStore()
-                # Save Data to Redis
-                cache_interval = self.probe_interval + 15  # Set the redis cache TTL slightly longer than the probe interval
-                cache.write(self.device_id, json.dumps(stats), cache_interval)
+                data_store = DatastoreFactory().create(self.config.datastore.type)
+                cache_interval = self.probe_interval + 15  # Set the cache TTL slightly longer than the probe interval
+                topic = self.config.datastore.topics.get('netprobe', 'netprobe')
+                data_store.write(topic, stats, cache_interval)
+                self.logger.debug("Stats successfully written to data store")
             except Exception as e:
-                self.logger.error("Could not connect to Redis")
+                self.logger.error("Could not connect to data store")
                 self.logger.error(e)
                 self.logger.error(traceback.format_exc())
             self.logger.debug(f'Probe sleeping for {self.probe_interval} seconds')

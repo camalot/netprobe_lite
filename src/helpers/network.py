@@ -2,6 +2,7 @@
 import json
 import os
 import re
+import statistics
 import subprocess
 import traceback
 from threading import Thread
@@ -156,27 +157,30 @@ rtt min/avg/max/mdev = 11.487/12.915/14.475/1.095 ms"""
         for s in threads:
             s.join()
 
-        results = json.dumps({"stats": self.stats, "dns_stats": self.dnsstats})
+        results = {"stats": self.stats, "dns_stats": self.dnsstats}
 
         return results
 
 
-class NetProbe_SpeedTest(object):  # Speed test class
+class SpeedTestCollector(object):  # Speed test class
     def __init__(self):
-        self.speedtest_stats = {"download": None, "upload": None}
+        self.speedtest_stats = {"download": None, "upload": None, "latency": None}
 
     def run(self):
         s = speedtest.Speedtest()
+        s.get_closest_servers()
         s.get_best_server()
         download = s.download()
         upload = s.upload()
+        # get the jitter and latency
+        latency = s.results.ping
 
-        self.speedtest_stats = {"download": download, "upload": upload}
+        self.speedtest_stats = {"download": download, "upload": upload, "latency": latency}
 
     def collect(self):
-        self.speedtest_stats = {"download": None, "upload": None}
+        self.speedtest_stats = {"download": None, "upload": None, "latency": None}
         self.run()
 
-        results = json.dumps({"speed_stats": self.speedtest_stats})
+        results = {"stats": self.speedtest_stats}
 
         return results

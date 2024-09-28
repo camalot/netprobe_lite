@@ -4,13 +4,11 @@ import os
 import time
 import traceback
 
-from config import PresentationConfiguration
-from enums.SpeedTestCacheTypes import SpeedTestCacheTypes
+from config import Configuration
+from lib.datastores.factory import DatastoreFactory
 from helpers.logging import setup_logging
-from helpers.mqtt import MqttDataStore
-from helpers.redis import RedisDataStore
 from prometheus_client import start_http_server
-from prometheus_client.core import REGISTRY, GaugeMetricFamily, InfoMetricFamily
+from prometheus_client.core import REGISTRY, GaugeMetricFamily
 
 
 
@@ -18,9 +16,9 @@ class CustomCollector(object):
     def __init__(self):
         # Namespace for the metrics
         self.logger = setup_logging()
-        self.presentation = PresentationConfiguration()
+        self.config = Configuration()
 
-        self.namespace = self.safe_name(self.presentation.device_id)
+        self.namespace = self.safe_name(self.config.presentation.device_id)
         pass
 
     def safe_name(self, name):
@@ -31,41 +29,26 @@ class CustomCollector(object):
         return f'{self.namespace}_{safe_name}'
 
     def collect(self):
-
         data_store = None
-
         try:
-            data_store = RedisDataStore()
-            data_store_topic = "speedtest"
+            data_store = DatastoreFactory().create(self.config.datastore.type)
         except Exception as e:
-            self.logger.error('Could not connect to Redis')
+            self.logger.error('Could not connect to data store')
             self.logger.error(e)
             self.logger.error(traceback.format_exc())
 
-        # if self.presentation.speedtest.cache_type == SpeedTestCacheTypes.REDIS:
-        #     try:
-        #         data_store = RedisDataStore()
-        #         data_store_topic = "speedtest"
-        #     except Exception as e:
-        #         self.logger.error('Could not connect to Redis')
-        #         self.logger.error(e)
-        #         self.logger.error(traceback.format_exc())
-        # elif self.presentation.speedtest.cache_type == SpeedTestCacheTypes.MQTT:
-        #     try:
-        #         data_store = MqttDataStore()
-        #     except Exception as e:
-        #         self.logger.error('Could not connect to MQTT')
-        #         self.logger.error(e)
-        #         self.logger.error(traceback.format_exc())
         if not data_store:
+            self.logger.error('Could not connect to data store')
             return
 
         # Retrieve Netprobe data
-        results_netprobe = data_store.read(self.presentation.device_id)  # Get the latest results from Redis
+        results_netprobe = data_store.read(self.config.datastore.topics.get('netprobe', self.config.probe.device_id))  # Get the latest results from Redis
 
         if results_netprobe:
-            stats_netprobe = json.loads(json.loads(results_netprobe))
+            stats_netprobe = results_netprobe
+            # stats_netprobe = json.loads(json.loads(results_netprobe))
         else:
+            self.logger.debug(f"No data found in data store. Skipping.")
             return
 
         g = GaugeMetricFamily(
@@ -122,10 +105,10 @@ class CustomCollector(object):
 
 
         # Retrieve Speedtest data
-        results_speedtest = data_store.read(data_store_topic)  # Get the latest results from Redis
+        results_speedtest = data_store.read('speedtest')  # Get the latest results from Redis
 
         if results_speedtest:  # Speed test is optional
-            stats_speedtest = json.loads(json.loads(results_speedtest))
+            stats_speedtest = results_speedtest
 
             s = GaugeMetricFamily(
                 self.metric_safe_name('speed_stats'),
@@ -133,22 +116,22 @@ class CustomCollector(object):
                 labels=['direction'],
             )
 
-            for key in stats_speedtest['speed_stats'].keys():
-                if stats_speedtest['speed_stats'][key]:
-                    s.add_metric([key], stats_speedtest['speed_stats'][key])
+            for key in stats_speedtest['stats'].keys():
+                if stats_speedtest['stats'][key]:
+                    s.add_metric([key], stats_speedtest['stats'][key])
 
             yield s
 
         # Calculate overall health score
-        weight_loss = self.presentation.weight_loss  # Loss is 60% of score
-        weight_latency = self.presentation.weight_latency  # Latency is 15% of score
-        weight_jitter = self.presentation.weight_jitter  # Jitter is 20% of score
+        weight_loss = self.config.presentation.weight_loss  # Loss is 60% of score
+        weight_latency = self.config.presentation.weight_latency  # Latency is 15% of score
+        weight_jitter = self.config.presentation.weight_jitter  # Jitter is 20% of score
         # weight_dns_latency = presentation.weight_dns_latency  # DNS latency is 5% of score
-        weight_internal_dns_latency = self.presentation.weight_internal_dns_latency  # Internal DNS latency is 2.5% of score
-        weight_external_dns_latency = self.presentation.weight_external_dns_latency  # External DNS latency is 2.5% of score
+        weight_internal_dns_latency = self.config.presentation.weight_internal_dns_latency  # Internal DNS latency is 2.5% of score
+        weight_external_dns_latency = self.config.presentation.weight_external_dns_latency  # External DNS latency is 2.5% of score
 
-        weight_speedtest_download = self.presentation.weight_speedtest_download
-        weight_speedtest_upload = self.presentation.weight_speedtest_upload
+        weight_speedtest_download = self.config.presentation.weight_speedtest_download
+        weight_speedtest_upload = self.config.presentation.weight_speedtest_upload
 
         g_score_weight = GaugeMetricFamily(
             self.metric_safe_name('weight'),
@@ -165,15 +148,15 @@ class CustomCollector(object):
         g_score_weight.add_metric(['speedtest_upload'], weight_speedtest_upload)
         yield g_score_weight
 
-        threshold_loss = self.presentation.threshold_loss  # 5% loss threshold as max
-        threshold_latency = self.presentation.threshold_latency  # 100ms latency threshold as max
-        threshold_jitter = self.presentation.threshold_jitter  # 30ms jitter threshold as max
+        threshold_loss = self.config.presentation.threshold_loss  # 5% loss threshold as max
+        threshold_latency = self.config.presentation.threshold_latency  # 100ms latency threshold as max
+        threshold_jitter = self.config.presentation.threshold_jitter  # 30ms jitter threshold as max
         # threshold_dns_latency = self.presentation.threshold_dns_latency  # 100ms dns latency threshold as max
-        threshold_internal_dns_latency = self.presentation.threshold_internal_dns_latency  # 100ms internal dns latency threshold as max
-        threshold_external_dns_latency = self.presentation.threshold_external_dns_latency  # 100ms external dns latency threshold as max
+        threshold_internal_dns_latency = self.config.presentation.threshold_internal_dns_latency  # 100ms internal dns latency threshold as max
+        threshold_external_dns_latency = self.config.presentation.threshold_external_dns_latency  # 100ms external dns latency threshold as max
 
-        threshold_speedtest_download = self.presentation.threshold_speedtest_download
-        threshold_speedtest_upload = self.presentation.threshold_speedtest_upload
+        threshold_speedtest_download = self.config.presentation.threshold_speedtest_download
+        threshold_speedtest_upload = self.config.presentation.threshold_speedtest_upload
 
         g_score_thresholds = GaugeMetricFamily(
             self.metric_safe_name('threshold'),
@@ -259,7 +242,7 @@ class CustomCollector(object):
 class NetProbePresentation:
     def __init__(self):
         self.logger = setup_logging()
-        self.presentation = PresentationConfiguration()
+        self.presentation = Configuration().presentation
 
     def run(self):
         interface=self.presentation.interface

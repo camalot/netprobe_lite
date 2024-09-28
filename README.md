@@ -29,6 +29,15 @@ To run Netprobe, you'll need a PC running Docker connected directly to your ISP 
 router. This ensures the tests are accurately measuring your ISP performance and excluding and interference from your
 home network. An old PC with Linux installed is a great option for this.
 
+### Datastore
+
+The collection of the metrics is stored in a Datastore to cache for use. There are multiple datastores available:
+
+- `FILE`: Stores cache in a local (or mounted) volume.
+- `REDIS`: Stores cache in Redis
+- `MONGODB`: Stores cache in MongoDB database collection.
+- `MQTT`: Stores cache in MQTT Broker.
+
 ### Environment Variables
 
 | NAME | DESCRIPTION | DEFAULT |

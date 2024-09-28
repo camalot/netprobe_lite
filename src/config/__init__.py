@@ -3,7 +3,7 @@ import os
 import re
 import typing
 
-from enums.SpeedTestCacheTypes import SpeedTestCacheTypes
+from enums.DataStoreTypes import DataStoreTypes
 import yaml
 from dotenv import find_dotenv, load_dotenv
 
@@ -14,16 +14,30 @@ except:  # noqa: E722
     pass
 
 
+@staticmethod
+def unquote(value: typing.Optional[str]) -> str:
+    """This function removes quotes from a string if they exist. It is used to clean up environment variables.
+    as they can be read with quotes if they are set in a docker-compose file or a .env file."""
+    if not value:
+        return ''
+
+    if value.startswith('"') and value.endswith('"'):
+        return value[1:-1]
+    elif value.startswith("'") and value.endswith("'"):
+        return value[1:-1]
+    return value
+
 class Configuration:
     def __init__(self, file_path: typing.Optional[str] = '/app/config/netprobe.yaml'):
 
-        self.netprobe = NetProbeConfiguration()
-        self.redis = RedisConfiguration()
+        self.probe = NetProbeConfiguration()
+        self.redis = RedisDataStoreConfiguration()
         self.presentation = PresentationConfiguration()
         self.logging = LoggingConfiguration()
-        self.mqtt = MqttConfiguration()
+        self.mqtt = MqttDataStoreConfiguration()
+        self.mongodb = MongoDBDataStoreConfiguration()
         self.speedtest = SpeedTestConfiguration()
-
+        self.datastore = DataStoreConfiguration()
 
         # if file_path exists and is not none, load the file
         if file_path and os.path.exists(file_path):
@@ -31,23 +45,36 @@ class Configuration:
                 self.__dict__.update(yaml.safe_load(file))
 
 
-class MqttConfiguration:
+class MqttDataStoreConfiguration:
     def __init__(self):
-        self.host = os.getenv('MQTT_HOST', 'localhost')
-        self.port = os.getenv('MQTT_PORT', '1883')
-        self.username = os.getenv('MQTT_USERNAME', None)
-        self.password = os.getenv('MQTT_PASSWORD', None)
-        self.enabled = bool(os.getenv('MQTT_ENABLED', 'FALSE').lower() in ('true', '1', 't', 'y', 'yes'))
+        self.host = unquote(os.getenv('NP_MQTT_HOST', 'localhost'))
+        self.port = int(unquote(os.getenv('NP_MQTT_PORT', '1883')))
+        self.username = unquote(os.getenv('NP_MQTT_USERNAME', None))
+        self.password = unquote(os.getenv('NP_MQTT_PASSWORD', None))
+        # split and remove any whitespace from the topics
+        # self.topics = [topic.strip() for topic in unquote(os.getenv('MQTT_TOPICS', 'netprobe,speedtest')).split(',')]
+        self.topics = [
+            unquote(os.getenv('NP_DATASTORE_TOPIC_SPEEDTEST', 'netprobe')),
+            unquote(os.getenv('NP_DATASTORE_TOPIC_SPEEDTEST', 'speedtest')),
+        ]
 
     def merge(self, config: dict):
         self.__dict__.update(config)
 
+class MongoDBDataStoreConfiguration:
+    def __init__(self):
+        self.url = unquote(os.getenv('NP_MONGODB_URL', 'mongodb://localhost:27017?authSource=admin'))
+        self.db = unquote(os.getenv('NP_MONGODB_DB', 'netprobe'))
+        self.collection = unquote(os.getenv('NP_MONGODB_COLLECTION', 'netprobe'))
+
+    def merge(self, config: dict):
+        self.__dict__.update(config)
 
 class LoggingConfiguration:
     def __init__(self):
-        log_level = os.getenv('NP_LOG_LEVEL', 'INFO').upper()
+        log_level = unquote(os.getenv('NP_LOG_LEVEL', 'INFO')).upper()
         self.level = getattr(logging, log_level, logging.INFO)
-        self.format = os.getenv('NP_LOG_FORMAT', '%(asctime)s %(levelname)s %(message)s')
+        self.format = unquote(os.getenv('NP_LOG_FORMAT', '%(asctime)s %(levelname)s %(message)s'))
 
     def merge(self, config: dict):
         self.__dict__.update(config)
@@ -55,30 +82,38 @@ class LoggingConfiguration:
 
 class SpeedTestConfiguration:
     def __init__(self):
-        self.enabled = bool(os.getenv("NP_SPEEDTEST_ENABLED", 'FALSE').lower() in ('true', '1', 't', 'y', 'yes'))
-        self.interval = int(os.getenv('NP_SPEEDTEST_INTERVAL', '937'))
-        self.weight_rebalance = os.getenv('NP_WEIGHT_SPEEDTEST_REBALANCE', 'TRUE').lower() in ('true', '1', 't', 'y', 'yes')
-        self.enforce_weight = os.getenv('NP_WEIGHT_SPEEDTEST_ENFORCE', 'FALSE').lower() in ('true', '1', 't', 'y', 'yes')
-        self.download_weight = float(os.getenv('NP_WEIGHT_SPEEDTEST_DOWNLOAD', '.5'))
-        self.upload_weight = float(os.getenv('NP_WEIGHT_SPEEDTEST_UPLOAD', '.5'))
-        self.threshold_download = int(os.getenv('NP_THRESHOLD_SPEEDTEST_DOWNLOAD', '200'))
-        self.threshold_upload = int(os.getenv('NP_THRESHOLD_SPEEDTEST_UPLOAD', '200'))
+        self.enabled = bool(unquote(os.getenv("NP_SPEEDTEST_ENABLED", 'FALSE')).lower() in ('true', '1', 't', 'y', 'yes'))
+        self.interval = int(unquote(os.getenv('NP_SPEEDTEST_INTERVAL', '937')))
+        self.weight_rebalance = unquote(os.getenv('NP_WEIGHT_SPEEDTEST_REBALANCE', 'TRUE')).lower() in ('true', '1', 't', 'y', 'yes')
+        self.enforce_weight = unquote(os.getenv('NP_WEIGHT_SPEEDTEST_ENFORCE', 'FALSE')).lower() in ('true', '1', 't', 'y', 'yes')
+        self.download_weight = float(unquote(os.getenv('NP_WEIGHT_SPEEDTEST_DOWNLOAD', '.5')))
+        self.upload_weight = float(unquote(os.getenv('NP_WEIGHT_SPEEDTEST_UPLOAD', '.5')))
+        self.threshold_download = int(unquote(os.getenv('NP_THRESHOLD_SPEEDTEST_DOWNLOAD', '200')))
+        self.threshold_upload = int(unquote(os.getenv('NP_THRESHOLD_SPEEDTEST_UPLOAD', '200')))
         self.enforce_or_enabled = self.enforce_weight or self.enabled
-
-        self.cache_type = SpeedTestCacheTypes.from_str(os.getenv('NP_SPEEDTEST_CACHE', 'NONE').upper())
 
 
     def merge(self, config: dict):
         self.__dict__.update(config)
 
+class DataStoreConfiguration:
+    def __init__(self):
+        self.type = DataStoreTypes.from_str(unquote(os.getenv('NP_DATASTORE_TYPE', 'FILE')).upper())
+        self.topics = {
+            'netprobe': unquote(os.getenv('NP_DATASTORE_TOPIC_NETPROBE', 'netprobe')),
+            'speedtest': unquote(os.getenv('NP_DATASTORE_TOPIC_SPEEDTEST', 'speedtest')),
+        }
+
+    def merge(self, config: dict):
+        self.__dict__.update(config)
 
 class NetProbeConfiguration:
     def __init__(self):
-        self.probe_interval = int(os.getenv('NP_PROBE_INTERVAL', '30'))
-        self.probe_count = int(os.getenv('NP_PROBE_COUNT', '50'))
-        self.sites = os.getenv('NP_SITES', 'google.com,facebook.com,twitter.com,youtube.com').split(',')
-        self.dns_test_site = os.getenv('NP_DNS_TEST_SITE', 'google.com')
-        self.device_id = os.getenv('NP_DEVICE_ID', 'netprobe').replace(' ', '_').replace('.', '_').replace('-', '_').lower()
+        self.interval = int(unquote(os.getenv('NP_PROBE_INTERVAL', '30')))
+        self.count = int(unquote(os.getenv('NP_PROBE_COUNT', '50')))
+        self.sites = unquote(os.getenv('NP_SITES', 'google.com,facebook.com,twitter.com,youtube.com')).split(',')
+        self.dns_test_site = unquote(os.getenv('NP_DNS_TEST_SITE', 'google.com'))
+        self.device_id = unquote(os.getenv('NP_DEVICE_ID', 'netprobe')).replace(' ', '_').replace('.', '_').replace('-', '_').lower()
 
         # get all environment variables that match the pattern DNS_NAMESERVER_\d{1,}
         # and create a list of tuples with the nameserver and the IP
@@ -91,51 +126,54 @@ class NetProbeConfiguration:
                 # get the nameserver number from the match
                 index = m.group(1)
                 label = value if value else f"EXTERNAL DNS NAMESERVER {index}"
-                ip = os.getenv(f'NP_DNS_NAMESERVER_{index}_IP', None)
+                ip = unquote(os.getenv(f'NP_DNS_NAMESERVER_{index}_IP', None))
                 if ip and label:
-                    self.nameservers.append((label, ip, 'external'))
+                    self.nameservers.append((unquote(label), ip, 'external'))
             m = re.match(match_pattern_local, key, re.IGNORECASE | re.DOTALL | re.MULTILINE)
             if m:
                 index = m.group(1)
                 label = value if value else f"INTERNAL DNS NAMESERVER {index}"
-                ip = os.getenv(f'NP_LOCAL_DNS_NAMESERVER_{index}_IP', None)
+                ip = unquote(os.getenv(f'NP_LOCAL_DNS_NAMESERVER_{index}_IP', None))
                 if ip and label:
-                    self.nameservers.append((label, ip, 'internal'))
+                    self.nameservers.append((unquote(label), ip, 'internal'))
 
         # singular local dns
-        NP_LOCAL_DNS = os.getenv('NP_LOCAL_DNS', None)
-        NP_LOCAL_DNS_IP = os.getenv('NP_LOCAL_DNS_IP', None)
+        NP_LOCAL_DNS = unquote(os.getenv('NP_LOCAL_DNS', None))
+        NP_LOCAL_DNS_IP = unquote(os.getenv('NP_LOCAL_DNS_IP', None))
 
         if NP_LOCAL_DNS and NP_LOCAL_DNS_IP:
             self.nameservers.append((NP_LOCAL_DNS, NP_LOCAL_DNS_IP, "internal"))
 
 
-class RedisConfiguration:
+class RedisDataStoreConfiguration:
     def __init__(self):
-        self.host = os.getenv('NP_REDIS_URL', os.getenv('NP_REDIS_HOST', 'localhost'))
-        self.port = os.getenv('NP_REDIS_PORT', '6379')
-        self.password = os.getenv('NP_REDIS_PASSWORD', '')
-        self.db = os.getenv('NP_REDIS_DB', '0')
-        self.enabled = bool(os.getenv('NP_REDIS_ENABLED', 'TRUE').lower() in ('true', '1', 't', 'y', 'yes'))
+        self.host = unquote(os.getenv('NP_REDIS_URL', os.getenv('NP_REDIS_HOST', 'localhost')))
+        self.port = unquote(os.getenv('NP_REDIS_PORT', '6379'))
+        self.password = unquote(os.getenv('NP_REDIS_PASSWORD', ''))
+        self.db = unquote(os.getenv('NP_REDIS_DB', '0'))
+        self.enabled = bool(unquote(os.getenv('NP_REDIS_ENABLED', 'TRUE')).lower() in ('true', '1', 't', 'y', 'yes'))
 
     def merge(self, config: dict):
         self.__dict__.update(config)
 
+class FileDataStoreConfiguration:
+    def __init__(self):
+        self.path = unquote(os.getenv('NP_FILE_DATASTORE_PATH', '/data'))
 
 class PresentationConfiguration:
     def __init__(self):
         self.speedtest = SpeedTestConfiguration()
-        self.port = int(os.getenv('NP_PRESENTATION_PORT', '5000'))
-        self.interface = os.getenv('NP_PRESENTATION_INTERFACE', '0.0.0.0')
-        self.device_id = os.getenv('NP_DEVICE_ID', 'netprobe')
+        self.port = int(unquote(os.getenv('NP_PRESENTATION_PORT', '5000')))
+        self.interface = unquote(os.getenv('NP_PRESENTATION_INTERFACE', '0.0.0.0'))
+        self.device_id = unquote(os.getenv('NP_DEVICE_ID', 'netprobe'))
 
-        self.local_dns_name = os.getenv('NP_LOCAL_DNS', None)
+        self.local_dns_name = unquote(os.getenv('NP_LOCAL_DNS', None))
 
-        self.weight_loss = float(os.getenv('NP_WEIGHT_LOSS', '.6'))
-        self.weight_latency = float(os.getenv('NP_WEIGHT_LATENCY', '.15'))
-        self.weight_jitter = float(os.getenv('NP_WEIGHT_JITTER', '.2'))
-        self.weight_internal_dns_latency = float(os.getenv('NP_WEIGHT_INTERNAL_DNS_LATENCY', '.025'))
-        self.weight_external_dns_latency = float(os.getenv('NP_WEIGHT_EXTERNAL_DNS_LATENCY', '.025'))
+        self.weight_loss = float(unquote(os.getenv('NP_WEIGHT_LOSS', '.6')))
+        self.weight_latency = float(unquote(os.getenv('NP_WEIGHT_LATENCY', '.15')))
+        self.weight_jitter = float(unquote(os.getenv('NP_WEIGHT_JITTER', '.2')))
+        self.weight_internal_dns_latency = float(unquote(os.getenv('NP_WEIGHT_INTERNAL_DNS_LATENCY', '.025')))
+        self.weight_external_dns_latency = float(unquote(os.getenv('NP_WEIGHT_EXTERNAL_DNS_LATENCY', '.025')))
 
         self.total_weight = sum(
             [
@@ -160,11 +198,11 @@ class PresentationConfiguration:
                 # add this weight to the "loss" weight
                 self.weight_loss += t_wstd + t_wstu
 
-        self.threshold_loss = int(os.getenv('NP_THRESHOLD_LOSS', '5'))
-        self.threshold_latency = int(os.getenv('NP_THRESHOLD_LATENCY', '100'))
-        self.threshold_jitter = int(os.getenv('NP_THRESHOLD_JITTER', '30'))
-        self.threshold_internal_dns_latency = int(os.getenv('NP_THRESHOLD_INTERNAL_DNS_LATENCY', '100'))
-        self.threshold_external_dns_latency = int(os.getenv('NP_THRESHOLD_EXTERNAL_DNS_LATENCY', '100'))
+        self.threshold_loss = int(unquote(os.getenv('NP_THRESHOLD_LOSS', '5')))
+        self.threshold_latency = int(unquote(os.getenv('NP_THRESHOLD_LATENCY', '100')))
+        self.threshold_jitter = int(unquote(os.getenv('NP_THRESHOLD_JITTER', '30')))
+        self.threshold_internal_dns_latency = int(unquote(os.getenv('NP_THRESHOLD_INTERNAL_DNS_LATENCY', '100')))
+        self.threshold_external_dns_latency = int(unquote(os.getenv('NP_THRESHOLD_EXTERNAL_DNS_LATENCY', '100')))
 
         self.threshold_speedtest_download = 0
         self.threshold_speedtest_upload = 0
