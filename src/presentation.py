@@ -5,6 +5,7 @@ import time
 import traceback
 
 from config import Configuration
+from enums.DataStoreTypes import DataStoreTypes
 from lib.datastores.factory import DatastoreFactory
 from helpers.logging import setup_logging
 from prometheus_client import start_http_server
@@ -29,20 +30,29 @@ class CustomCollector(object):
         return f'{self.namespace}_{safe_name}'
 
     def collect(self):
-        data_store = None
+        probe_data_store = None
+        speedtest_data_store = None
         try:
-            data_store = DatastoreFactory().create(self.config.datastore.type)
+            probe_data_store = DatastoreFactory().create(self.config.datastore.netprobe.get('type', DataStoreTypes.FILE))
         except Exception as e:
             self.logger.error('Could not connect to data store')
             self.logger.error(e)
             self.logger.error(traceback.format_exc())
 
-        if not data_store:
+        try:
+            speedtest_data_store = DatastoreFactory().create(self.config.datastore.speedtest.get('type', DataStoreTypes.FILE))
+        except Exception as e:
+            self.logger.error('Could not connect to data store')
+            self.logger.error(e)
+            self.logger.error(traceback.format_exc())
+
+
+        if not probe_data_store:
             self.logger.error('Could not connect to data store')
             return
 
         # Retrieve Netprobe data
-        results_netprobe = data_store.read(self.config.datastore.topics.get('netprobe', self.config.probe.device_id))  # Get the latest results from Redis
+        results_netprobe = probe_data_store.read(self.config.datastore.netprobe.get('topic', 'netprobe/probe'))
 
         if results_netprobe:
             stats_netprobe = results_netprobe
@@ -103,24 +113,24 @@ class CustomCollector(object):
         ext_dns_latency = sum(ext_dns) / len(ext_dns)
         yield h
 
-
         # Retrieve Speedtest data
-        results_speedtest = data_store.read('speedtest')  # Get the latest results from Redis
+        if speedtest_data_store:
+            results_speedtest = speedtest_data_store.read(self.config.datastore.speedtest.get('topic', 'netprobe/speedtest'))  # Get the latest results from Redis
 
-        if results_speedtest:  # Speed test is optional
-            stats_speedtest = results_speedtest
+            if results_speedtest:  # Speed test is optional
+                stats_speedtest = results_speedtest
 
-            s = GaugeMetricFamily(
-                self.metric_safe_name('speed_stats'),
-                'Speedtest performance statistics from speedtest.net',
-                labels=['direction'],
-            )
+                s = GaugeMetricFamily(
+                    self.metric_safe_name('speed_stats'),
+                    'Speedtest performance statistics from speedtest.net',
+                    labels=['direction'],
+                )
 
-            for key in stats_speedtest['stats'].keys():
-                if stats_speedtest['stats'][key]:
-                    s.add_metric([key], stats_speedtest['stats'][key])
+                for key in stats_speedtest.keys():
+                    if stats_speedtest[key]:
+                        s.add_metric([key], stats_speedtest[key])
 
-            yield s
+                yield s
 
         # Calculate overall health score
         weight_loss = self.config.presentation.weight_loss  # Loss is 60% of score

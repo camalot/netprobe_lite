@@ -98,11 +98,19 @@ class SpeedTestConfiguration:
 
 class DataStoreConfiguration:
     def __init__(self):
-        self.type = DataStoreTypes.from_str(unquote(os.getenv('NP_DATASTORE_TYPE', 'FILE')).upper())
-        self.topics = {
-            'netprobe': unquote(os.getenv('NP_DATASTORE_TOPIC_NETPROBE', 'netprobe')),
-            'speedtest': unquote(os.getenv('NP_DATASTORE_TOPIC_SPEEDTEST', 'speedtest')),
+        self.netprobe = {
+            'type': DataStoreTypes.from_str(unquote(os.getenv('NP_DATASTORE_PROBE_TYPE', 'FILE')).upper()),
+            'topic': unquote(os.getenv('NP_DATASTORE_TOPIC_NETPROBE', 'netprobe')),
         }
+        self.speedtest = {
+            'type': DataStoreTypes.from_str(unquote(os.getenv('NP_DATASTORE_SPEEDTEST_TYPE', 'FILE')).upper()),
+            'topic': unquote(os.getenv('NP_DATASTORE_TOPIC_SPEEDTEST', 'speedtest')),
+        }
+        # self.type = DataStoreTypes.from_str(unquote(os.getenv('NP_DATASTORE_TYPE', 'FILE')).upper())
+        # self.topics = {
+        #     'netprobe': unquote(os.getenv('NP_DATASTORE_TOPIC_NETPROBE', 'netprobe')),
+        #     'speedtest': unquote(os.getenv('NP_DATASTORE_TOPIC_SPEEDTEST', 'speedtest')),
+        # }
 
     def merge(self, config: dict):
         self.__dict__.update(config)

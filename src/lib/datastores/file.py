@@ -39,7 +39,7 @@ class FileDataStore(DataStore):
         except FileNotFoundError:
             self.logger.warning(f"File {topic} not found")
             data = None
-        return data
+        return json.loads(data) if data else None
 
     def write(self, topic, data, ttl) -> bool:
         topic = self.__normalize_topic(topic)

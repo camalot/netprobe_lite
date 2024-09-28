@@ -4,6 +4,7 @@ import time
 import traceback
 
 from config import Configuration
+from enums.DataStoreTypes import DataStoreTypes
 from helpers.logging import setup_logging
 from helpers.network import SpeedTestCollector
 from lib.datastores.factory import DatastoreFactory
@@ -30,12 +31,11 @@ class NetProbeSpeedTest:
                     self.logger.error(traceback.format_exc())
                     time.sleep(self.interval)  # Pause before retrying
                     continue
-                # Connect to Redis
                 try:
-                    data_store = DatastoreFactory().create(self.config.datastore.type)
+                    data_store = DatastoreFactory().create(self.config.datastore.speedtest.get('type', DataStoreTypes.FILE))
                     # Save Data to Datastore
                     cache_interval = self.interval * 2  # Set the redis cache 2x longer than the speedtest interval
-                    topic = self.config.datastore.topics.get('speedtest', 'speedtest')
+                    topic = self.config.datastore.speedtest.get('topic', 'netprobe/speedtest')
                     data_store.write(topic, stats, cache_interval)
                     self.logger.info('Stats successfully written to Datastore for Speed Test')
                 except Exception as e:

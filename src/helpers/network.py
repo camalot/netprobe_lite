@@ -181,6 +181,6 @@ class SpeedTestCollector(object):  # Speed test class
         self.speedtest_stats = {"download": None, "upload": None, "latency": None}
         self.run()
 
-        results = {"stats": self.speedtest_stats}
+        results = self.speedtest_stats
 
         return results

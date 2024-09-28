@@ -26,7 +26,9 @@ class NetProbe:
         # Logging Config
         self.logger = setup_logging()
 
-        self.logger.info(f"DATASTORE TYPE: {self.config.datastore.type}")
+        self.logger.info(f"PROBE DATASTORE TYPE: {self.config.datastore.netprobe.get('type', DataStoreTypes.FILE)}")
+        self.logger.info(f"PROBE DATASTORE TOPIC: {self.config.datastore.netprobe.get('topic', 'netprobe/probe')}")
+
         self.logger.info(f"PROBE INTERVAL: {self.probe_interval}s")
         self.logger.info(f"PROBE COUNT: {probe_count}")
         self.logger.info(f"SITES: {sites}")
@@ -76,9 +78,9 @@ class NetProbe:
                 continue
             # Connect to Datastore
             try:
-                data_store = DatastoreFactory().create(self.config.datastore.type)
+                data_store = DatastoreFactory().create(self.config.datastore.netprobe.get('type', DataStoreTypes.FILE))
                 cache_interval = self.probe_interval + 15  # Set the cache TTL slightly longer than the probe interval
-                topic = self.config.datastore.topics.get('netprobe', 'netprobe')
+                topic = self.config.datastore.netprobe.get('topic', 'netprobe/probe')
                 data_store.write(topic, stats, cache_interval)
                 self.logger.debug("Stats successfully written to data store")
             except Exception as e:
