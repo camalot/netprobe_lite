@@ -123,7 +123,7 @@ class CustomCollector(object):
                 s = GaugeMetricFamily(
                     self.metric_safe_name('speed_stats'),
                     'Speedtest performance statistics from speedtest.net',
-                    labels=['direction'],
+                    labels=['type'],
                 )
 
                 for key in stats_speedtest.keys():
