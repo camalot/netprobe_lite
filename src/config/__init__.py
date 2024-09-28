@@ -52,10 +52,18 @@ class MqttDataStoreConfiguration:
         self.username = unquote(os.getenv('NP_MQTT_USERNAME', None))
         self.password = unquote(os.getenv('NP_MQTT_PASSWORD', None))
 
-        self.topics = [
-            unquote(os.getenv('NP_DATASTORE_TOPIC_NETPROBE', 'netprobe/probe')),
-            unquote(os.getenv('NP_DATASTORE_TOPIC_SPEEDTEST', 'netprobe/speedtest')),
-        ]
+        dsc = DataStoreConfiguration()
+        np_type = dsc.netprobe.get('type', None)
+        np_topic = dsc.netprobe.get('topic', None) if np_type == DataStoreTypes.MQTT else None
+
+        st_type = dsc.speedtest.get('type', None)
+        st_topic = dsc.speedtest.get('topic', None) if st_type == DataStoreTypes.MQTT else None
+
+        self.topics = []
+        if np_topic:
+            self.topics.append(np_topic)
+        if st_topic:
+            self.topics.append(st_topic)
 
     def merge(self, config: dict):
         self.__dict__.update(config)
