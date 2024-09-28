@@ -51,11 +51,10 @@ class MqttDataStoreConfiguration:
         self.port = int(unquote(os.getenv('NP_MQTT_PORT', '1883')))
         self.username = unquote(os.getenv('NP_MQTT_USERNAME', None))
         self.password = unquote(os.getenv('NP_MQTT_PASSWORD', None))
-        # split and remove any whitespace from the topics
-        # self.topics = [topic.strip() for topic in unquote(os.getenv('MQTT_TOPICS', 'netprobe,speedtest')).split(',')]
+
         self.topics = [
-            unquote(os.getenv('NP_DATASTORE_TOPIC_SPEEDTEST', 'netprobe')),
-            unquote(os.getenv('NP_DATASTORE_TOPIC_SPEEDTEST', 'speedtest')),
+            unquote(os.getenv('NP_DATASTORE_TOPIC_NETPROBE', 'netprobe/probe')),
+            unquote(os.getenv('NP_DATASTORE_TOPIC_SPEEDTEST', 'netprobe/speedtest')),
         ]
 
     def merge(self, config: dict):
@@ -100,17 +99,14 @@ class DataStoreConfiguration:
     def __init__(self):
         self.netprobe = {
             'type': DataStoreTypes.from_str(unquote(os.getenv('NP_DATASTORE_PROBE_TYPE', 'FILE')).upper()),
-            'topic': unquote(os.getenv('NP_DATASTORE_TOPIC_NETPROBE', 'netprobe')),
+            'topic': unquote(os.getenv('NP_DATASTORE_TOPIC_NETPROBE', 'netprobe/probe')),
         }
         self.speedtest = {
             'type': DataStoreTypes.from_str(unquote(os.getenv('NP_DATASTORE_SPEEDTEST_TYPE', 'FILE')).upper()),
-            'topic': unquote(os.getenv('NP_DATASTORE_TOPIC_SPEEDTEST', 'speedtest')),
+            'topic': unquote(os.getenv('NP_DATASTORE_TOPIC_SPEEDTEST', 'netprobe/speedtest')),
         }
-        # self.type = DataStoreTypes.from_str(unquote(os.getenv('NP_DATASTORE_TYPE', 'FILE')).upper())
-        # self.topics = {
-        #     'netprobe': unquote(os.getenv('NP_DATASTORE_TOPIC_NETPROBE', 'netprobe')),
-        #     'speedtest': unquote(os.getenv('NP_DATASTORE_TOPIC_SPEEDTEST', 'speedtest')),
-        # }
+
+
 
     def merge(self, config: dict):
         self.__dict__.update(config)
