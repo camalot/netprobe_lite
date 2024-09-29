@@ -214,9 +214,9 @@ class CustomCollector(object):
         self.logger.info(f"External DNS Latency Coefficient: {cv_external_dns_latency}")
         self.logger.info(f"Internal DNS Latency Coefficient: {cv_internal_dns_latency}")
 
-        # assume 1 if no speedtest data
-        cv_download = 1
-        cv_upload = 1
+        # assume 0 if no speedtest data
+        cv_download = 0
+        cv_upload = 0
         if stats_speedtest:
             self.logger.debug(f"Speedtest Data: {stats_speedtest}")
             cv_download = (
