@@ -267,6 +267,8 @@ class CustomCollector(object):
             - (weight_latency * eval_latency)
             - (weight_internal_dns_latency * eval_internal_dns_latency)
             - (weight_external_dns_latency * eval_external_dns_latency)
+            - (weight_speedtest_download * eval_download)
+            - (weight_speedtest_upload * eval_upload)
         )
 
         i = GaugeMetricFamily(self.metric_safe_name('health_score'), 'Overall internet health function')
