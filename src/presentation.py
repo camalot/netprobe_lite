@@ -208,6 +208,11 @@ class CustomCollector(object):
             1 if local_dns_latency / threshold_internal_dns_latency >= 1
             else local_dns_latency / threshold_internal_dns_latency
         )
+        self.logger.info(f"Loss Coefficient: {eval_loss}")
+        self.logger.info(f"Latency Coefficient: {eval_latency}")
+        self.logger.info(f"Jitter Coefficient: {eval_jitter}")
+        self.logger.info(f"External DNS Latency Coefficient: {eval_external_dns_latency}")
+        self.logger.info(f"Internal DNS Latency Coefficient: {eval_internal_dns_latency}")
 
         # assume 1 if no speedtest data
         eval_download = 1
@@ -221,6 +226,9 @@ class CustomCollector(object):
                 1 if stats_speedtest['upload'] / threshold_speedtest_upload >= 1
                 else stats_speedtest['upload'] / threshold_speedtest_upload
             )
+
+            self.logger.info(f"Speedtest Download Coefficient: {eval_download}")
+            self.logger.info(f"Speedtest Upload Coefficient: {eval_upload}")
 
         # if average_loss / threshold_loss >= 1:
         #     eval_loss = 1
@@ -272,6 +280,15 @@ class CustomCollector(object):
             - (weight_speedtest_download * eval_download)
             - (weight_speedtest_upload * eval_upload)
         )
+        self.logger.info(f"Loss Score: {(1 - (weight_loss * eval_loss)) * 100}%")
+        self.logger.info(f"Latency Score: {(1 - (weight_latency * eval_latency)) * 100}%")
+        self.logger.info(f"Jitter Score: {(1 - (weight_jitter * eval_jitter)) * 100}%")
+        self.logger.info(f"Internal DNS Latency Score: {(1 - (weight_internal_dns_latency * eval_internal_dns_latency)) * 100}%")
+        self.logger.info(f"External DNS Latency Score: {(1 - (weight_external_dns_latency * eval_external_dns_latency)) * 100}%")
+        self.logger.info(f"Speedtest Download Score: {(1 - (weight_speedtest_download * eval_download)) * 100}%")
+        self.logger.info(f"Speedtest Upload Score: {(1 - (weight_speedtest_upload * eval_upload)) * 100}%")
+        
+        self.logger.info(f"Total Network Health Score: {score * 100}%")
 
         i = GaugeMetricFamily(self.metric_safe_name('health_score'), 'Overall internet health function')
         i.add_metric(['health'], score)
