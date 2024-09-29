@@ -221,11 +221,11 @@ class CustomCollector(object):
             self.logger.debug(f"Speedtest Data: {stats_speedtest}")
             cv_download = (
                 1 if stats_speedtest['download'] / threshold_speedtest_download >= 1
-                else stats_speedtest['download'] / threshold_speedtest_download
+                else 1 - (stats_speedtest['download'] / threshold_speedtest_download)
             )
             cv_upload = (
                 1 if stats_speedtest['upload'] / threshold_speedtest_upload >= 1
-                else stats_speedtest['upload'] / threshold_speedtest_upload
+                else 1 - (stats_speedtest['upload'] / threshold_speedtest_upload)
             )
 
             self.logger.info(f"Speedtest Download Coefficient: {cv_download}")
