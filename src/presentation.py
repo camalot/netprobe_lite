@@ -54,9 +54,12 @@ class CustomCollector(object):
         # Retrieve Netprobe data
         results_netprobe = probe_data_store.read(self.config.datastore.netprobe.get('topic', 'netprobe/probe'))
 
+        stats_speedtest = None
+        if speedtest_data_store:
+            stats_speedtest = speedtest_data_store.read(self.config.datastore.speedtest.get('topic', 'netprobe/speedtest'))  # Get the latest results from Redis
+
         if results_netprobe:
             stats_netprobe = results_netprobe
-            # stats_netprobe = json.loads(json.loads(results_netprobe))
         else:
             self.logger.debug(f"No data found in data store. Skipping.")
             return
@@ -75,6 +78,10 @@ class CustomCollector(object):
         average_loss = 0
         average_latency = 0
 
+        latency_item_count = len(stats_netprobe['stats'])
+        loss_item_count = len(stats_netprobe['stats'])
+        jitter_item_count = len(stats_netprobe['stats'])
+
         for item in stats_netprobe['stats']:  # Expose each individual latency / loss metric for each site tested
             g.add_metric(['latency', item['site']], item['latency'])
             g.add_metric(['loss', item['site']], item['loss'])
@@ -84,9 +91,21 @@ class CustomCollector(object):
             total_loss += float(item['loss'])
             total_jitter += float(item['jitter'])
 
-        average_latency = total_latency / len(stats_netprobe['stats'])
-        average_loss = total_loss / len(stats_netprobe['stats'])
-        average_jitter = total_jitter / len(stats_netprobe['stats'])
+        if stats_speedtest:
+            for key in stats_speedtest.keys():
+                if key == 'latency' or key == 'jitter':
+                    g.add_metric([key, 'speedtest'], stats_speedtest[key])
+                # add speedtest jitter and latency to the total
+                if key == 'latency':
+                    total_latency += float(stats_speedtest[key])
+                    latency_item_count += 1
+                elif key == 'jitter':
+                    total_jitter += float(stats_speedtest[key])
+                    jitter_item_count += 1
+
+        average_latency = total_latency / latency_item_count
+        average_loss = total_loss / loss_item_count
+        average_jitter = total_jitter / jitter_item_count
         yield g
 
         h = GaugeMetricFamily(
@@ -113,24 +132,18 @@ class CustomCollector(object):
         ext_dns_latency = sum(ext_dns) / len(ext_dns)
         yield h
 
-        # Retrieve Speedtest data
-        if speedtest_data_store:
-            results_speedtest = speedtest_data_store.read(self.config.datastore.speedtest.get('topic', 'netprobe/speedtest'))  # Get the latest results from Redis
+        if stats_speedtest:  # Speed test is optional
+            s = GaugeMetricFamily(
+                self.metric_safe_name('speed_stats'),
+                'Speedtest performance statistics from speedtest.net',
+                labels=['type'],
+            )
 
-            if results_speedtest:  # Speed test is optional
-                stats_speedtest = results_speedtest
+            for key in stats_speedtest.keys():
+                if stats_speedtest[key]:
+                    s.add_metric([key], stats_speedtest[key])
 
-                s = GaugeMetricFamily(
-                    self.metric_safe_name('speed_stats'),
-                    'Speedtest performance statistics from speedtest.net',
-                    labels=['type'],
-                )
-
-                for key in stats_speedtest.keys():
-                    if stats_speedtest[key]:
-                        s.add_metric([key], stats_speedtest[key])
-
-                yield s
+            yield s
 
         # Calculate overall health score
         weight_loss = self.config.presentation.weight_loss  # Loss is 60% of score
@@ -195,31 +208,42 @@ class CustomCollector(object):
             1 if local_dns_latency / threshold_internal_dns_latency >= 1
             else local_dns_latency / threshold_internal_dns_latency
         )
+        eval_download = 1
+        eval_upload = 1
+        if stats_speedtest:
+            eval_download = (
+                1 if stats_speedtest['download'] / threshold_speedtest_download >= 1
+                else stats_speedtest['download'] / threshold_speedtest_download
+            )
+            eval_upload = (
+                1 if stats_speedtest['upload'] / threshold_speedtest_upload >= 1
+                else stats_speedtest['upload'] / threshold_speedtest_upload
+            )
 
-        if average_loss / threshold_loss >= 1:
-            eval_loss = 1
-        else:
-            eval_loss = average_loss / threshold_loss
+        # if average_loss / threshold_loss >= 1:
+        #     eval_loss = 1
+        # else:
+        #     eval_loss = average_loss / threshold_loss
 
-        if average_latency / threshold_latency >= 1:
-            eval_latency = 1
-        else:
-            eval_latency = average_latency / threshold_latency
+        # if average_latency / threshold_latency >= 1:
+        #     eval_latency = 1
+        # else:
+        #     eval_latency = average_latency / threshold_latency
 
-        if average_jitter / threshold_jitter >= 1:
-            eval_jitter = 1
-        else:
-            eval_jitter = average_jitter / threshold_jitter
+        # if average_jitter / threshold_jitter >= 1:
+        #     eval_jitter = 1
+        # else:
+        #     eval_jitter = average_jitter / threshold_jitter
 
-        if ext_dns_latency / threshold_external_dns_latency >= 1:
-            eval_external_dns_latency = 1
-        else:
-            eval_external_dns_latency = ext_dns_latency / threshold_external_dns_latency
+        # if ext_dns_latency / threshold_external_dns_latency >= 1:
+        #     eval_external_dns_latency = 1
+        # else:
+        #     eval_external_dns_latency = ext_dns_latency / threshold_external_dns_latency
 
-        if local_dns_latency / threshold_internal_dns_latency >= 1:
-            eval_internal_dns_latency = 1
-        else:
-            eval_internal_dns_latency = local_dns_latency / threshold_internal_dns_latency
+        # if local_dns_latency / threshold_internal_dns_latency >= 1:
+        #     eval_internal_dns_latency = 1
+        # else:
+        #     eval_internal_dns_latency = local_dns_latency / threshold_internal_dns_latency
 
         g_cv = GaugeMetricFamily(
             self.metric_safe_name('coefficient'),
@@ -231,6 +255,8 @@ class CustomCollector(object):
         g_cv.add_metric(['jitter'], eval_jitter)
         g_cv.add_metric(['internal_dns_latency'], eval_internal_dns_latency)
         g_cv.add_metric(['external_dns_latency'], eval_external_dns_latency)
+        g_cv.add_metric(['speedtest_download'], eval_download)
+        g_cv.add_metric(['speedtest_upload'], eval_upload)
 
         yield g_cv
 
