@@ -4,10 +4,10 @@ import time
 import traceback
 
 from config import Configuration
-from enums.DataStoreTypes import DataStoreTypes
 from helpers.logging import setup_logging
 from helpers.network import SpeedTestCollector
 from lib.datastores.factory import DatastoreFactory
+from lib.enums.DataStoreTypes import DataStoreTypes
 
 
 class NetProbeSpeedTest:

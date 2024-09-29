@@ -50,7 +50,6 @@ class MqttDataStore(DataStore):
         self.messages[msg.topic] = msg.payload
 
     def on_disconnect(self, client, userdata, rc):
-        self.logger.debug(f"Disconnected with result code {rc}")
         pass
 
     def read(self, topic) -> typing.Any:

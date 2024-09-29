@@ -5,13 +5,14 @@ class DataStoreTypes(Enum):
     REDIS = "REDIS"
     MQTT = "MQTT"
     MONGODB = "MONGODB"
+    NONE = "NONE"
 
     @staticmethod
     def from_str(name: str):
         try:
             return DataStoreTypes[name.upper()]
         except KeyError:
-            return DataStoreTypes.FILE
+            return DataStoreTypes.NONE
 
     @staticmethod
     def to_list():

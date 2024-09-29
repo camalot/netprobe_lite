@@ -1,5 +1,5 @@
-from enums.DataStoreTypes import DataStoreTypes
 from helpers.logging import setup_logging
+from lib.enums.DataStoreTypes import DataStoreTypes
 
 class DatastoreFactory:
     def __init__(self):
@@ -23,5 +23,9 @@ class DatastoreFactory:
             logger.debug("Creating MongoDB Datastore")
             from lib.datastores.mongodb import MongoDBDatastore
             return MongoDBDatastore()
+        elif type == DataStoreTypes.NONE:
+            logger.debug("Creating Null Datastore")
+            from lib.datastores.null import NullDataStore
+            return NullDataStore()
         else:
             raise Exception("DataStore type not supported")

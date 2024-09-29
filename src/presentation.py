@@ -5,9 +5,9 @@ import time
 import traceback
 
 from config import Configuration
-from enums.DataStoreTypes import DataStoreTypes
-from lib.datastores.factory import DatastoreFactory
 from helpers.logging import setup_logging
+from lib.datastores.factory import DatastoreFactory
+from lib.enums.DataStoreTypes import DataStoreTypes
 from prometheus_client import start_http_server
 from prometheus_client.core import REGISTRY, GaugeMetricFamily
 
@@ -195,6 +195,14 @@ class CustomCollector(object):
         g_score_thresholds.add_metric(['speedtest_download'], threshold_speedtest_download)
         g_score_thresholds.add_metric(['speedtest_upload'], threshold_speedtest_upload)
 
+        self.logger.info(f"Loss Threshold: {threshold_loss}")
+        self.logger.info(f"Latency Threshold: {threshold_latency}")
+        self.logger.info(f"Jitter Threshold: {threshold_jitter}")
+        self.logger.info(f"Internal DNS Latency Threshold: {threshold_internal_dns_latency}")
+        self.logger.info(f"External DNS Latency Threshold: {threshold_external_dns_latency}")
+        self.logger.info(f"Speedtest Download Threshold: {threshold_speedtest_download}")
+        self.logger.info(f"Speedtest Upload Threshold: {threshold_speedtest_upload}")
+
         yield g_score_thresholds
 
         cv_loss = 1 if average_loss / threshold_loss >= 1 else average_loss / threshold_loss
@@ -219,13 +227,15 @@ class CustomCollector(object):
         cv_upload = 0
         if stats_speedtest:
             self.logger.debug(f"Speedtest Data: {stats_speedtest}")
-            cv_download = (
+            cv_download = 1 - (
                 1 if stats_speedtest['download'] / threshold_speedtest_download >= 1
-                else 1 - (stats_speedtest['download'] / threshold_speedtest_download)
+                else (stats_speedtest['download'] / threshold_speedtest_download)
             )
-            cv_upload = (
+            upload = stats_speedtest['upload'] if stats_speedtest['upload'] else 0
+
+            cv_upload = 1 - (
                 1 if stats_speedtest['upload'] / threshold_speedtest_upload >= 1
-                else 1 - (stats_speedtest['upload'] / threshold_speedtest_upload)
+                else (stats_speedtest['upload'] / threshold_speedtest_upload)
             )
 
             self.logger.debug(f"{stats_speedtest['download']} / {threshold_speedtest_download} = {cv_download}")

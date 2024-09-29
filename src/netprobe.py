@@ -3,11 +3,10 @@ import time
 import traceback
 
 from config import Configuration
-from enums.DataStoreTypes import DataStoreTypes
 from helpers.logging import setup_logging
 from helpers.network import NetworkCollector
-
 from lib.datastores.factory import DatastoreFactory
+from lib.enums.DataStoreTypes import DataStoreTypes
 
 
 class NetProbe:
@@ -48,13 +47,18 @@ class NetProbe:
         self.logger.info(f"LATENCY WEIGHT: {presentation_config.weight_latency * 100}%")
         self.logger.info(f"EXTERNAL DNS LATENCY WEIGHT: {presentation_config.weight_external_dns_latency * 100}%")
         self.logger.info(f"INTERNAL DNS LATENCY WEIGHT: {presentation_config.weight_internal_dns_latency * 100}%")
+        self.logger.info(f"SPEEDTEST DOWNLOAD WEIGHT: {presentation_config.weight_speedtest_download * 100}%")
+        self.logger.info(f"SPEEDTEST UPLOAD WEIGHT: {presentation_config.weight_speedtest_upload * 100}%")
+
         total_weight = sum(
             [
                 presentation_config.weight_jitter,
                 presentation_config.weight_loss,
                 presentation_config.weight_latency,
                 presentation_config.weight_external_dns_latency,
-                presentation_config.weight_internal_dns_latency
+                presentation_config.weight_internal_dns_latency,
+                presentation_config.weight_speedtest_download,
+                presentation_config.weight_speedtest_upload,
             ]
         )
         self.logger.info(f"TOTAL WEIGHT: {total_weight * 100}%")
@@ -65,6 +69,8 @@ class NetProbe:
         self.logger.info(f"LATENCY THRESHOLD: {presentation_config.threshold_latency}ms")
         self.logger.info(f"EXTERNAL DNS LATENCY THRESHOLD: {presentation_config.threshold_external_dns_latency}ms")
         self.logger.info(f"INTERNAL DNS LATENCY THRESHOLD: {presentation_config.threshold_internal_dns_latency}ms")
+        self.logger.info(f"SPEEDTEST DOWNLOAD THRESHOLD: {presentation_config.threshold_speedtest_download}Mbps")
+        self.logger.info(f"SPEEDTEST UPLOAD THRESHOLD: {presentation_config.threshold_speedtest_upload}Mbps")
 
     def run(self):
         while True:
@@ -78,7 +84,7 @@ class NetProbe:
                 continue
             # Connect to Datastore
             try:
-                data_store = DatastoreFactory().create(self.config.datastore.netprobe.get('type', DataStoreTypes.FILE))
+                data_store = DatastoreFactory().create(self.config.datastore.netprobe.get('type', DataStoreTypes.NONE))
                 cache_interval = self.probe_interval + 15  # Set the cache TTL slightly longer than the probe interval
                 topic = self.config.datastore.netprobe.get('topic', 'netprobe/probe')
                 data_store.write(topic, stats, cache_interval)
