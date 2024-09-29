@@ -197,39 +197,39 @@ class CustomCollector(object):
 
         yield g_score_thresholds
 
-        eval_loss = 1 if average_loss / threshold_loss >= 1 else average_loss / threshold_loss
-        eval_latency = 1 if average_latency / threshold_latency >= 1 else average_latency / threshold_latency
-        eval_jitter = 1 if average_jitter / threshold_jitter >= 1 else average_jitter / threshold_jitter
-        eval_external_dns_latency = (
+        cv_loss = 1 if average_loss / threshold_loss >= 1 else average_loss / threshold_loss
+        cv_latency = 1 if average_latency / threshold_latency >= 1 else average_latency / threshold_latency
+        cv_jitter = 1 if average_jitter / threshold_jitter >= 1 else average_jitter / threshold_jitter
+        cv_external_dns_latency = (
             1 if ext_dns_latency / threshold_external_dns_latency >= 1
             else ext_dns_latency / threshold_external_dns_latency
         )
-        eval_internal_dns_latency = (
+        cv_internal_dns_latency = (
             1 if local_dns_latency / threshold_internal_dns_latency >= 1
             else local_dns_latency / threshold_internal_dns_latency
         )
-        self.logger.info(f"Loss Coefficient: {eval_loss}")
-        self.logger.info(f"Latency Coefficient: {eval_latency}")
-        self.logger.info(f"Jitter Coefficient: {eval_jitter}")
-        self.logger.info(f"External DNS Latency Coefficient: {eval_external_dns_latency}")
-        self.logger.info(f"Internal DNS Latency Coefficient: {eval_internal_dns_latency}")
+        self.logger.info(f"Loss Coefficient: {cv_loss}")
+        self.logger.info(f"Latency Coefficient: {cv_latency}")
+        self.logger.info(f"Jitter Coefficient: {cv_jitter}")
+        self.logger.info(f"External DNS Latency Coefficient: {cv_external_dns_latency}")
+        self.logger.info(f"Internal DNS Latency Coefficient: {cv_internal_dns_latency}")
 
         # assume 1 if no speedtest data
-        eval_download = 1
-        eval_upload = 1
+        cv_download = 1
+        cv_upload = 1
         if stats_speedtest:
             self.logger.debug(f"Speedtest Data: {stats_speedtest}")
-            eval_download = (
+            cv_download = (
                 1 if stats_speedtest['download'] / threshold_speedtest_download >= 1
                 else stats_speedtest['download'] / threshold_speedtest_download
             )
-            eval_upload = (
+            cv_upload = (
                 1 if stats_speedtest['upload'] / threshold_speedtest_upload >= 1
                 else stats_speedtest['upload'] / threshold_speedtest_upload
             )
 
-            self.logger.info(f"Speedtest Download Coefficient: {eval_download}")
-            self.logger.info(f"Speedtest Upload Coefficient: {eval_upload}")
+            self.logger.info(f"Speedtest Download Coefficient: {cv_download}")
+            self.logger.info(f"Speedtest Upload Coefficient: {cv_upload}")
 
         # if average_loss / threshold_loss >= 1:
         #     eval_loss = 1
@@ -261,33 +261,33 @@ class CustomCollector(object):
             'Network Score Coefficients',
             labels=['type'],
         )
-        g_cv.add_metric(['loss'], eval_loss)
-        g_cv.add_metric(['latency'], eval_latency)
-        g_cv.add_metric(['jitter'], eval_jitter)
-        g_cv.add_metric(['internal_dns_latency'], eval_internal_dns_latency)
-        g_cv.add_metric(['external_dns_latency'], eval_external_dns_latency)
-        g_cv.add_metric(['speedtest_download'], eval_download)
-        g_cv.add_metric(['speedtest_upload'], eval_upload)
+        g_cv.add_metric(['loss'], cv_loss)
+        g_cv.add_metric(['latency'], cv_latency)
+        g_cv.add_metric(['jitter'], cv_jitter)
+        g_cv.add_metric(['internal_dns_latency'], cv_internal_dns_latency)
+        g_cv.add_metric(['external_dns_latency'], cv_external_dns_latency)
+        g_cv.add_metric(['speedtest_download'], cv_download)
+        g_cv.add_metric(['speedtest_upload'], cv_upload)
 
         yield g_cv
 
         # Master scoring function
         score = (
-            (1 - weight_loss * eval_loss)
-            - (weight_jitter * eval_jitter)
-            - (weight_latency * eval_latency)
-            - (weight_internal_dns_latency * eval_internal_dns_latency)
-            - (weight_external_dns_latency * eval_external_dns_latency)
-            - (weight_speedtest_download * eval_download)
-            - (weight_speedtest_upload * eval_upload)
+            (1 - weight_loss * cv_loss)
+            - (weight_jitter * cv_jitter)
+            - (weight_latency * cv_latency)
+            - (weight_internal_dns_latency * cv_internal_dns_latency)
+            - (weight_external_dns_latency * cv_external_dns_latency)
+            - (weight_speedtest_download * cv_download)
+            - (weight_speedtest_upload * cv_upload)
         )
-        self.logger.info(f"Loss Score: {((weight_loss * eval_loss)) * 100}%")
-        self.logger.info(f"Latency Score: {((weight_latency * eval_latency)) * 100}%")
-        self.logger.info(f"Jitter Score: {((weight_jitter * eval_jitter)) * 100}%")
-        self.logger.info(f"Internal DNS Latency Score: {((weight_internal_dns_latency * eval_internal_dns_latency)) * 100}%")
-        self.logger.info(f"External DNS Latency Score: {((weight_external_dns_latency * eval_external_dns_latency)) * 100}%")
-        self.logger.info(f"Speedtest Download Score: {((weight_speedtest_download * eval_download)) * 100}%")
-        self.logger.info(f"Speedtest Upload Score: {((weight_speedtest_upload * eval_upload)) * 100}%")
+        self.logger.info(f"Loss Score: {(1 - (weight_loss * cv_loss))*100}%")
+        self.logger.info(f"Latency Score: {(1 - (weight_latency * cv_latency)) * 100}%")
+        self.logger.info(f"Jitter Score: {(1 - (weight_jitter * cv_jitter)) * 100}%")
+        self.logger.info(f"Internal DNS Latency Score: {(1 - (weight_internal_dns_latency * cv_internal_dns_latency)) * 100}%")
+        self.logger.info(f"External DNS Latency Score: {(1 - (weight_external_dns_latency * cv_external_dns_latency)) * 100}%")
+        self.logger.info(f"Speedtest Download Score: {(1 - (weight_speedtest_download * cv_download)) * 100}%")
+        self.logger.info(f"Speedtest Upload Score: {(1 - (weight_speedtest_upload * cv_upload)) * 100}%")
 
         self.logger.info(f"Total Network Health Score: {score * 100}%")
 
