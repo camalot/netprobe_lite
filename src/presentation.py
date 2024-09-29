@@ -91,17 +91,17 @@ class CustomCollector(object):
             total_loss += float(item['loss'])
             total_jitter += float(item['jitter'])
 
-        if stats_speedtest:
-            for key in stats_speedtest.keys():
-                if key == 'latency' or key == 'jitter':
-                    g.add_metric([key, 'speedtest'], stats_speedtest[key])
-                # add speedtest jitter and latency to the total
-                if key == 'latency':
-                    total_latency += float(stats_speedtest[key])
-                    latency_item_count += 1
-                elif key == 'jitter':
-                    total_jitter += float(stats_speedtest[key])
-                    jitter_item_count += 1
+        # if stats_speedtest:
+        #     for key in stats_speedtest.keys():
+        #         if key == 'latency' or key == 'jitter':
+        #             g.add_metric([key, 'speedtest'], stats_speedtest[key])
+        #         # add speedtest jitter and latency to the total
+        #         if key == 'latency':
+        #             total_latency += float(stats_speedtest[key])
+        #             latency_item_count += 1
+        #         elif key == 'jitter':
+        #             total_jitter += float(stats_speedtest[key])
+        #             jitter_item_count += 1
 
         average_latency = total_latency / latency_item_count
         average_loss = total_loss / loss_item_count
@@ -208,6 +208,8 @@ class CustomCollector(object):
             1 if local_dns_latency / threshold_internal_dns_latency >= 1
             else local_dns_latency / threshold_internal_dns_latency
         )
+
+        # assume 1 if no speedtest data
         eval_download = 1
         eval_upload = 1
         if stats_speedtest:
