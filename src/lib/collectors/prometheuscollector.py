@@ -282,9 +282,6 @@ class PrometheusCollector(Collector):
                     else (upload / threshold_speedtest_upload)
                 )
 
-            self.logger.debug(f"{download} / {threshold_speedtest_download} = {cv_download}")
-            self.logger.debug(f"{upload} / {threshold_speedtest_upload} = {cv_upload}")
-
         self.logger.info(f"\tSpeedtest Download Coefficient: {cv_download}")
         self.logger.info(f"\tSpeedtest Upload Coefficient: {cv_upload}")
 

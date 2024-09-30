@@ -66,21 +66,27 @@ rtt min/avg/max/mdev = 11.487/12.915/14.475/1.095 ms"""
             jitter = 0
 
             if loss_match:
-                loss = loss_match.group(1)
+                loss = float(loss_match.group(1))
             else:
-                loss = 100
+                loss = -1
                 self.logger.critical("Ping output did not match expected format")
             if latency_match:
-                latency = latency_match.group(2)
-                jitter = latency_match.group(4)
+                latency = float(latency_match.group(2))
+                jitter = float(latency_match.group(4))
             else:
                 self.logger.critical("Ping output did not match expected format")
                 latency = -1
                 jitter = -1
 
-            netdata = {"site": site, "latency": latency, "loss": loss, "jitter": jitter}
-            self.logger.debug(json.dumps(netdata, indent=4))
-            self.stats.append(netdata)
+            # check that the values are valid
+            if loss >= 0 or latency == 0 or jitter == 0:
+                netdata = {"site": site, "latency": latency, "loss": loss, "jitter": jitter}
+                self.logger.debug(json.dumps(netdata, indent=4))
+                self.stats.append(netdata)
+            else:
+                self.logger.warning(f"Invalid ping results for {site}")
+
+
         except Exception as e:
             self.logger.error(f"Error parsing ping output for {site}")
             self.logger.error(e)
@@ -90,14 +96,14 @@ rtt min/avg/max/mdev = 11.487/12.915/14.475/1.095 ms"""
         return True
 
     def dnstest(self, site, nameserver) -> bool:
-        my_resolver = dns.resolver.Resolver()
+        resolver = dns.resolver.Resolver()
         server = []  # Resolver needs a list
         server.append(nameserver[1])
 
         try:
-            my_resolver.nameservers = server
-            my_resolver.timeout = 10
-            answers = my_resolver.query(site, 'A')
+            resolver.nameservers = server
+            resolver.timeout = 10
+            answers = resolver.query(site, 'A')
 
             dns_latency = round(answers.response.time * 1000, 2)
 
@@ -115,14 +121,14 @@ rtt min/avg/max/mdev = 11.487/12.915/14.475/1.095 ms"""
             self.logger.error(e)
             self.logger.error(traceback.format_exc())
 
-            dnsdata = {
-                "nameserver": nameserver[0],
-                "nameserver_ip": nameserver[1],
-                "type": nameserver[2] if len(nameserver) == 3 else "external",
-                "latency": 5000,
-            }
+            # dnsdata = {
+            #     "nameserver": nameserver[0],
+            #     "nameserver_ip": nameserver[1],
+            #     "type": nameserver[2] if len(nameserver) == 3 else "external",
+            #     "latency": 5000,
+            # }
 
-            self.dnsstats.append(dnsdata)
+            # self.dnsstats.append(dnsdata)
 
         return True
 
