@@ -53,11 +53,15 @@ class PrometheusCollector(Collector):
             return
 
         # Retrieve Netprobe data
-        results_netprobe = probe_data_store.read(self.config.datastore.netprobe.get('topic', 'netprobe/probe'))
+        results_netprobe = probe_data_store.read(
+            self.config.datastore.netprobe.get('topic', ConfigurationDefaults.DATASTORE_TOPIC_PROBE)
+        )
 
         stats_speedtest = None
         if speedtest_data_store:
-            stats_speedtest = speedtest_data_store.read(self.config.datastore.speedtest.get('topic', 'netprobe/speedtest'))  # Get the latest results from Redis
+            stats_speedtest = speedtest_data_store.read(
+                self.config.datastore.speedtest.get('topic', ConfigurationDefaults.DATASTORE_TOPIC_SPEEDTEST)
+            )
 
         if results_netprobe:
             stats_netprobe = results_netprobe
@@ -107,6 +111,12 @@ class PrometheusCollector(Collector):
         average_latency = total_latency / latency_item_count
         average_loss = total_loss / loss_item_count
         average_jitter = total_jitter / jitter_item_count
+
+        self.logger.info("Network Stats:")
+        self.logger.info(f"\tAverage Loss: {average_loss}")
+        self.logger.info(f"\tAverage Latency: {average_latency}")
+        self.logger.info(f"\tAverage Jitter: {average_jitter}")
+
         yield g
 
         h = GaugeMetricFamily(
@@ -130,6 +140,11 @@ class PrometheusCollector(Collector):
 
         average_local_dns_latency = sum(local_dns) / len(local_dns)
         average_ext_dns_latency = sum(ext_dns) / len(ext_dns)
+
+        self.logger.info("DNS Latency:")
+        self.logger.info(f"\tAverage Local DNS Latency: {average_local_dns_latency}")
+        self.logger.info(f"\tAverage External DNS Latency: {average_ext_dns_latency}")
+
         yield h
 
         if stats_speedtest:  # Speed test is optional
@@ -169,6 +184,16 @@ class PrometheusCollector(Collector):
         g_score_weight.add_metric(['external_dns_latency'], weight_external_dns_latency)
         g_score_weight.add_metric(['speedtest_download'], weight_speedtest_download)
         g_score_weight.add_metric(['speedtest_upload'], weight_speedtest_upload)
+
+        self.logger.info("Network Score Weights:")
+        self.logger.info(f"\tLoss Weight: {weight_loss}")
+        self.logger.info(f"\tLatency Weight: {weight_latency}")
+        self.logger.info(f"\tJitter Weight: {weight_jitter}")
+        self.logger.info(f"\tInternal DNS Latency Weight: {weight_internal_dns_latency}")
+        self.logger.info(f"\tExternal DNS Latency Weight: {weight_external_dns_latency}")
+        self.logger.info(f"\tSpeedtest Download Weight: {weight_speedtest_download}")
+        self.logger.info(f"\tSpeedtest Upload Weight: {weight_speedtest_upload}")
+
         yield g_score_weight
 
         threshold_loss = self.config.presentation.threshold_loss  # 5% loss threshold as max
@@ -195,13 +220,14 @@ class PrometheusCollector(Collector):
         g_score_thresholds.add_metric(['speedtest_download'], threshold_speedtest_download)
         g_score_thresholds.add_metric(['speedtest_upload'], threshold_speedtest_upload)
 
-        self.logger.info(f"Loss Threshold: {threshold_loss}")
-        self.logger.info(f"Latency Threshold: {threshold_latency}")
-        self.logger.info(f"Jitter Threshold: {threshold_jitter}")
-        self.logger.info(f"Internal DNS Latency Threshold: {threshold_internal_dns_latency}")
-        self.logger.info(f"External DNS Latency Threshold: {threshold_external_dns_latency}")
-        self.logger.info(f"Speedtest Download Threshold: {threshold_speedtest_download}")
-        self.logger.info(f"Speedtest Upload Threshold: {threshold_speedtest_upload}")
+        self.logger.info("Network Score Thresholds:")
+        self.logger.info(f"\tLoss Threshold: {threshold_loss}")
+        self.logger.info(f"\tLatency Threshold: {threshold_latency}")
+        self.logger.info(f"\tJitter Threshold: {threshold_jitter}")
+        self.logger.info(f"\tInternal DNS Latency Threshold: {threshold_internal_dns_latency}")
+        self.logger.info(f"\tExternal DNS Latency Threshold: {threshold_external_dns_latency}")
+        self.logger.info(f"\tSpeedtest Download Threshold: {threshold_speedtest_download}")
+        self.logger.info(f"\tSpeedtest Upload Threshold: {threshold_speedtest_upload}")
 
         yield g_score_thresholds
         if threshold_loss == 0:
@@ -231,18 +257,17 @@ class PrometheusCollector(Collector):
                 else average_local_dns_latency / threshold_internal_dns_latency
             )
 
-        self.logger.info(f"Loss Coefficient: {cv_loss}")
-        self.logger.info(f"Latency Coefficient: {cv_latency}")
-        self.logger.info(f"Jitter Coefficient: {cv_jitter}")
-        self.logger.info(f"External DNS Latency Coefficient: {cv_external_dns_latency}")
-        self.logger.info(f"Internal DNS Latency Coefficient: {cv_internal_dns_latency}")
+        self.logger.info("Network Score Coefficients:")
+        self.logger.info(f"\tLoss Coefficient: {cv_loss}")
+        self.logger.info(f"\tLatency Coefficient: {cv_latency}")
+        self.logger.info(f"\tJitter Coefficient: {cv_jitter}")
+        self.logger.info(f"\tExternal DNS Latency Coefficient: {cv_external_dns_latency}")
+        self.logger.info(f"\tInternal DNS Latency Coefficient: {cv_internal_dns_latency}")
 
         # assume 0 if no speedtest data
         cv_download = 0
         cv_upload = 0
         if stats_speedtest:
-            self.logger.debug(f"Speedtest Data: {stats_speedtest}")
-
             download = stats_speedtest['download'] if stats_speedtest['download'] else 0
             if download >= 0:
                 cv_download = 1 - (
@@ -260,8 +285,8 @@ class PrometheusCollector(Collector):
             self.logger.debug(f"{download} / {threshold_speedtest_download} = {cv_download}")
             self.logger.debug(f"{upload} / {threshold_speedtest_upload} = {cv_upload}")
 
-            self.logger.info(f"Speedtest Download Coefficient: {cv_download}")
-            self.logger.info(f"Speedtest Upload Coefficient: {cv_upload}")
+        self.logger.info(f"\tSpeedtest Download Coefficient: {cv_download}")
+        self.logger.info(f"\tSpeedtest Upload Coefficient: {cv_upload}")
 
         g_cv = GaugeMetricFamily(
             self.metric_safe_name('coefficient'),
@@ -288,13 +313,15 @@ class PrometheusCollector(Collector):
             - (weight_speedtest_download * cv_download)
             - (weight_speedtest_upload * cv_upload)
         )
-        self.logger.info(f"Loss Score: {(1 - (weight_loss * cv_loss))*100}%")
-        self.logger.info(f"Latency Score: {(1 - (weight_latency * cv_latency)) * 100}%")
-        self.logger.info(f"Jitter Score: {(1 - (weight_jitter * cv_jitter)) * 100}%")
-        self.logger.info(f"Internal DNS Latency Score: {(1 - (weight_internal_dns_latency * cv_internal_dns_latency)) * 100}%")
-        self.logger.info(f"External DNS Latency Score: {(1 - (weight_external_dns_latency * cv_external_dns_latency)) * 100}%")
-        self.logger.info(f"Speedtest Download Score: {(1 - (weight_speedtest_download * cv_download)) * 100}%")
-        self.logger.info(f"Speedtest Upload Score: {(1 - (weight_speedtest_upload * cv_upload)) * 100}%")
+
+        self.logger.info("Network Health Scores:")
+        self.logger.info(f"\tLoss Score: {(1 - (weight_loss * cv_loss))*100}%")
+        self.logger.info(f"\tLatency Score: {(1 - (weight_latency * cv_latency)) * 100}%")
+        self.logger.info(f"\tJitter Score: {(1 - (weight_jitter * cv_jitter)) * 100}%")
+        self.logger.info(f"\tInternal DNS Latency Score: {(1 - (weight_internal_dns_latency * cv_internal_dns_latency)) * 100}%")
+        self.logger.info(f"\tExternal DNS Latency Score: {(1 - (weight_external_dns_latency * cv_external_dns_latency)) * 100}%")
+        self.logger.info(f"\tSpeedtest Download Score: {(1 - (weight_speedtest_download * cv_download)) * 100}%")
+        self.logger.info(f"\tSpeedtest Upload Score: {(1 - (weight_speedtest_upload * cv_upload)) * 100}%")
 
         self.logger.info(f"Total Network Health Score: {score * 100}%")
 
