@@ -230,6 +230,11 @@ class PrometheusCollector(Collector):
         self.logger.info(f"\tSpeedtest Upload Threshold: {threshold_speedtest_upload}")
 
         yield g_score_thresholds
+
+        # The coefficient of variation (CV) is a statistic that compares the standard deviation of a data set
+        # to its mean. It's calculated by dividing the standard deviation by the mean, and is often expressed
+        # as a percentage. The CV is used to compare data sets that have different units or means.
+
         if threshold_loss == 0:
             cv_loss = 0
         else:
@@ -287,7 +292,7 @@ class PrometheusCollector(Collector):
 
         g_cv = GaugeMetricFamily(
             self.metric_safe_name('coefficient'),
-            'Network Score Coefficients',
+            'The coefficient of variation (CV)',
             labels=['type'],
         )
         g_cv.add_metric(['loss'], cv_loss)
@@ -300,29 +305,62 @@ class PrometheusCollector(Collector):
 
         yield g_cv
 
-        # Master scoring function
-        score = (
-            (1 - weight_loss * cv_loss)
-            - (weight_jitter * cv_jitter)
-            - (weight_latency * cv_latency)
-            - (weight_internal_dns_latency * cv_internal_dns_latency)
-            - (weight_external_dns_latency * cv_external_dns_latency)
-            - (weight_speedtest_download * cv_download)
-            - (weight_speedtest_upload * cv_upload)
+        loss_score = (1 - weight_loss * cv_loss)
+        latency_score = (1 - weight_latency * cv_latency)
+        jitter_score = (1 - weight_jitter * cv_jitter)
+        internal_dns_latency_score = (1 - weight_internal_dns_latency * cv_internal_dns_latency)
+        external_dns_latency_score = (1 - weight_external_dns_latency * cv_external_dns_latency)
+        speedtest_download_score = (1 - weight_speedtest_download * cv_download)
+        speedtest_upload_score = (1 - weight_speedtest_upload * cv_upload)
+        speedtest_overall_score = (speedtest_download_score + speedtest_upload_score) / 2
+
+        total_score = (
+            loss_score
+            + latency_score
+            + jitter_score
+            + internal_dns_latency_score
+            + external_dns_latency_score
+            + speedtest_download_score
+            + speedtest_upload_score
         )
 
+        # Master scoring function
+        # score = (
+        #     (1 - weight_loss * cv_loss)
+        #     - (weight_jitter * cv_jitter)
+        #     - (weight_latency * cv_latency)
+        #     - (weight_internal_dns_latency * cv_internal_dns_latency)
+        #     - (weight_external_dns_latency * cv_external_dns_latency)
+        #     - (weight_speedtest_download * cv_download)
+        #     - (weight_speedtest_upload * cv_upload)
+        # )
+
         self.logger.info("Network Health Scores:")
-        self.logger.info(f"\tLoss Score: {(1 - (weight_loss * cv_loss))*100}%")
-        self.logger.info(f"\tLatency Score: {(1 - (weight_latency * cv_latency)) * 100}%")
-        self.logger.info(f"\tJitter Score: {(1 - (weight_jitter * cv_jitter)) * 100}%")
-        self.logger.info(f"\tInternal DNS Latency Score: {(1 - (weight_internal_dns_latency * cv_internal_dns_latency)) * 100}%")
-        self.logger.info(f"\tExternal DNS Latency Score: {(1 - (weight_external_dns_latency * cv_external_dns_latency)) * 100}%")
-        self.logger.info(f"\tSpeedtest Download Score: {(1 - (weight_speedtest_download * cv_download)) * 100}%")
-        self.logger.info(f"\tSpeedtest Upload Score: {(1 - (weight_speedtest_upload * cv_upload)) * 100}%")
+        self.logger.info(f"\tLoss Score: {(loss_score)*100}%")
+        self.logger.info(f"\tLatency Score: {(latency_score) * 100}%")
+        self.logger.info(f"\tJitter Score: {(jitter_score) * 100}%")
+        self.logger.info(f"\tInternal DNS Latency Score: {(internal_dns_latency_score) * 100}%")
+        self.logger.info(f"\tExternal DNS Latency Score: {(external_dns_latency_score) * 100}%")
+        self.logger.info(f"\tSpeedtest Download Score: {(speedtest_download_score) * 100}%")
+        self.logger.info(f"\tSpeedtest Upload Score: {(speedtest_upload_score) * 100}%")
+        self.logger.info(f"\tSpeedtest Overall Score: {(speedtest_overall_score) * 100}%")
 
-        self.logger.info(f"Total Network Health Score: {score * 100}%")
+        self.logger.info(f"Total Network Health Score: {total_score * 100}%")
 
-        i = GaugeMetricFamily(self.metric_safe_name('health_score'), 'Overall internet health function')
-        i.add_metric(['health'], score)
+        i = GaugeMetricFamily(
+            self.metric_safe_name('health_score'),
+            'Overall internet health function',
+            labels=['type']
+        )
+        i.add_metric(['loss'], loss_score)
+        i.add_metric(['latency'], latency_score)
+        i.add_metric(['jitter'], jitter_score)
+        i.add_metric(['internal_dns_latency'], internal_dns_latency_score)
+        i.add_metric(['external_dns_latency'], external_dns_latency_score)
+        i.add_metric(['speedtest_download'], speedtest_download_score)
+        i.add_metric(['speedtest_upload'], speedtest_upload_score)
+        i.add_metric(['speedtest_overall'], speedtest_overall_score)
+        
+        i.add_metric(['overall'], total_score)
 
         yield i
