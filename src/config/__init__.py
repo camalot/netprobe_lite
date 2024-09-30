@@ -40,7 +40,7 @@ class MqttDataStoreConfiguration:
     def __init__(self):
         self.host = EnvVars.MQTT_HOST.string(ConfigurationDefaults.MQTT_HOST)
         self.port = EnvVars.MQTT_PORT.integer(ConfigurationDefaults.MQTT_PORT)
-        self.username = EnvVars.MQTT_PASSWORD.nullable()
+        self.username = EnvVars.MQTT_USERNAME.nullable()
         self.password = EnvVars.MQTT_PASSWORD.nullable()
 
         dsc = DataStoreConfiguration()

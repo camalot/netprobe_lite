@@ -28,6 +28,11 @@ class MqttDataStore(DataStore):
             count += 1
             found = 0
             time.sleep(1)
+        self.logger.info(f"Subscribed to {found} of {len(self.config.topics)} topics")
+        if found < len(self.config.topics):
+            self.logger.warning(f"Failed to retrieve all expected topics: {found} of {len(self.config.topics)}")
+            self.logger.warning(f"Topics found: {self.messages.keys()}")
+            self.logger.warning(f"Expected topics: {self.config.topics}")
         self.client.loop_stop()
 
     def create(self) -> mqtt.Client:
@@ -36,15 +41,30 @@ class MqttDataStore(DataStore):
         client.on_message = self.on_message
         client.on_disconnect = self.on_disconnect
         client.on_log = self.on_log
-        # client.tls_set()
+        client.on_connect_fail = self.on_connect_fail
+
+        self.logger.debug("========================================")
+        self.logger.debug(f"user: {self.config.username}")
+        self.logger.debug(f"password: ********")
+        self.logger.debug(f"host: {self.config.host}")
+        self.logger.debug(f"port: {self.config.port}")
+        self.logger.debug("========================================")
+
         client.username_pw_set(self.config.username, self.config.password)
         client.connect(self.config.host, self.config.port, 60)
         return client
+
+    def on_connect_fail(self, client, userdata):
+        self.logger.error(f"Connection failed: {json.dumps(userdata)}")
 
     def on_log(self, client, userdata, level, buf):
         self.logger.debug(buf)
 
     def on_connect(self, client, userdata, flags, rc):
+        if rc > 0:
+            self.logger.error(f"Disconnected with result code {rc}")
+            self.logger.debug(self._get_rc_message(rc))
+
         for topic in self.config.topics:
             self.logger.debug(f"Subscribing to topic '{topic}'")
             client.subscribe(topic)
@@ -55,7 +75,26 @@ class MqttDataStore(DataStore):
         self.messages[msg.topic] = msg.payload
 
     def on_disconnect(self, client, userdata, rc):
-        pass
+        if rc > 0:
+            self.logger.error(f"Disconnected with result code {rc}")
+            self.logger.debug(self._get_rc_message(rc))
+
+    def _get_rc_message(self, rc: int) -> str:
+        if rc == 0:
+            msg = "Success"
+        elif rc == 1:
+            msg = "Connection refused because of a bad protocol version"
+        elif rc == 2:
+            msg = "Connection refused because the identifier was rejected"
+        elif rc == 3:
+            msg = "Connection refused because the server is unavailable"
+        elif rc == 4:
+            msg = "Connection refused because the user name or password is incorrect"
+        elif rc == 5:
+            msg = "Connection refused because the client is not authorized"
+        else:
+            msg = f"Unknown error code: {rc}"
+        return msg
 
     def read(self, topic) -> typing.Any:
         if topic in self.messages:
