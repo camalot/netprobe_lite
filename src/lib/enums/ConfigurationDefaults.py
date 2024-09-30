@@ -22,6 +22,7 @@ class ConfigurationDefaults():
     PRESENTATION_PORT = 5000
     PRESENTATION_INTERFACE = "0.0.0.0"
 
+    PROBE_ENABLED = True
     PROBE_COUNT = 50
     PROBE_INTERVAL = 120
     PROBE_SITES = [

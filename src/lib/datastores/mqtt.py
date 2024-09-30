@@ -35,17 +35,22 @@ class MqttDataStore(DataStore):
         client.on_connect = self.on_connect
         client.on_message = self.on_message
         client.on_disconnect = self.on_disconnect
+        client.on_log = self.on_log
         # client.tls_set()
         client.username_pw_set(self.config.username, self.config.password)
         client.connect(self.config.host, self.config.port, 60)
         return client
 
+    def on_log(self, client, userdata, level, buf):
+        self.logger.debug(buf)
+
     def on_connect(self, client, userdata, flags, rc):
         for topic in self.config.topics:
+            self.logger.debug(f"Subscribing to topic '{topic}'")
             client.subscribe(topic)
 
     def on_message(self, client, userdata, msg):
-        self.logger.debug(f"Message received on topic {msg.topic}")
+        self.logger.debug(f"Message received on topic '{msg.topic}'")
         self.logger.debug(msg.payload)
         self.messages[msg.topic] = msg.payload
 
@@ -54,12 +59,17 @@ class MqttDataStore(DataStore):
 
     def read(self, topic) -> typing.Any:
         if topic in self.messages:
-            return json.loads(self.messages[topic])
+            self.logger.debug(f"Read from topic '{topic}'")
+            result = json.loads(self.messages[topic])
+            self.logger.debug(result)
+            return result
+        else:
+            self.logger.debug(f"Topic '{topic}' not found")
         return None
 
     def write(self, topic, data, ttl) -> bool:
         try:
-            self.logger.debug(f"Publishing to topic {topic}")
+            self.logger.debug(f"Publishing to topic '{topic}'")
             if isinstance(data, dict):
                 data = json.dumps(data)
 

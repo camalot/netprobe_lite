@@ -1,11 +1,11 @@
 import typing
+
 from helpers.logging import setup_logging
-class DataStore:
+
+
+class BaseCollector:
     def __init__(self):
         self.logger = setup_logging(self.__class__.__name__)
 
-    def read(self, key) -> typing.Any:
+    def collect(self) -> typing.Optional[dict]:
         return None
-
-    def write(self, key, data, ttl) -> bool:
-        return False

@@ -5,9 +5,9 @@ from concurrent.futures import ProcessPoolExecutor
 # from bot.lib.colors import Colors
 from dotenv import find_dotenv, load_dotenv
 from helpers.logging import setup_logging
-from netprobe import NetProbe
-from netprobe_speedtest import NetProbeSpeedTest
-from presentation import NetProbePresentation
+from lib.probes.network import NetworkProbe
+from lib.probes.speedtest import SpeedTestProbe
+from lib.presentations.prometheus import PrometheusPresentation
 load_dotenv(find_dotenv())
 
 logger = setup_logging()
@@ -20,7 +20,7 @@ def sighandler(signum, frame):
 
 def presentation():
     try:
-        presentation = NetProbePresentation()
+        presentation = PrometheusPresentation()
         logger.debug('Starting presentation')
         presentation.run()
     except KeyboardInterrupt:
@@ -30,7 +30,7 @@ def presentation():
 
 def speedtest():
     try:
-        speedtest = NetProbeSpeedTest()
+        speedtest = SpeedTestProbe()
         logger.debug('Starting Speed Test')
         speedtest.run()
     except KeyboardInterrupt:
@@ -40,7 +40,7 @@ def speedtest():
 
 def probe():
     try:
-        probe = NetProbe()
+        probe = NetworkProbe()
         logger.debug('Starting probe')
         probe.run()
     except KeyboardInterrupt:

@@ -1,22 +1,18 @@
-# Data presentation service (prometheus)
-import json
-import os
-import time
 import traceback
 
 from config import Configuration
 from helpers.logging import setup_logging
 from lib.datastores.factory import DatastoreFactory
 from lib.enums.DataStoreTypes import DataStoreTypes
-from prometheus_client import start_http_server
-from prometheus_client.core import REGISTRY, GaugeMetricFamily
+from prometheus_client.core import GaugeMetricFamily
+from prometheus_client.registry import Collector
 
 
 
-class CustomCollector(object):
+class PrometheusCollector(Collector):
     def __init__(self):
         # Namespace for the metrics
-        self.logger = setup_logging()
+        self.logger = setup_logging(self.__class__.__name__)
         self.config = Configuration()
 
         self.namespace = self.safe_name(self.config.presentation.device_id)
@@ -91,17 +87,17 @@ class CustomCollector(object):
             total_loss += float(item['loss'])
             total_jitter += float(item['jitter'])
 
-        # if stats_speedtest:
-        #     for key in stats_speedtest.keys():
-        #         if key == 'latency' or key == 'jitter':
-        #             g.add_metric([key, 'speedtest'], stats_speedtest[key])
-        #         # add speedtest jitter and latency to the total
-        #         if key == 'latency':
-        #             total_latency += float(stats_speedtest[key])
-        #             latency_item_count += 1
-        #         elif key == 'jitter':
-        #             total_jitter += float(stats_speedtest[key])
-        #             jitter_item_count += 1
+        if stats_speedtest:
+            for key in stats_speedtest.keys():
+                if key == 'latency' or key == 'jitter':
+                    g.add_metric([key, 'speedtest'], stats_speedtest[key])
+                # add speedtest jitter and latency to the total
+                if key == 'latency':
+                    total_latency += float(stats_speedtest[key])
+                    latency_item_count += 1
+                elif key == 'jitter':
+                    total_jitter += float(stats_speedtest[key])
+                    jitter_item_count += 1
 
         average_latency = total_latency / latency_item_count
         average_loss = total_loss / loss_item_count
@@ -121,15 +117,14 @@ class CustomCollector(object):
         for item in stats_netprobe['dns_stats']:
             labels = [item['nameserver'], item['nameserver_ip'], item['type']]
             h.add_metric(labels, item['latency'])
-
             # find them by type, and then get the average of the latency
             if item['type'].lower() == 'internal':
                 local_dns.append(float(item['latency']))
             else:
                 ext_dns.append(float(item['latency']))
 
-        local_dns_latency = sum(local_dns) / len(local_dns)
-        ext_dns_latency = sum(ext_dns) / len(ext_dns)
+        average_local_dns_latency = sum(local_dns) / len(local_dns)
+        average_ext_dns_latency = sum(ext_dns) / len(ext_dns)
         yield h
 
         if stats_speedtest:  # Speed test is optional
@@ -149,7 +144,7 @@ class CustomCollector(object):
         weight_loss = self.config.presentation.weight_loss  # Loss is 60% of score
         weight_latency = self.config.presentation.weight_latency  # Latency is 15% of score
         weight_jitter = self.config.presentation.weight_jitter  # Jitter is 20% of score
-        # weight_dns_latency = presentation.weight_dns_latency  # DNS latency is 5% of score
+
         weight_internal_dns_latency = self.config.presentation.weight_internal_dns_latency  # Internal DNS latency is 2.5% of score
         weight_external_dns_latency = self.config.presentation.weight_external_dns_latency  # External DNS latency is 2.5% of score
 
@@ -174,7 +169,7 @@ class CustomCollector(object):
         threshold_loss = self.config.presentation.threshold_loss  # 5% loss threshold as max
         threshold_latency = self.config.presentation.threshold_latency  # 100ms latency threshold as max
         threshold_jitter = self.config.presentation.threshold_jitter  # 30ms jitter threshold as max
-        # threshold_dns_latency = self.presentation.threshold_dns_latency  # 100ms dns latency threshold as max
+
         threshold_internal_dns_latency = self.config.presentation.threshold_internal_dns_latency  # 100ms internal dns latency threshold as max
         threshold_external_dns_latency = self.config.presentation.threshold_external_dns_latency  # 100ms external dns latency threshold as max
 
@@ -204,18 +199,33 @@ class CustomCollector(object):
         self.logger.info(f"Speedtest Upload Threshold: {threshold_speedtest_upload}")
 
         yield g_score_thresholds
+        if threshold_loss == 0:
+            cv_loss = 0
+        else:
+            cv_loss = 1 if average_loss / threshold_loss >= 1 else average_loss / threshold_loss
+        if threshold_latency == 0:
+            cv_latency = 0
+        else:
+            cv_latency = 1 if average_latency / threshold_latency >= 1 else average_latency / threshold_latency
+        if threshold_jitter == 0:
+            cv_jitter = 0
+        else:
+            cv_jitter = 1 if average_jitter / threshold_jitter >= 1 else average_jitter / threshold_jitter
+        if threshold_external_dns_latency == 0:
+            cv_external_dns_latency = 0
+        else:
+            cv_external_dns_latency = (
+                1 if average_ext_dns_latency / threshold_external_dns_latency >= 1
+                else average_ext_dns_latency / threshold_external_dns_latency
+            )
+        if threshold_internal_dns_latency == 0:
+            cv_internal_dns_latency = 0
+        else:
+            cv_internal_dns_latency = (
+                1 if average_local_dns_latency / threshold_internal_dns_latency >= 1
+                else average_local_dns_latency / threshold_internal_dns_latency
+            )
 
-        cv_loss = 1 if average_loss / threshold_loss >= 1 else average_loss / threshold_loss
-        cv_latency = 1 if average_latency / threshold_latency >= 1 else average_latency / threshold_latency
-        cv_jitter = 1 if average_jitter / threshold_jitter >= 1 else average_jitter / threshold_jitter
-        cv_external_dns_latency = (
-            1 if ext_dns_latency / threshold_external_dns_latency >= 1
-            else ext_dns_latency / threshold_external_dns_latency
-        )
-        cv_internal_dns_latency = (
-            1 if local_dns_latency / threshold_internal_dns_latency >= 1
-            else local_dns_latency / threshold_internal_dns_latency
-        )
         self.logger.info(f"Loss Coefficient: {cv_loss}")
         self.logger.info(f"Latency Coefficient: {cv_latency}")
         self.logger.info(f"Jitter Coefficient: {cv_jitter}")
@@ -227,47 +237,26 @@ class CustomCollector(object):
         cv_upload = 0
         if stats_speedtest:
             self.logger.debug(f"Speedtest Data: {stats_speedtest}")
-            cv_download = 1 - (
-                1 if stats_speedtest['download'] / threshold_speedtest_download >= 1
-                else (stats_speedtest['download'] / threshold_speedtest_download)
-            )
+
+            download = stats_speedtest['download'] if stats_speedtest['download'] else 0
+            if download >= 0:
+                cv_download = 1 - (
+                    1 if download / threshold_speedtest_download >= 1
+                    else (download / threshold_speedtest_download)
+                )
+
             upload = stats_speedtest['upload'] if stats_speedtest['upload'] else 0
+            if upload >= 0:
+                cv_upload = 1 - (
+                    1 if upload / threshold_speedtest_upload >= 1
+                    else (upload / threshold_speedtest_upload)
+                )
 
-            cv_upload = 1 - (
-                1 if stats_speedtest['upload'] / threshold_speedtest_upload >= 1
-                else (stats_speedtest['upload'] / threshold_speedtest_upload)
-            )
-
-            self.logger.debug(f"{stats_speedtest['download']} / {threshold_speedtest_download} = {cv_download}")
-            self.logger.debug(f"{stats_speedtest['upload']} / {threshold_speedtest_upload} = {cv_upload}")
+            self.logger.debug(f"{download} / {threshold_speedtest_download} = {cv_download}")
+            self.logger.debug(f"{upload} / {threshold_speedtest_upload} = {cv_upload}")
 
             self.logger.info(f"Speedtest Download Coefficient: {cv_download}")
             self.logger.info(f"Speedtest Upload Coefficient: {cv_upload}")
-
-        # if average_loss / threshold_loss >= 1:
-        #     eval_loss = 1
-        # else:
-        #     eval_loss = average_loss / threshold_loss
-
-        # if average_latency / threshold_latency >= 1:
-        #     eval_latency = 1
-        # else:
-        #     eval_latency = average_latency / threshold_latency
-
-        # if average_jitter / threshold_jitter >= 1:
-        #     eval_jitter = 1
-        # else:
-        #     eval_jitter = average_jitter / threshold_jitter
-
-        # if ext_dns_latency / threshold_external_dns_latency >= 1:
-        #     eval_external_dns_latency = 1
-        # else:
-        #     eval_external_dns_latency = ext_dns_latency / threshold_external_dns_latency
-
-        # if local_dns_latency / threshold_internal_dns_latency >= 1:
-        #     eval_internal_dns_latency = 1
-        # else:
-        #     eval_internal_dns_latency = local_dns_latency / threshold_internal_dns_latency
 
         g_cv = GaugeMetricFamily(
             self.metric_safe_name('coefficient'),
@@ -308,21 +297,3 @@ class CustomCollector(object):
         i.add_metric(['health'], score)
 
         yield i
-
-
-class NetProbePresentation:
-    def __init__(self):
-        self.logger = setup_logging()
-        self.presentation = Configuration().presentation
-
-    def run(self):
-        interface=self.presentation.interface
-        port=self.presentation.port
-        self.logger.debug('Starting presentation service')
-        start_http_server(port, addr=interface)
-        self.logger.info(
-            f'Listening => {interface}:{port}'
-        )
-        REGISTRY.register(CustomCollector())
-        while True:
-            time.sleep(15)

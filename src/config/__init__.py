@@ -124,6 +124,7 @@ class DataStoreConfiguration:
 
 class NetProbeConfiguration:
     def __init__(self):
+        self.enabled = EnvVars.PROBE_ENABLED.boolean(ConfigurationDefaults.PROBE_ENABLED)
         self.interval = EnvVars.PROBE_INTERVAL.integer(ConfigurationDefaults.PROBE_INTERVAL)
         self.count = EnvVars.PROBE_COUNT.integer(ConfigurationDefaults.PROBE_COUNT)
         self.sites = EnvVars.PROBE_SITES.list(',', ConfigurationDefaults.PROBE_SITES)
@@ -185,7 +186,6 @@ class FileDataStoreConfiguration:
         self.path = EnvVars.FILE_DATASTORE_PATH.string(ConfigurationDefaults.FILE_DATASTORE_PATH)
 
         # print(f"{self.__class__.__name__} => {json.dumps(self.__dict__)}")
-
 
 
 class PresentationConfiguration:

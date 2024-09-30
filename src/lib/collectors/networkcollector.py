@@ -1,20 +1,18 @@
-# Network tests
 import json
 import os
 import re
-import statistics
 import subprocess
 import traceback
 from threading import Thread
+import typing
+
+from lib.collectors.basecollector import BaseCollector
 
 import dns.resolver
-from helpers.logging import setup_logging
-import speedtest
 
-logger = setup_logging()
-
-class NetworkCollector(object):  # Main network collection class
+class NetworkCollector(BaseCollector):  # Main network collection class
     def __init__(self, sites: list[str], count: int, dns_test_site: str, nameservers: list[tuple[str, str, str]]):
+        super().__init__()
         self.sites = sites  # List of sites to ping
         self.count = str(count)  # Number of pings
         self.stats = []  # List of stat dicts
@@ -22,18 +20,18 @@ class NetworkCollector(object):  # Main network collection class
         self.dns_test_site = dns_test_site  # Site used to test DNS response times
         self.nameservers = nameservers
 
-    def pingtest(self, count, site):
+    def pingtest(self, count, site) -> bool:
         ping = None
         if os.name == "nt":
             # This is only for testing purposes locally.
-            logger.warning("Windows detected, using windows ping")
+            self.logger.warning("Windows detected, using windows ping")
             try:
                 ping = """10 packets transmitted, 10 received, 0% packet loss, time 9011ms
 rtt min/avg/max/mdev = 11.487/12.915/14.475/1.095 ms"""
             except Exception as e:
-                logger.error(f"Error pinging {site}")
-                logger.error(e)
-                logger.error(traceback.format_exc())
+                self.logger.error(f"Error pinging {site}")
+                self.logger.error(e)
+                self.logger.error(traceback.format_exc())
                 return False
         else:
             try:
@@ -47,17 +45,17 @@ rtt min/avg/max/mdev = 11.487/12.915/14.475/1.095 ms"""
                 # jitter = ping.split('/')[6].split(' ')[0]
 
             except Exception as e:
-                logger.error(f"Error pinging {site}")
-                logger.error(e)
-                logger.error(traceback.format_exc())
+                self.logger.error(f"Error pinging {site}")
+                self.logger.error(e)
+                self.logger.error(traceback.format_exc())
                 return False
 
         if ping is None:
-            logger.error(f"Error pinging {site}. No output from ping command")
+            self.logger.error(f"Error pinging {site}. No output from ping command")
             return False
 
         try:
-            logger.debug(ping)
+            self.logger.debug(ping)
             loss_regex = re.compile(r"(\d+)% packet loss", re.MULTILINE | re.DOTALL | re.IGNORECASE)
             latency_regex = re.compile(r"^rtt\s.*?(\d+\.\d+)/(\d+\.\d+)/(\d+\.\d+)/(\d+\.\d+)\sms", re.MULTILINE | re.DOTALL | re.IGNORECASE)
 
@@ -71,27 +69,27 @@ rtt min/avg/max/mdev = 11.487/12.915/14.475/1.095 ms"""
                 loss = loss_match.group(1)
             else:
                 loss = 100
-                logger.critical("Ping output did not match expected format")
+                self.logger.critical("Ping output did not match expected format")
             if latency_match:
                 latency = latency_match.group(2)
                 jitter = latency_match.group(4)
             else:
-                logger.critical("Ping output did not match expected format")
+                self.logger.critical("Ping output did not match expected format")
                 latency = -1
                 jitter = -1
 
             netdata = {"site": site, "latency": latency, "loss": loss, "jitter": jitter}
-            logger.debug(json.dumps(netdata, indent=4))
+            self.logger.debug(json.dumps(netdata, indent=4))
             self.stats.append(netdata)
         except Exception as e:
-            logger.error(f"Error parsing ping output for {site}")
-            logger.error(e)
-            logger.error(traceback.format_exc())
+            self.logger.error(f"Error parsing ping output for {site}")
+            self.logger.error(e)
+            self.logger.error(traceback.format_exc())
             return False
 
         return True
 
-    def dnstest(self, site, nameserver):
+    def dnstest(self, site, nameserver) -> bool:
         my_resolver = dns.resolver.Resolver()
         server = []  # Resolver needs a list
         server.append(nameserver[1])
@@ -113,9 +111,9 @@ rtt min/avg/max/mdev = 11.487/12.915/14.475/1.095 ms"""
             self.dnsstats.append(dnsdata)
 
         except Exception as e:
-            logger.error(f"Error performing DNS resolution on {nameserver}")
-            logger.error(e)
-            logger.error(traceback.format_exc())
+            self.logger.error(f"Error performing DNS resolution on {nameserver}")
+            self.logger.error(e)
+            self.logger.error(traceback.format_exc())
 
             dnsdata = {
                 "nameserver": nameserver[0],
@@ -128,59 +126,41 @@ rtt min/avg/max/mdev = 11.487/12.915/14.475/1.095 ms"""
 
         return True
 
-    def collect(self):
-        # Empty preveious results
-        self.stats = []
-        self.dnsstats = []
+    def collect(self) -> typing.Optional[dict]:
+        try:
+            # Empty preveious results
+            self.stats = []
+            self.dnsstats = []
 
-        # Create threads, start them
-        threads = []
+            # Create threads, start them
+            threads = []
 
-        for item in self.sites:
-            t = Thread(target=self.pingtest, args=(self.count, item))
-            threads.append(t)
-            t.start()
+            for item in self.sites:
+                t = Thread(target=self.pingtest, args=(self.count, item))
+                threads.append(t)
+                t.start()
 
-        # Wait for threads to complete
-        for t in threads:
-            t.join()
+            # Wait for threads to complete
+            for t in threads:
+                t.join()
 
-        # Create threads, start them
-        threads = []
+            # Create threads, start them
+            threads = []
 
-        for item in self.nameservers:
-            s = Thread(target=self.dnstest, args=(self.dns_test_site, item))
-            threads.append(s)
-            s.start()
+            for item in self.nameservers:
+                s = Thread(target=self.dnstest, args=(self.dns_test_site, item))
+                threads.append(s)
+                s.start()
 
-        # Wait for threads to complete
-        for s in threads:
-            s.join()
+            # Wait for threads to complete
+            for s in threads:
+                s.join()
 
-        results = {"stats": self.stats, "dns_stats": self.dnsstats}
+            results = {"stats": self.stats, "dns_stats": self.dnsstats}
 
-        return results
-
-
-class SpeedTestCollector(object):  # Speed test class
-    def __init__(self):
-        self.speedtest_stats = {"download": None, "upload": None, "latency": None}
-
-    def run(self):
-        s = speedtest.Speedtest()
-        s.get_closest_servers()
-        s.get_best_server()
-        download = s.download()
-        upload = s.upload()
-        # get the jitter and latency
-        latency = s.results.ping
-
-        self.speedtest_stats = {"download": download, "upload": upload, "latency": latency}
-
-    def collect(self):
-        self.speedtest_stats = {"download": None, "upload": None, "latency": None}
-        self.run()
-
-        results = self.speedtest_stats
-
-        return results
+            return results
+        except Exception as e:
+            self.logger.error("Error collecting network stats")
+            self.logger.error(e)
+            self.logger.error(traceback.format_exc())
+            return None

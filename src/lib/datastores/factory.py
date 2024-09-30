@@ -6,7 +6,7 @@ class DatastoreFactory:
         pass
 
     def create(self, type: DataStoreTypes):
-        logger = setup_logging()
+        logger = setup_logging(self.__class__.__name__)
         if type == DataStoreTypes.REDIS:
             logger.debug("Creating Redis Datastore")
             from lib.datastores.redis import RedisDataStore

@@ -1,8 +1,8 @@
 # Logging helper
 # - Sets up logging config
-
 import logging
 import sys
+import typing
 # from logging.handlers import RotatingFileHandler
 from config import LoggingConfiguration
 
@@ -52,14 +52,14 @@ class ColorFormatter(logging.Formatter):
         return super().format(record)
 
 
-def setup_logging():
+def setup_logging(name: typing.Optional[str] = None):
     config = LoggingConfiguration()
-    logger = logging.getLogger("netprobe")
+    logger = logging.getLogger("netprobe" if name is None else name)
 
     logger.setLevel(level=config.level)
 
     # Set formatter
-    logColorFormatter = ColorFormatter(fmt="%(asctime)s %(levelname)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    logColorFormatter = ColorFormatter(fmt="%(asctime)s [%(levelname)s] [%(name)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
     stdoutHandler = logging.StreamHandler(sys.stdout)
     stdoutHandler.name = "stdout"
