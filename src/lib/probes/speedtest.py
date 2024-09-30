@@ -8,14 +8,15 @@ from lib.enums.DataStoreTypes import DataStoreTypes
 
 class SpeedTestProbe(BaseProbe):
     def __init__(self):
-        self.config = Configuration()
+        self.app_config = Configuration()
         probe_config = BaseProbeConfiguration(
-            self.config.speedtest.enabled,
-            self.config.speedtest.interval,
-            self.config.datastore.speedtest.get('topic', ConfigurationDefaults.DATASTORE_TOPIC_SPEEDTEST),
-            self.config.datastore.speedtest.get('type', DataStoreTypes.NONE)
+            self.app_config.speedtest.enabled,
+            self.app_config.speedtest.interval,
+            self.app_config.datastore.speedtest.get('topic', ConfigurationDefaults.DATASTORE_TOPIC_SPEEDTEST),
+            self.app_config.datastore.speedtest.get('type', DataStoreTypes.NONE)
         )
         super().__init__(probe_config, SpeedTestCollector())
+
 
     def run(self) -> None:
         return super().run()

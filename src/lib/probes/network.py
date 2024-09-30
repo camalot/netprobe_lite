@@ -24,13 +24,9 @@ class NetworkProbe(BaseProbe):
             enabled=self.app_config.probe.enabled,
             interval=self.app_config.probe.interval,
             topic=self.app_config.datastore.netprobe.get('topic', ConfigurationDefaults.DATASTORE_TOPIC_PROBE),
-            datastore=self.app_config.datastore.netprobe.get('type', DataStoreTypes.FILE),
+            datastore=self.app_config.datastore.netprobe.get('type', DataStoreTypes.NONE),
         ), NetworkCollector(sites, probe_count, dns_test_site, nameservers))
 
-        self.logger.info(f"PROBE DATASTORE TYPE: {self.config.datastore}")
-        self.logger.info(f"PROBE DATASTORE TOPIC: {self.config.topic}")
-
-        self.logger.info(f"PROBE INTERVAL: {self.interval}s")
         self.logger.info(f"PROBE COUNT: {probe_count}")
         self.logger.info(f"SITES: {sites}")
         self.logger.info(f"DNS TEST SITE: {dns_test_site}")

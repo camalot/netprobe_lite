@@ -6,9 +6,9 @@ Netprobe aggregates these metrics into a common score, which you can use to moni
 connection.
 
 > [!NOTE]
-> This is a [fork of Netprobe_lite](https://github.com/plaintextpackets/netprobe_lite). I did some refactoring of how the
-> container is built, how the variables are set, the names of the variables, a lot of refactoring to pass lint tests, and
-> other things.
+> This is a [fork of Netprobe_lite](https://github.com/plaintextpackets/netprobe_lite). I did some refactoring of
+> how the container is built, how the variables are set, the names of the variables, a lot of refactoring
+> to pass lint tests, and other things.
 
 ## Support the Project
 
@@ -40,33 +40,7 @@ The collection of the metrics is stored in a Datastore to cache for use. There a
 
 ### Environment Variables
 
-| NAME | DESCRIPTION | DEFAULT |
-| ---- | ----------- | ------- |
-| `NP_SITES` | Comma-separated list of domains to test | `google.com,facebook.com,twitter.com,youtube.com` |
-| `NP_DNS_TEST_SITE` | A single site to test DNS | `google.com` |
-| `NP_DNS_NAMESERVER_<N>` | A DNS nameserver name to test with. `<N>` is an index/number of the entry. | `Google` |
-| `NP_DNS_NAMESERVER_<N>_IP` | The IP Address of the DNS nameserver that matches up with the prior value. | `8.8.8.8` |
-| `NP_LOCAL_DNS_NAMESERVER_<N>` | A local/internal DNS nameserver name. `<N>` is an index/number of the entry | `Local DNS` |
-| `NP_LOCAL_DNS_NAMESERVER_<N>_IP` | The IP Address of the the local DNS. | `192.168.2.1` |
-| `NP_WEIGHT_DNS_LATENCY` | DNS latency weight for the score. | `0.05` |
-| `NP_WEIGHT_JITTER` | Jitter weight for the score. | `0.2` |
-| `NP_WEIGHT_LATENCY` | Latency weight for the score. | `0.15` |
-| `NP_WEIGHT_LOSS` | Packet loss weight for the score. | `0.6` |
-| `NP_THRESHOLD_DNS_LATENCY` | DNS latency threshold for score, in milliseconds. | `100` |
-| `NP_THRESHOLD_JITTER` | Jitter threshold for score, in milliseconds. | `30` |
-| `NP_THRESHOLD_LATENCY` | Latency threshold for score, in milliseconds. | `100` |
-| `NP_THRESHOLD_LOSS` | Packet loss threshold for score, in percentage. | `5` |
-| `NP_SPEEDTEST_ENABLED` | Enable/Disable speedtest runs | `false` |
-| `NP_SPEEDTEST_INTERVAL` | Interval on which the speedtest will run, in seconds. | `937` |
-| `NP_PRESENTATION_INTERFACE` | What interface is the prometheus metrics presented. | `0.0.0.0` |
-| `NP_PRESENTATION_PORT` |  This is the port on which the presentation layer will run | `5000` |
-| `NP_REDIS_HOST` | The hostname/port to connect to redis. | `netprobe-redis` |
-| `NP_REDIS_PORT` | The port to connect to redis. | `6379` |
-| `NP_REDIS_PASSWORD` | The password to connect to redis. This should only be set if you have a password set for redis. | `""` |
-| `NP_REDIS_DB` | The redis DB index | `0` |
-| `NP_PROBE_COUNT` | The number of checks to run against the tests | `50` |
-| `NP_PROBE_INTERVAL` | The interval at which the system probes | `30` |
-| `NP_DEVICE_ID` | This is used as the "namespace" in prometheus | `netprobe` |
+TODO SINCE THESE ARE IN PROGRESS
 
 ### Configuration via file
 
