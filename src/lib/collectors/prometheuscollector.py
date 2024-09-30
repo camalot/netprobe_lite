@@ -314,26 +314,16 @@ class PrometheusCollector(Collector):
         speedtest_upload_score = (1 - weight_speedtest_upload * cv_upload)
         speedtest_overall_score = (speedtest_download_score + speedtest_upload_score) / 2
 
-        total_score = (
-            loss_score
-            + latency_score
-            + jitter_score
-            + internal_dns_latency_score
-            + external_dns_latency_score
-            + speedtest_download_score
-            + speedtest_upload_score
-        )
-
         # Master scoring function
-        # score = (
-        #     (1 - weight_loss * cv_loss)
-        #     - (weight_jitter * cv_jitter)
-        #     - (weight_latency * cv_latency)
-        #     - (weight_internal_dns_latency * cv_internal_dns_latency)
-        #     - (weight_external_dns_latency * cv_external_dns_latency)
-        #     - (weight_speedtest_download * cv_download)
-        #     - (weight_speedtest_upload * cv_upload)
-        # )
+        overall_score = (
+            (1 - weight_loss * cv_loss)
+            - (weight_jitter * cv_jitter)
+            - (weight_latency * cv_latency)
+            - (weight_internal_dns_latency * cv_internal_dns_latency)
+            - (weight_external_dns_latency * cv_external_dns_latency)
+            - (weight_speedtest_download * cv_download)
+            - (weight_speedtest_upload * cv_upload)
+        )
 
         self.logger.info("Network Health Scores:")
         self.logger.info(f"\tLoss Score: {(loss_score)*100}%")
@@ -345,7 +335,7 @@ class PrometheusCollector(Collector):
         self.logger.info(f"\tSpeedtest Upload Score: {(speedtest_upload_score) * 100}%")
         self.logger.info(f"\tSpeedtest Overall Score: {(speedtest_overall_score) * 100}%")
 
-        self.logger.info(f"Total Network Health Score: {total_score * 100}%")
+        self.logger.info(f"Total Network Health Score: {overall_score * 100}%")
 
         i = GaugeMetricFamily(
             self.metric_safe_name('health_score'),
@@ -360,7 +350,7 @@ class PrometheusCollector(Collector):
         i.add_metric(['speedtest_download'], speedtest_download_score)
         i.add_metric(['speedtest_upload'], speedtest_upload_score)
         i.add_metric(['speedtest_overall'], speedtest_overall_score)
-        
-        i.add_metric(['overall'], total_score)
+
+        i.add_metric(['overall'], overall_score)
 
         yield i
