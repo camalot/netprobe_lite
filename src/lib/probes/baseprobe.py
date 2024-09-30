@@ -27,6 +27,10 @@ class BaseProbe:
         self._exit_loop = True
 
     def run(self):
+        if not self.enabled:
+            self.logger.debug(f"Probe {self.__class__.__name__} is disabled")
+            return
+        
         while not self._exit_loop:
             try:
                 self.logger.debug(f"Running probe: {self.__class__.__name__}")
