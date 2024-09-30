@@ -1,6 +1,7 @@
 import traceback
 
 from config import Configuration
+from lib.enums.ConfigurationDefaults import ConfigurationDefaults
 from helpers.logging import setup_logging
 from lib.datastores.factory import DatastoreFactory
 from lib.enums.DataStoreTypes import DataStoreTypes
@@ -29,14 +30,18 @@ class PrometheusCollector(Collector):
         probe_data_store = None
         speedtest_data_store = None
         try:
-            probe_data_store = DatastoreFactory().create(self.config.datastore.netprobe.get('type', DataStoreTypes.FILE))
+            probe_data_store = DatastoreFactory().create(
+                self.config.datastore.netprobe.get('type', ConfigurationDefaults.DATASTORE_TYPE_PROBE)
+            )
         except Exception as e:
             self.logger.error('Could not connect to data store')
             self.logger.error(e)
             self.logger.error(traceback.format_exc())
 
         try:
-            speedtest_data_store = DatastoreFactory().create(self.config.datastore.speedtest.get('type', DataStoreTypes.FILE))
+            speedtest_data_store = DatastoreFactory().create(
+                self.config.datastore.speedtest.get('type', ConfigurationDefaults.DATASTORE_TYPE_SPEEDTEST)
+            )
         except Exception as e:
             self.logger.error('Could not connect to data store')
             self.logger.error(e)

@@ -3,7 +3,6 @@ from lib.enums.ConfigurationDefaults import ConfigurationDefaults
 from lib.probes.baseprobe import BaseProbe
 from lib.probes.baseprobe import BaseProbeConfiguration
 from lib.collectors.speedtestcollector import SpeedTestCollector
-from lib.enums.DataStoreTypes import DataStoreTypes
 
 
 class SpeedTestProbe(BaseProbe):
@@ -13,7 +12,7 @@ class SpeedTestProbe(BaseProbe):
             self.app_config.speedtest.enabled,
             self.app_config.speedtest.interval,
             self.app_config.datastore.speedtest.get('topic', ConfigurationDefaults.DATASTORE_TOPIC_SPEEDTEST),
-            self.app_config.datastore.speedtest.get('type', DataStoreTypes.NONE)
+            self.app_config.datastore.speedtest.get('type', ConfigurationDefaults.DATASTORE_TYPE_SPEEDTEST)
         )
         super().__init__(probe_config, SpeedTestCollector())
 
