@@ -121,6 +121,44 @@ class DataStoreConfiguration:
     def merge(self, config: dict):
         self.__dict__.update(config)
 
+class HttpRequestConfiguration:
+    def __init__(self, *args, **kwargs):
+        self.url = kwargs.get('url', None)
+        self.method = kwargs.get('method', 'GET')
+        self.headers = kwargs.get('headers', {})
+        self.timeout = kwargs.get('timeout', 10)
+        self.cookies = kwargs.get('cookies', None)
+        self.auth = kwargs.get('auth', None)
+        self.params = kwargs.get('params', None)
+
+    def merge(self, config: dict):
+        self.__dict__.update(config)
+
+class HttpDataStoreConfiguration:
+    def __init__(self):
+        self.verify_ssl = EnvVars.HTTP_VERIFY_SSL.boolean(ConfigurationDefaults.HTTP_VERIFY_SSL)
+        self.read = HttpRequestConfiguration(
+            url=EnvVars.HTTP_READ_URL.nullable(ConfigurationDefaults.HTTP_READ_URL),
+            method=EnvVars.HTTP_READ_METHOD.string(ConfigurationDefaults.HTTP_READ_METHOD),
+            headers=EnvVars.HTTP_READ_HEADERS.nullable_dict(default=ConfigurationDefaults.HTTP_READ_HEADERS),
+            timeout=EnvVars.HTTP_READ_TIMEOUT.integer(ConfigurationDefaults.HTTP_READ_TIMEOUT),
+            auth=EnvVars.HTTP_READ_AUTH.nullable_dict(default=ConfigurationDefaults.HTTP_READ_AUTH),
+            cookies=EnvVars.HTTP_READ_COOKIES.nullable_dict(default=ConfigurationDefaults.HTTP_READ_COOKIES),
+            params=EnvVars.HTTP_READ_PARAMS.nullable_dict(default=ConfigurationDefaults.HTTP_READ_PARAMS),
+        )
+        self.write = HttpRequestConfiguration(
+            url=EnvVars.HTTP_WRITE_URL.nullable(ConfigurationDefaults.HTTP_WRITE_URL),
+            method=EnvVars.HTTP_WRITE_METHOD.string(ConfigurationDefaults.HTTP_WRITE_METHOD),
+            headers=EnvVars.HTTP_WRITE_HEADERS.nullable_dict(default=ConfigurationDefaults.HTTP_WRITE_HEADERS),
+            timeout=EnvVars.HTTP_WRITE_TIMEOUT.integer(ConfigurationDefaults.HTTP_WRITE_TIMEOUT),
+            auth=EnvVars.HTTP_WRITE_AUTH.nullable_dict(default=ConfigurationDefaults.HTTP_WRITE_AUTH),
+            cookies=EnvVars.HTTP_WRITE_COOKIES.nullable_dict(default=ConfigurationDefaults.HTTP_WRITE_COOKIES),
+            params=EnvVars.HTTP_WRITE_PARAMS.nullable_dict(default=ConfigurationDefaults.HTTP_WRITE_PARAMS),
+        )
+
+    def merge(self, config: dict):
+        self.__dict__.update(config)
+
 
 class NetProbeConfiguration:
     def __init__(self):

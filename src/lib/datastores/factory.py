@@ -23,6 +23,10 @@ class DatastoreFactory:
             logger.debug("Creating MongoDB Datastore")
             from lib.datastores.mongodb import MongoDBDatastore
             return MongoDBDatastore()
+        elif type == DataStoreTypes.HTTP:
+            logger.debug("Creating HTTP Datastore")
+            from lib.datastores.http import HttpDataStore
+            return HttpDataStore()
         elif type == DataStoreTypes.NONE:
             logger.debug("Creating Null Datastore")
             from lib.datastores.null import NullDataStore

@@ -5,7 +5,7 @@ class NullDataStore(DataStore):
     def __init__(self):
         super().__init__()
 
-        self.logger.info(f"Initializing Null Data Store")
+        self.logger.debug(f"Initializing Null Data Store")
 
     def read(self, topic) -> typing.Any:
         return None

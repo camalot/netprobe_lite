@@ -26,17 +26,17 @@ class RedisDataStore(DataStore):
             self.r = redis.Redis(host=self.host, port=int(self.port), db=int(self.db), password=self.password)
         else:
             self.r = redis.Redis(host=self.host, port=int(self.port), db=int(self.db))
-        self.logger.info(f"Initializing Redis Data Store with host {self.host} and port {self.port}")
+        self.logger.debug(f"Initializing Redis Data Store with host {self.host} and port {self.port}")
 
-    def read(self, key) -> typing.Any:  # Read data from Redis
-        results = self.r.get(key)  # Get the latest results from Redis for a given key
+    def read(self, topic: str) -> typing.Any:  # Read data from Redis
+        results = self.r.get(topic)  # Get the latest results from Redis for a given key
         if results:
             data = json.loads(results)
         else:
             data = ""
         return data
 
-    def write(self, key, data, ttl) -> bool:  # Write data to Redis
-        self.logger.debug(f"Writing to Redis: {key} - {ttl}")
-        write = self.r.set(key, json.dumps(data), ttl)  # Store data with a given TTL
+    def write(self, topic: str, data: dict, ttl: int) -> bool:  # Write data to Redis
+        self.logger.debug(f"Writing to Redis: {topic} - {ttl}")
+        write = self.r.set(topic, json.dumps(data), ttl)  # Store data with a given TTL
         return True if write else False

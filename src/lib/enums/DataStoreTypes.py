@@ -5,6 +5,7 @@ class DataStoreTypes(Enum):
     REDIS = "REDIS"
     MQTT = "MQTT"
     MONGODB = "MONGODB"
+    HTTP = "HTTP"
     NONE = "NONE"
 
     @staticmethod

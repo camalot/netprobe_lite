@@ -24,7 +24,7 @@ class NetworkCollector(BaseCollector):  # Main network collection class
         ping = None
         if os.name == "nt":
             # This is only for testing purposes locally.
-            self.logger.warning("Windows detected, using windows ping")
+            self.logger.warning("Windows detected, using fake ping")
             try:
                 ping = """10 packets transmitted, 10 received, 0% packet loss, time 9011ms
 rtt min/avg/max/mdev = 11.487/12.915/14.475/1.095 ms"""

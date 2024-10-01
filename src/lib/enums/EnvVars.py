@@ -10,6 +10,22 @@ class EnvVars(Enum):
 
     FILE_DATASTORE_PATH = "NP_FILE_DATASTORE_PATH"
 
+    HTTP_READ_URL = "NP_HTTP_READ_URL"
+    HTTP_WRITE_URL = "NP_HTTP_WRITE_URL"
+    HTTP_READ_METHOD = "NP_HTTP_READ_METHOD"
+    HTTP_WRITE_METHOD = "NP_HTTP_WRITE_METHOD"
+    HTTP_READ_HEADERS = "NP_HTTP_READ_HEADERS"
+    HTTP_WRITE_HEADERS = "NP_HTTP_WRITE_HEADERS"
+    HTTP_READ_TIMEOUT = "NP_HTTP_READ_TIMEOUT"
+    HTTP_WRITE_TIMEOUT = "NP_HTTP_WRITE_TIMEOUT"
+    HTTP_READ_AUTH = "NP_HTTP_READ_AUTH"
+    HTTP_WRITE_AUTH = "NP_HTTP_WRITE_AUTH"
+    HTTP_READ_COOKIES = "NP_HTTP_READ_COOKIES"
+    HTTP_WRITE_COOKIES = "NP_HTTP_WRITE_COOKIES"
+    HTTP_READ_PARAMS = "NP_HTTP_READ_PARAMS"
+    HTTP_WRITE_PARAMS = "NP_HTTP_WRITE_PARAMS"
+    HTTP_VERIFY_SSL = "NP_HTTP_VERIFY_SSL"
+
     LOG_LEVEL = "NP_LOG_LEVEL"
     LOG_FORMAT = "NP_LOG_FORMAT"
 
@@ -79,10 +95,24 @@ class EnvVars(Enum):
     def float(self, default: float = 0.0) -> float:
         return float(self.expand(str(default)))
 
-    def list(self, separator: str, default: typing.List[str] = []) -> typing.List[str]:
+    def list(self, separator: str = ',', default: typing.List[str] = []) -> typing.List[str]:
         # split and trim the values
         return [x.strip() for x in self.expand(separator.join(default)).split(separator)]
 
+    # take key=value pairs separated by a separator and return a dictionary
+    def dict(self, separator: str = ";", default: typing.Dict[str, str] = {}) -> typing.Dict[str, str]:
+        result = self.nullable_dict(separator, default)
+        if result:
+            return result
+        return {}
+
+    def nullable_dict(
+        self, separator: str = ";", default: typing.Optional[typing.Dict[str, str]] = {}
+    ) -> typing.Optional[typing.Dict[str, str]]:
+        if default:
+            # split and trim the values
+            return {x.split("=")[0].strip(): x.split("=")[1].strip() for x in self.expand(separator.join(default)).split(separator)}
+        return None
 
     @staticmethod
     def unquote(value: typing.Optional[str]) -> typing.Any:

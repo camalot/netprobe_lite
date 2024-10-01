@@ -12,7 +12,7 @@ class MqttDataStore(DataStore):
         self.messages = {}
 
         self.config = MqttDataStoreConfiguration()
-        self.logger.info(f"Initializing MQTT Data Store with broker {self.config.host}:{self.config.port}")
+        self.logger.debug(f"Initializing MQTT Data Store with broker {self.config.host}:{self.config.port}")
         self.client = self.create()
         self.client.loop_start()
         count = 0
@@ -28,7 +28,7 @@ class MqttDataStore(DataStore):
             count += 1
             found = 0
             time.sleep(1)
-        self.logger.info(f"Subscribed to {found} of {len(self.config.topics)} topics")
+        self.logger.debug(f"Subscribed to {found} of {len(self.config.topics)} topics")
         if found < len(self.config.topics):
             self.logger.warning(f"Failed to retrieve all expected topics: {found} of {len(self.config.topics)}")
             self.logger.warning(f"Topics found: {self.messages.keys()}")
@@ -96,7 +96,7 @@ class MqttDataStore(DataStore):
             msg = f"Unknown error code: {rc}"
         return msg
 
-    def read(self, topic) -> typing.Any:
+    def read(self, topic: str) -> typing.Any:
         if topic in self.messages:
             self.logger.debug(f"Read from topic '{topic}'")
             result = json.loads(self.messages[topic])
@@ -106,7 +106,7 @@ class MqttDataStore(DataStore):
             self.logger.debug(f"Topic '{topic}' not found")
         return None
 
-    def write(self, topic, data, ttl) -> bool:
+    def write(self, topic: str, data: typing.Union[dict,str], ttl: int) -> bool:
         try:
             self.logger.debug(f"Publishing to topic '{topic}'")
             if isinstance(data, dict):

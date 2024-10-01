@@ -13,16 +13,16 @@ class MongoDBDatastore(DataStore):
         self.collection = self.db[self.config.collection]
         self.logger.debug(f"Initializing MongoDB Data Store with database {self.config.db}")
 
-    def write(self, key, data, ttl) -> bool:
+    def write(self, topic: str, data: dict, ttl: int) -> bool:
         try:
-            result = self.collection.update_one({ "id": key }, { "$set": { "data": data, "ttl": ttl } }, upsert=True)
+            result = self.collection.update_one({ "id": topic }, { "$set": { "data": data, "ttl": ttl } }, upsert=True)
             return True if result else False
         except Exception as e:
             self.logger.error(f"Error writing to MongoDB: {e}")
             return False
 
-    def read(self, key) -> typing.Any:
-        result = self.collection.find_one({ "id": key })
+    def read(self, topic: str) -> typing.Any:
+        result = self.collection.find_one({ "id": topic })
         if result:
             return result["data"]
         else:

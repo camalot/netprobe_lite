@@ -4,8 +4,8 @@ class DataStore:
     def __init__(self):
         self.logger = setup_logging(self.__class__.__name__)
 
-    def read(self, key) -> typing.Any:
+    def read(self, topic: str) -> typing.Any:
         return None
 
-    def write(self, key, data, ttl) -> bool:
+    def write(self, topic: str, data: dict, ttl: int) -> bool:
         return False
