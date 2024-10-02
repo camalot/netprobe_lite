@@ -1,7 +1,7 @@
 import typing
 
-from lib.collectors.basecollector import BaseCollector
 import speedtest
+from lib.collectors.basecollector import BaseCollector
 
 
 class SpeedTestCollector(BaseCollector):  # Speed test class
