@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class DataStoreTypes(Enum):
     FILE = "FILE"
     REDIS = "REDIS"

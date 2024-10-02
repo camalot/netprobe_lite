@@ -1,11 +1,9 @@
-# Logging helper
-# - Sets up logging config
 import logging
 import sys
 import typing
 
-from lib.logging.ColorFormatter import ColorFormatter
 from config import LoggingConfiguration
+from lib.logging.ColorFormatter import ColorFormatter
 
 
 def setup_logging(name: typing.Optional[str] = None):

@@ -2,6 +2,7 @@ import os
 import typing
 from enum import Enum
 
+
 class EnvVars(Enum):
     DATASTORE_PROBE_TYPE = "NP_DATASTORE_PROBE_TYPE"
     DATASTORE_SPEEDTEST_TYPE = "NP_DATASTORE_SPEEDTEST_TYPE"

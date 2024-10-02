@@ -30,21 +30,21 @@ class BaseProbe:
         self.logger.info(f"PROBE INTERVAL: {self.config.interval}s")
 
     def sighandler(self, signum, frame):
-        self.logger.warning(f'<SIGTERM received>')
+        self.logger.warning('<SIGTERM received>')
         self._exit_loop = True
 
     def run(self):
         if not self.enabled:
-            self.logger.debug(f"Probe is disabled")
+            self.logger.debug("Probe is disabled")
             return
 
         while not self._exit_loop:
             stats = None
             try:
-                self.logger.debug(f"Running probe")
+                self.logger.debug("Running probe")
                 stats = self.collector.collect()
             except Exception as e:
-                self.logger.error(f"Error executing probe")
+                self.logger.error("Error executing probe")
                 self.logger.error(e)
                 self.logger.error(traceback.format_exc())
             # Connect to Datastore
@@ -63,4 +63,4 @@ class BaseProbe:
                 self.logger.error(traceback.format_exc())
             self.logger.debug(f'Probe sleeping for {self.interval} seconds')
             time.sleep(self.interval)
-        self.logger.debug(f"Exiting probe")
+        self.logger.debug("Exiting probe")

@@ -3,6 +3,7 @@ import typing
 from lib.collectors.basecollector import BaseCollector
 import speedtest
 
+
 class SpeedTestCollector(BaseCollector):  # Speed test class
     def __init__(self):
         super().__init__()

@@ -3,7 +3,6 @@ import time
 import typing
 
 import paho.mqtt.client as mqtt
-import paho.mqtt.publish as publish
 from config import MqttDataStoreConfiguration
 from lib.datastores.datastore import DataStore
 
@@ -47,7 +46,7 @@ class MqttDataStore(DataStore):
 
         self.logger.debug("========================================")
         self.logger.debug(f"user: {self.config.username}")
-        self.logger.debug(f"password: ********")
+        self.logger.debug("password: ********")
         self.logger.debug(f"host: {self.config.host}")
         self.logger.debug(f"port: {self.config.port}")
         self.logger.debug("========================================")

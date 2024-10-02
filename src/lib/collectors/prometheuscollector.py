@@ -1,9 +1,8 @@
 import traceback
 
 from config import Configuration
-from lib.enums.ConfigurationDefaults import ConfigurationDefaults
 from lib.datastores.factory import DatastoreFactory
-from lib.enums.DataStoreTypes import DataStoreTypes
+from lib.enums.ConfigurationDefaults import ConfigurationDefaults
 from lib.logging import setup_logging
 from prometheus_client.core import GaugeMetricFamily
 from prometheus_client.registry import Collector
@@ -64,7 +63,7 @@ class PrometheusCollector(Collector):
         if results_netprobe:
             stats_netprobe = results_netprobe
         else:
-            self.logger.debug(f"No data found in data store. Skipping.")
+            self.logger.debug("No data found in data store. Skipping.")
             return
 
         g = GaugeMetricFamily(

@@ -1,10 +1,11 @@
 import hashlib
 import json
-import requests
 import typing
 
+import requests
 from config import HttpDataStoreConfiguration
 from lib.datastores.datastore import DataStore
+
 
 class HttpDataStore(DataStore):
     def __init__(self):

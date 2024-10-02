@@ -1,14 +1,7 @@
-import json
-import time
-import traceback
-
 from config import Configuration
 from lib.collectors.networkcollector import NetworkCollector
-from lib.datastores.factory import DatastoreFactory
 from lib.enums.ConfigurationDefaults import ConfigurationDefaults
-from lib.enums.DataStoreTypes import DataStoreTypes
-from lib.probes.baseprobe import BaseProbe
-from lib.probes.baseprobe import BaseProbeConfiguration
+from lib.probes.baseprobe import BaseProbe, BaseProbeConfiguration
 
 
 class NetworkProbe(BaseProbe):
@@ -78,7 +71,9 @@ class NetworkProbe(BaseProbe):
         self.logger.info(
             f"INTERNAL DNS LATENCY THRESHOLD: {self.app_config.presentation.threshold_internal_dns_latency}ms"
         )
-        self.logger.info(f"SPEEDTEST DOWNLOAD THRESHOLD: {self.app_config.presentation.threshold_speedtest_download}Mbp/s")
+        self.logger.info(
+            f"SPEEDTEST DOWNLOAD THRESHOLD: {self.app_config.presentation.threshold_speedtest_download}Mbp/s"
+        )
         self.logger.info(f"SPEEDTEST UPLOAD THRESHOLD: {self.app_config.presentation.threshold_speedtest_upload}Mbp/s")
 
     # def run(self):

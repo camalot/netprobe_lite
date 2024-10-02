@@ -5,8 +5,8 @@ import typing
 
 import yaml
 from dotenv import find_dotenv, load_dotenv
-from lib.enums.DataStoreTypes import DataStoreTypes
 from lib.enums.ConfigurationDefaults import ConfigurationDefaults
+from lib.enums.DataStoreTypes import DataStoreTypes
 from lib.enums.EnvVars import EnvVars
 
 # Load configs from env

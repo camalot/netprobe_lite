@@ -3,8 +3,8 @@ import os
 import re
 import subprocess
 import traceback
-from threading import Thread
 import typing
+from threading import Thread
 
 import dns.resolver
 from lib.collectors.basecollector import BaseCollector

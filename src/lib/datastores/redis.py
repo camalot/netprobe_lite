@@ -1,11 +1,9 @@
-# Redis helper
-# Functions to help read and write from Redis
 import json
 import typing
 
-from redis import Redis
 from config import RedisDataStoreConfiguration
 from lib.datastores.datastore import DataStore
+from redis import Redis
 
 
 class RedisDataStore(DataStore):

@@ -1,8 +1,7 @@
 from config import Configuration
-from lib.enums.ConfigurationDefaults import ConfigurationDefaults
-from lib.probes.baseprobe import BaseProbe
-from lib.probes.baseprobe import BaseProbeConfiguration
 from lib.collectors.speedtestcollector import SpeedTestCollector
+from lib.enums.ConfigurationDefaults import ConfigurationDefaults
+from lib.probes.baseprobe import BaseProbe, BaseProbeConfiguration
 
 
 class SpeedTestProbe(BaseProbe):

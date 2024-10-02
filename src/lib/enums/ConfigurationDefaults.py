@@ -1,4 +1,3 @@
-
 class ConfigurationDefaults:
     CONFIG_FILE_PATH = "/app/config/netprobe.yaml"
 
