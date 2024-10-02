@@ -1,17 +1,12 @@
-# Logging helper
-# - Sets up logging config
 import logging
-import sys
-import typing
-# from logging.handlers import RotatingFileHandler
-from config import LoggingConfiguration
+
 
 class ColorFormatter(logging.Formatter):
     def __init__(self, fmt=None, datefmt=None, validate=True):
         super().__init__(fmt=fmt, datefmt=datefmt, validate=validate)
         self.colors = {
             "RESET": "\u001b[0m",
-
+            # FORGROUND COLORS
             "FGBLACK": "\u001b[30m",
             "FGRED": "\u001b[31m",
             "FGGREEN": "\u001b[32m",
@@ -20,7 +15,7 @@ class ColorFormatter(logging.Formatter):
             "FGMAGENTA": "\u001b[35m",
             "FGCYAN": "\u001b[36m",
             "FGWHITE": "\u001b[37m",
-
+            # BACKGROUND COLORS
             "BGBLACK": "\u001b[40m",
             "BGRED": "\u001b[41m",
             "BGGREEN": "\u001b[42m",
@@ -29,7 +24,7 @@ class ColorFormatter(logging.Formatter):
             "BGMAGENTA": "\u001b[45m",
             "BGCYAN": "\u001b[46m",
             "BGWHITE": "\u001b[47m",
-
+            # STYLES
             "BOLD": "\u001b[1m",
             "UNDERLINE": "\u001b[4m",
             "REVERSE": "\u001b[7m",
@@ -50,31 +45,3 @@ class ColorFormatter(logging.Formatter):
             log_color = self.colors["RESET"]
         record.msg = f"{self.colors['RESET']}{log_color}{record.msg}{self.colors['RESET']}"
         return super().format(record)
-
-
-def setup_logging(name: typing.Optional[str] = None):
-    config = LoggingConfiguration()
-    logger = logging.getLogger("netprobe" if name is None else name)
-
-    logger.setLevel(level=config.level)
-
-    # Set formatter
-    logColorFormatter = ColorFormatter(fmt="%(asctime)s [%(levelname)s] [%(name)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-
-    stdoutHandler = logging.StreamHandler(sys.stdout)
-    stdoutHandler.name = "stdout"
-    stdoutHandler.setFormatter(logColorFormatter)
-    stdoutHandler.setLevel(level=config.level)
-
-    active_handlers = [stdoutHandler]
-
-    if not logger.handlers:
-        # check if stdoutHandler is already added
-        # check if a handler with the name is already added
-        for handler in active_handlers:
-            if not logger.hasHandlers():
-                logger.addHandler(handler)
-            elif not any([handler.name == h.name for h in logger.handlers]):
-                logger.addHandler(handler)
-
-    return logger

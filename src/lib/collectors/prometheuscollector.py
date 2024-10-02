@@ -2,12 +2,11 @@ import traceback
 
 from config import Configuration
 from lib.enums.ConfigurationDefaults import ConfigurationDefaults
-from helpers.logging import setup_logging
 from lib.datastores.factory import DatastoreFactory
 from lib.enums.DataStoreTypes import DataStoreTypes
+from lib.logging import setup_logging
 from prometheus_client.core import GaugeMetricFamily
 from prometheus_client.registry import Collector
-
 
 
 class PrometheusCollector(Collector):
@@ -46,7 +45,6 @@ class PrometheusCollector(Collector):
             self.logger.error('Could not connect to data store')
             self.logger.error(e)
             self.logger.error(traceback.format_exc())
-
 
         if not probe_data_store:
             self.logger.error('Could not connect to data store')
@@ -125,8 +123,8 @@ class PrometheusCollector(Collector):
             labels=['server', 'ip', 'type'],
         )
 
-        local_dns_latency = 0
-        ext_dns_latency = 0
+        average_local_dns_latency = 0
+        average_local_dns_latency = 0
         local_dns = []
         ext_dns = []
         for item in stats_netprobe['dns_stats']:
@@ -165,17 +163,17 @@ class PrometheusCollector(Collector):
         weight_latency = self.config.presentation.weight_latency  # Latency is 15% of score
         weight_jitter = self.config.presentation.weight_jitter  # Jitter is 20% of score
 
-        weight_internal_dns_latency = self.config.presentation.weight_internal_dns_latency  # Internal DNS latency is 2.5% of score
-        weight_external_dns_latency = self.config.presentation.weight_external_dns_latency  # External DNS latency is 2.5% of score
+        weight_internal_dns_latency = (
+            self.config.presentation.weight_internal_dns_latency
+        )  # Internal DNS latency is 2.5% of score
+        weight_external_dns_latency = (
+            self.config.presentation.weight_external_dns_latency
+        )  # External DNS latency is 2.5% of score
 
         weight_speedtest_download = self.config.presentation.weight_speedtest_download
         weight_speedtest_upload = self.config.presentation.weight_speedtest_upload
 
-        g_score_weight = GaugeMetricFamily(
-            self.metric_safe_name('weight'),
-            'Network Score Weights',
-            labels=['type'],
-        )
+        g_score_weight = GaugeMetricFamily(self.metric_safe_name('weight'), 'Network Score Weights', labels=['type'])
 
         g_score_weight.add_metric(['loss'], weight_loss)
         g_score_weight.add_metric(['latency'], weight_latency)
@@ -200,16 +198,18 @@ class PrometheusCollector(Collector):
         threshold_latency = self.config.presentation.threshold_latency  # 100ms latency threshold as max
         threshold_jitter = self.config.presentation.threshold_jitter  # 30ms jitter threshold as max
 
-        threshold_internal_dns_latency = self.config.presentation.threshold_internal_dns_latency  # 100ms internal dns latency threshold as max
-        threshold_external_dns_latency = self.config.presentation.threshold_external_dns_latency  # 100ms external dns latency threshold as max
+        threshold_internal_dns_latency = (
+            self.config.presentation.threshold_internal_dns_latency
+        )  # 100ms internal dns latency threshold as max
+        threshold_external_dns_latency = (
+            self.config.presentation.threshold_external_dns_latency
+        )  # 100ms external dns latency threshold as max
 
         threshold_speedtest_download = self.config.presentation.threshold_speedtest_download
         threshold_speedtest_upload = self.config.presentation.threshold_speedtest_upload
 
         g_score_thresholds = GaugeMetricFamily(
-            self.metric_safe_name('threshold'),
-            'Network Score Thresholds',
-            labels=['type'],
+            self.metric_safe_name('threshold'), 'Network Score Thresholds', labels=['type']
         )
 
         g_score_thresholds.add_metric(['loss'], threshold_loss)
@@ -251,14 +251,16 @@ class PrometheusCollector(Collector):
             cv_external_dns_latency = 0
         else:
             cv_external_dns_latency = (
-                1 if average_ext_dns_latency / threshold_external_dns_latency >= 1
+                1
+                if average_ext_dns_latency / threshold_external_dns_latency >= 1
                 else average_ext_dns_latency / threshold_external_dns_latency
             )
         if threshold_internal_dns_latency == 0:
             cv_internal_dns_latency = 0
         else:
             cv_internal_dns_latency = (
-                1 if average_local_dns_latency / threshold_internal_dns_latency >= 1
+                1
+                if average_local_dns_latency / threshold_internal_dns_latency >= 1
                 else average_local_dns_latency / threshold_internal_dns_latency
             )
 
@@ -276,24 +278,20 @@ class PrometheusCollector(Collector):
             download = stats_speedtest['download'] if stats_speedtest['download'] else 0
             if download >= 0:
                 cv_download = 1 - (
-                    1 if download / threshold_speedtest_download >= 1
-                    else (download / threshold_speedtest_download)
+                    1 if download / threshold_speedtest_download >= 1 else (download / threshold_speedtest_download)
                 )
 
             upload = stats_speedtest['upload'] if stats_speedtest['upload'] else 0
             if upload >= 0:
                 cv_upload = 1 - (
-                    1 if upload / threshold_speedtest_upload >= 1
-                    else (upload / threshold_speedtest_upload)
+                    1 if upload / threshold_speedtest_upload >= 1 else (upload / threshold_speedtest_upload)
                 )
 
         self.logger.info(f"\tSpeedtest Download Coefficient: {cv_download}")
         self.logger.info(f"\tSpeedtest Upload Coefficient: {cv_upload}")
 
         g_cv = GaugeMetricFamily(
-            self.metric_safe_name('coefficient'),
-            'The coefficient of variation (CV)',
-            labels=['type'],
+            self.metric_safe_name('coefficient'), 'The coefficient of variation (CV)', labels=['type']
         )
         g_cv.add_metric(['loss'], cv_loss)
         g_cv.add_metric(['latency'], cv_latency)
@@ -305,13 +303,13 @@ class PrometheusCollector(Collector):
 
         yield g_cv
 
-        loss_score = (1 - weight_loss * cv_loss)
-        latency_score = (1 - weight_latency * cv_latency)
-        jitter_score = (1 - weight_jitter * cv_jitter)
-        internal_dns_latency_score = (1 - weight_internal_dns_latency * cv_internal_dns_latency)
-        external_dns_latency_score = (1 - weight_external_dns_latency * cv_external_dns_latency)
-        speedtest_download_score = (1 - weight_speedtest_download * cv_download)
-        speedtest_upload_score = (1 - weight_speedtest_upload * cv_upload)
+        loss_score = 1 - (weight_loss * cv_loss)
+        latency_score = 1 - (weight_latency * cv_latency)
+        jitter_score = 1 - (weight_jitter * cv_jitter)
+        internal_dns_latency_score = 1 - (weight_internal_dns_latency * cv_internal_dns_latency)
+        external_dns_latency_score = 1 - (weight_external_dns_latency * cv_external_dns_latency)
+        speedtest_download_score = 1 - (weight_speedtest_download * cv_download)
+        speedtest_upload_score = 1 - (weight_speedtest_upload * cv_upload)
         speedtest_overall_score = (speedtest_download_score + speedtest_upload_score) / 2
 
         # Master scoring function
@@ -338,9 +336,7 @@ class PrometheusCollector(Collector):
         self.logger.info(f"Total Network Health Score: {overall_score * 100}%")
 
         i = GaugeMetricFamily(
-            self.metric_safe_name('health_score'),
-            'Overall internet health function',
-            labels=['type']
+            self.metric_safe_name('health_score'), 'Overall internet health function', labels=['type']
         )
         i.add_metric(['loss'], loss_score)
         i.add_metric(['latency'], latency_score)

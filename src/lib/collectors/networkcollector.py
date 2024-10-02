@@ -6,9 +6,9 @@ import traceback
 from threading import Thread
 import typing
 
+import dns.resolver
 from lib.collectors.basecollector import BaseCollector
 
-import dns.resolver
 
 class NetworkCollector(BaseCollector):  # Main network collection class
     def __init__(self, sites: list[str], count: int, dns_test_site: str, nameservers: list[tuple[str, str, str]]):
@@ -57,7 +57,9 @@ rtt min/avg/max/mdev = 11.487/12.915/14.475/1.095 ms"""
         try:
             self.logger.debug(ping)
             loss_regex = re.compile(r"(\d+)% packet loss", re.MULTILINE | re.DOTALL | re.IGNORECASE)
-            latency_regex = re.compile(r"^rtt\s.*?(\d+\.\d+)/(\d+\.\d+)/(\d+\.\d+)/(\d+\.\d+)\sms", re.MULTILINE | re.DOTALL | re.IGNORECASE)
+            latency_regex = re.compile(
+                r"^rtt\s.*?(\d+\.\d+)/(\d+\.\d+)/(\d+\.\d+)/(\d+\.\d+)\sms", re.MULTILINE | re.DOTALL | re.IGNORECASE
+            )
 
             loss_match = loss_regex.search(ping)
             latency_match = latency_regex.search(ping)
@@ -85,7 +87,6 @@ rtt min/avg/max/mdev = 11.487/12.915/14.475/1.095 ms"""
                 self.stats.append(netdata)
             else:
                 self.logger.warning(f"Invalid ping results for {site}")
-
 
         except Exception as e:
             self.logger.error(f"Error parsing ping output for {site}")

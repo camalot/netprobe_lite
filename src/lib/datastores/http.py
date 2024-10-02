@@ -2,6 +2,7 @@ import hashlib
 import json
 import requests
 import typing
+
 from config import HttpDataStoreConfiguration
 from lib.datastores.datastore import DataStore
 
@@ -17,7 +18,6 @@ class HttpDataStore(DataStore):
     def build_url(self, url: str, topic: str) -> str:
         return url.replace(":topic", topic)
 
-
     def read(self, topic: str) -> typing.Optional[dict]:
         # add topic to the params
         if self.config.read.params is None:
@@ -25,8 +25,10 @@ class HttpDataStore(DataStore):
 
         self.config.read.params["topic"] = topic
 
+        url: str = self.build_url(self.config.read.url, topic)
+        self.logger.debug(f"Reading data from {url}")
         response = requests.request(
-            url=self.build_url(self.config.read.url, topic),
+            url=url,
             method=self.config.read.method,
             headers=self.config.read.headers,
             cookies=self.config.read.cookies,
@@ -41,6 +43,7 @@ class HttpDataStore(DataStore):
         try:
             result = response.json()
             if result and "data" in result:
+                self.logger.debug(json.dumps(result["data"], indent=2))
                 return result["data"]
             else:
                 return None
@@ -52,6 +55,9 @@ class HttpDataStore(DataStore):
     def write(self, topic: str, data: dict, ttl: int) -> bool:
         checksum = self.checksum(data)
         payload = {"topic": topic, "data": data, "ttl": ttl, "checksum": checksum}
+        url: str = self.build_url(self.config.read.url, topic)
+        self.logger.debug(f"Writing data to {url}")
+
         response = requests.request(
             url=self.build_url(self.config.write.url, topic),
             method=self.config.write.method,
@@ -62,7 +68,7 @@ class HttpDataStore(DataStore):
             verify=self.config.verify_ssl,
             json=payload,
         )
-        self.logger.debug(json.dumps(payload, indent=2))
+        # self.logger.debug(json.dumps(payload, indent=2))
         try:
             result = response.json()
             # response object: { topic, success, checksum, ttl }

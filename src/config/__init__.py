@@ -1,15 +1,13 @@
-import json
 import logging
 import os
 import re
 import typing
 
+import yaml
+from dotenv import find_dotenv, load_dotenv
 from lib.enums.DataStoreTypes import DataStoreTypes
 from lib.enums.ConfigurationDefaults import ConfigurationDefaults
 from lib.enums.EnvVars import EnvVars
-
-import yaml
-from dotenv import find_dotenv, load_dotenv
 
 # Load configs from env
 try:  # Try to load env vars from file, if fails pass
@@ -45,10 +43,18 @@ class MqttDataStoreConfiguration:
 
         dsc = DataStoreConfiguration()
         np_type = dsc.netprobe.get('type', None)
-        np_topic = dsc.netprobe.get('topic', ConfigurationDefaults.DATASTORE_TOPIC_PROBE) if np_type == DataStoreTypes.MQTT else None
+        np_topic = (
+            dsc.netprobe.get('topic', ConfigurationDefaults.DATASTORE_TOPIC_PROBE)
+            if np_type == DataStoreTypes.MQTT
+            else None
+        )
 
         st_type = dsc.speedtest.get('type', None)
-        st_topic = dsc.speedtest.get('topic', ConfigurationDefaults.DATASTORE_TOPIC_SPEEDTEST) if st_type == DataStoreTypes.MQTT else None
+        st_topic = (
+            dsc.speedtest.get('topic', ConfigurationDefaults.DATASTORE_TOPIC_SPEEDTEST)
+            if st_type == DataStoreTypes.MQTT
+            else None
+        )
 
         self.topics = []
         if np_topic:
@@ -87,12 +93,18 @@ class SpeedTestConfiguration:
     def __init__(self):
         self.enabled = EnvVars.SPEEDTEST_ENABLED.boolean(ConfigurationDefaults.SPEEDTEST_ENABLED)
         self.interval = EnvVars.SPEEDTEST_INTERVAL.integer(ConfigurationDefaults.SPEEDTEST_INTERVAL)
-        self.weight_rebalance = EnvVars.SPEEDTEST_WEIGHT_REBALANCE.boolean(ConfigurationDefaults.SPEEDTEST_WEIGHT_REBALANCE)
+        self.weight_rebalance = EnvVars.SPEEDTEST_WEIGHT_REBALANCE.boolean(
+            ConfigurationDefaults.SPEEDTEST_WEIGHT_REBALANCE
+        )
         self.enforce_weight = EnvVars.SPEEDTEST_WEIGHT_ENFORCE.boolean(ConfigurationDefaults.SPEEDTEST_WEIGHT_ENFORCE)
         self.download_weight = EnvVars.WEIGHT_SPEEDTEST_DOWNLOAD.float(ConfigurationDefaults.WEIGHT_SPEEDTEST_DOWNLOAD)
         self.upload_weight = EnvVars.WEIGHT_SPEEDTEST_UPLOAD.float(ConfigurationDefaults.WEIGHT_SPEEDTEST_UPLOAD)
-        self.threshold_download = EnvVars.THRESHOLD_SPEEDTEST_DOWNLOAD.float(ConfigurationDefaults.THRESHOLD_SPEEDTEST_DOWNLOAD)
-        self.threshold_upload = EnvVars.THRESHOLD_SPEEDTEST_UPLOAD.float(ConfigurationDefaults.THRESHOLD_SPEEDTEST_UPLOAD)
+        self.threshold_download = EnvVars.THRESHOLD_SPEEDTEST_DOWNLOAD.float(
+            ConfigurationDefaults.THRESHOLD_SPEEDTEST_DOWNLOAD
+        )
+        self.threshold_upload = EnvVars.THRESHOLD_SPEEDTEST_UPLOAD.float(
+            ConfigurationDefaults.THRESHOLD_SPEEDTEST_UPLOAD
+        )
 
         self.enforce_or_enabled = self.enforce_weight or self.enabled
 
@@ -121,6 +133,7 @@ class DataStoreConfiguration:
     def merge(self, config: dict):
         self.__dict__.update(config)
 
+
 class HttpRequestConfiguration:
     def __init__(self, *args, **kwargs):
         self.url = kwargs.get('url', None)
@@ -133,6 +146,7 @@ class HttpRequestConfiguration:
 
     def merge(self, config: dict):
         self.__dict__.update(config)
+
 
 class HttpDataStoreConfiguration:
     def __init__(self):
@@ -167,9 +181,13 @@ class NetProbeConfiguration:
         self.count = EnvVars.PROBE_COUNT.integer(ConfigurationDefaults.PROBE_COUNT)
         self.sites = EnvVars.PROBE_SITES.list(',', ConfigurationDefaults.PROBE_SITES)
         self.dns_test_site = EnvVars.PROBE_DNS_TEST_SITE.string(ConfigurationDefaults.PROBE_DNS_TEST_SITE)
-        self.device_id = EnvVars.PROBE_DEVICE_ID.string(
-            ConfigurationDefaults.PROBE_DEVICE_ID
-        ).replace(' ', '_').replace('.', '_').replace('-', '_').lower()
+        self.device_id = (
+            EnvVars.PROBE_DEVICE_ID.string(ConfigurationDefaults.PROBE_DEVICE_ID)
+            .replace(' ', '_')
+            .replace('.', '_')
+            .replace('-', '_')
+            .lower()
+        )
 
         # get all environment variables that match the pattern DNS_NAMESERVER_\d{1,}
         # and create a list of tuples with the nameserver and the IP

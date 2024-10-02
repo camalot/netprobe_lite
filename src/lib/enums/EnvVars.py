@@ -111,7 +111,10 @@ class EnvVars(Enum):
     ) -> typing.Optional[typing.Dict[str, str]]:
         if default:
             # split and trim the values
-            return {x.split("=")[0].strip(): x.split("=")[1].strip() for x in self.expand(separator.join(default)).split(separator)}
+            return {
+                x.split("=")[0].strip(): x.split("=")[1].strip()
+                for x in self.expand(separator.join(default)).split(separator)
+            }
         return None
 
     @staticmethod

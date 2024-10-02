@@ -1,5 +1,7 @@
 import typing
+
 from lib.datastores.datastore import DataStore
+
 
 class NullDataStore(DataStore):
     def __init__(self):

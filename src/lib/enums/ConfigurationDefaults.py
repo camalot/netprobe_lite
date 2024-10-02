@@ -1,5 +1,5 @@
 
-class ConfigurationDefaults():
+class ConfigurationDefaults:
     CONFIG_FILE_PATH = "/app/config/netprobe.yaml"
 
     DATASTORE_TOPIC_SPEEDTEST = "netprobe/speedtest"
@@ -41,12 +41,7 @@ class ConfigurationDefaults():
     PROBE_ENABLED = True
     PROBE_COUNT = 50
     PROBE_INTERVAL = 120
-    PROBE_SITES = [
-        "google.com",
-        "facebook.com",
-        "twitter.com",
-        "youtube.com",
-    ]
+    PROBE_SITES = ["google.com", "facebook.com", "twitter.com", "youtube.com"]
     PROBE_DNS_TEST_SITE = "google.com"
     PROBE_DEVICE_ID = "netprobe"
 

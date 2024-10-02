@@ -1,5 +1,8 @@
 import typing
-from helpers.logging import setup_logging
+
+from lib.logging import setup_logging
+
+
 class DataStore:
     def __init__(self):
         self.logger = setup_logging(self.__class__.__name__)

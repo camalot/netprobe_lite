@@ -2,8 +2,10 @@ import json
 import os
 import time
 import typing
-from lib.datastores.datastore import DataStore
+
 from config import FileDataStoreConfiguration
+from lib.datastores.datastore import DataStore
+
 
 class FileDataStore(DataStore):
     def __init__(self):
@@ -48,6 +50,7 @@ class FileDataStore(DataStore):
             expired = diff > ttl
 
         if expired:
+            self.logger.debug(f"File '{topic}' has expired. Removing it.")
             # remove the file and the ttl file
             os.remove(topic)
             os.remove(ttl_file)

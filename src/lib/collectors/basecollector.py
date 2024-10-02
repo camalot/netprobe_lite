@@ -1,6 +1,6 @@
 import typing
 
-from helpers.logging import setup_logging
+from lib.logging import setup_logging
 
 
 class BaseCollector:

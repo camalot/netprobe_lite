@@ -1,10 +1,12 @@
 import json
 import time
 import typing
-from config import MqttDataStoreConfiguration
-from lib.datastores.datastore import DataStore
+
 import paho.mqtt.client as mqtt
 import paho.mqtt.publish as publish
+from config import MqttDataStoreConfiguration
+from lib.datastores.datastore import DataStore
+
 
 class MqttDataStore(DataStore):
     def __init__(self):
@@ -106,7 +108,7 @@ class MqttDataStore(DataStore):
             self.logger.debug(f"Topic '{topic}' not found")
         return None
 
-    def write(self, topic: str, data: typing.Union[dict,str], ttl: int) -> bool:
+    def write(self, topic: str, data: typing.Union[dict, str], ttl: int) -> bool:
         try:
             self.logger.debug(f"Publishing to topic '{topic}'")
             if isinstance(data, dict):

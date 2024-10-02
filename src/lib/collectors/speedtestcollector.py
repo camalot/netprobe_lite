@@ -21,7 +21,8 @@ class SpeedTestCollector(BaseCollector):  # Speed test class
         except Exception as e:
             self.logger.error("Error fetching speedtest results")
             self.logger.error(e)
-            return  None
+            return
+        None
 
     def collect(self) -> typing.Optional[dict]:
         results = self._fetch()

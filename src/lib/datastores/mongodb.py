@@ -1,8 +1,9 @@
 import typing
 
-from lib.datastores.datastore import DataStore
 from config import MongoDBDataStoreConfiguration
+from lib.datastores.datastore import DataStore
 from pymongo import MongoClient
+
 
 class MongoDBDatastore(DataStore):
     def __init__(self):
@@ -15,14 +16,14 @@ class MongoDBDatastore(DataStore):
 
     def write(self, topic: str, data: dict, ttl: int) -> bool:
         try:
-            result = self.collection.update_one({ "id": topic }, { "$set": { "data": data, "ttl": ttl } }, upsert=True)
+            result = self.collection.update_one({"id": topic}, {"$set": {"data": data, "ttl": ttl}}, upsert=True)
             return True if result else False
         except Exception as e:
             self.logger.error(f"Error writing to MongoDB: {e}")
             return False
 
     def read(self, topic: str) -> typing.Any:
-        result = self.collection.find_one({ "id": topic })
+        result = self.collection.find_one({"id": topic})
         if result:
             return result["data"]
         else:

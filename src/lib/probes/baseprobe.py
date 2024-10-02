@@ -2,10 +2,11 @@ import signal
 import time
 import traceback
 
-from helpers.logging import setup_logging
-from lib.datastores.factory import DatastoreFactory
-from lib.probes.BaseProbeConfiguration import BaseProbeConfiguration
 from lib.collectors.basecollector import BaseCollector
+from lib.datastores.factory import DatastoreFactory
+from lib.logging import setup_logging
+from lib.probes.BaseProbeConfiguration import BaseProbeConfiguration
+
 
 class BaseProbe:
     def __init__(self, configuration: BaseProbeConfiguration, collector: BaseCollector):
@@ -28,7 +29,6 @@ class BaseProbe:
         self.logger.info(f"PROBE ENABLED: {self.config.enabled}")
         self.logger.info(f"PROBE INTERVAL: {self.config.interval}s")
 
-
     def sighandler(self, signum, frame):
         self.logger.warning(f'<SIGTERM received>')
         self._exit_loop = True
@@ -39,6 +39,7 @@ class BaseProbe:
             return
 
         while not self._exit_loop:
+            stats = None
             try:
                 self.logger.debug(f"Running probe")
                 stats = self.collector.collect()
@@ -46,14 +47,16 @@ class BaseProbe:
                 self.logger.error(f"Error executing probe")
                 self.logger.error(e)
                 self.logger.error(traceback.format_exc())
-                continue
             # Connect to Datastore
             try:
-                data_store = DatastoreFactory().create(self.config.datastore)
-                cache_interval = self.interval + 15  # Set the cache TTL slightly longer than the probe interval
-                topic = self.config.topic
-                data_store.write(topic, stats, cache_interval)
-                self.logger.debug("Stats successfully written to data store")
+                if stats is not None:
+                    data_store = DatastoreFactory().create(self.config.datastore)
+                    cache_interval = self.interval + 15  # Set the cache TTL slightly longer than the probe interval
+                    topic = self.config.topic
+                    data_store.write(topic, stats, cache_interval)
+                    self.logger.debug("Stats successfully written to data store")
+                else:
+                    self.logger.debug("No stats to write to data store")
             except Exception as e:
                 self.logger.error("Could not connect to data store")
                 self.logger.error(e)

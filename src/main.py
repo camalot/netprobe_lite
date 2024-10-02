@@ -4,10 +4,11 @@ from concurrent.futures import ProcessPoolExecutor
 
 # from bot.lib.colors import Colors
 from dotenv import find_dotenv, load_dotenv
-from helpers.logging import setup_logging
+from lib.logging import setup_logging
 from lib.probes.network import NetworkProbe
 from lib.probes.speedtest import SpeedTestProbe
 from lib.presentations.prometheus import PrometheusPresentation
+
 load_dotenv(find_dotenv())
 
 logger = setup_logging()

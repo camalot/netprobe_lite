@@ -3,7 +3,7 @@
 import json
 import typing
 
-import redis
+from redis import Redis
 from config import RedisDataStoreConfiguration
 from lib.datastores.datastore import DataStore
 
@@ -23,9 +23,9 @@ class RedisDataStore(DataStore):
         self.db = self.config.db
         # Connect to Redis
         if self.password:
-            self.r = redis.Redis(host=self.host, port=int(self.port), db=int(self.db), password=self.password)
+            self.r = Redis(host=self.host, port=int(self.port), db=int(self.db), password=self.password)
         else:
-            self.r = redis.Redis(host=self.host, port=int(self.port), db=int(self.db))
+            self.r = Redis(host=self.host, port=int(self.port), db=int(self.db))
         self.logger.debug(f"Initializing Redis Data Store with host {self.host} and port {self.port}")
 
     def read(self, topic: str) -> typing.Any:  # Read data from Redis

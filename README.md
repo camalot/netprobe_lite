@@ -33,18 +33,20 @@ home network. An old PC with Linux installed is a great option for this.
 
 The collection of the metrics is stored in a Datastore to cache for use. There are multiple datastores available:
 
+- `NONE`: No cache
 - `FILE`: Stores cache in a local (or mounted) volume.
 - `REDIS`: Stores cache in Redis
 - `MONGODB`: Stores cache in MongoDB database collection.
 - `MQTT`: Stores cache in MQTT Broker.
+- `HTTP`: Performs a `GET` to retrieve, and a `POST` to save the data
 
 ### Environment Variables
 
-TODO SINCE THESE ARE IN PROGRESS
+Todo: describe a good way to define all the environment variables
 
 ### Configuration via file
 
-TODO
+Todo: Not currently supported.
 
 ## Installation
 
