@@ -268,9 +268,7 @@ class NetProbeConfiguration:
         self.interval = EnvVars.PROBE_INTERVAL.integer(
             YamlVars.PROBE_INTERVAL.integer(base, ConfigurationDefaults.PROBE_INTERVAL)
         )
-        self.count = EnvVars.PROBE_COUNT.integer(
-            YamlVars.PROBE_COUNT.integer(base, ConfigurationDefaults.PROBE_COUNT)
-        )
+        self.count = EnvVars.PROBE_COUNT.integer(YamlVars.PROBE_COUNT.integer(base, ConfigurationDefaults.PROBE_COUNT))
 
         sites = EnvVars.PROBE_SITES.list(',', list())
         if not sites or len(sites) == 0:
@@ -432,7 +430,9 @@ class PresentationConfiguration:
             ]
         )
 
-        self.threshold_loss = EnvVars.THRESHOLD_LOSS.integer(YamlVars.THRESHOLD_LOSS.integer(base, ConfigurationDefaults.THRESHOLD_LOSS))
+        self.threshold_loss = EnvVars.THRESHOLD_LOSS.integer(
+            YamlVars.THRESHOLD_LOSS.integer(base, ConfigurationDefaults.THRESHOLD_LOSS)
+        )
         self.threshold_latency = EnvVars.THRESHOLD_LATENCY.integer(
             YamlVars.THRESHOLD_LATENCY.integer(base, ConfigurationDefaults.THRESHOLD_LATENCY)
         )
