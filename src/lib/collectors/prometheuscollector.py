@@ -152,7 +152,7 @@ class PrometheusCollector(Collector):
             )
 
             for key in stats_speedtest.keys():
-                if stats_speedtest[key]:
+                if stats_speedtest[key] and isinstance(stats_speedtest[key], (int, float)):
                     s.add_metric([key], stats_speedtest[key])
 
             yield s
