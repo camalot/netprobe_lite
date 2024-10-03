@@ -1,6 +1,6 @@
 import traceback
 
-from config import Configuration
+from config import ApplicationConfiguration
 from lib.datastores.factory import DatastoreFactory
 from lib.enums.ConfigurationDefaults import ConfigurationDefaults
 from lib.logging import setup_logging
@@ -11,8 +11,8 @@ from prometheus_client.registry import Collector
 class PrometheusCollector(Collector):
     def __init__(self):
         # Namespace for the metrics
-        self.logger = setup_logging(self.__class__.__name__)
-        self.config = Configuration()
+        self.config = ApplicationConfiguration
+        self.logger = setup_logging(self.__class__.__name__, self.config.logging)
 
         self.namespace = self.safe_name(self.config.presentation.device_id)
         pass
@@ -29,7 +29,7 @@ class PrometheusCollector(Collector):
         speedtest_data_store = None
         try:
             probe_data_store = DatastoreFactory().create(
-                self.config.datastore.netprobe.get('type', ConfigurationDefaults.DATASTORE_TYPE_PROBE)
+                self.config.datastore.netprobe.get('type', ConfigurationDefaults.DATASTORE_PROBE_TYPE)
             )
         except Exception as e:
             self.logger.error('Could not connect to data store')
@@ -38,7 +38,7 @@ class PrometheusCollector(Collector):
 
         try:
             speedtest_data_store = DatastoreFactory().create(
-                self.config.datastore.speedtest.get('type', ConfigurationDefaults.DATASTORE_TYPE_SPEEDTEST)
+                self.config.datastore.speedtest.get('type', ConfigurationDefaults.DATASTORE_SPEEDTEST_TYPE)
             )
         except Exception as e:
             self.logger.error('Could not connect to data store')
@@ -51,13 +51,13 @@ class PrometheusCollector(Collector):
 
         # Retrieve Netprobe data
         results_netprobe = probe_data_store.read(
-            self.config.datastore.netprobe.get('topic', ConfigurationDefaults.DATASTORE_TOPIC_PROBE)
+            self.config.datastore.netprobe.get('topic', ConfigurationDefaults.DATASTORE_PROBE_TOPIC)
         )
 
         stats_speedtest = None
         if speedtest_data_store:
             stats_speedtest = speedtest_data_store.read(
-                self.config.datastore.speedtest.get('topic', ConfigurationDefaults.DATASTORE_TOPIC_SPEEDTEST)
+                self.config.datastore.speedtest.get('topic', ConfigurationDefaults.DATASTORE_SPEEDTEST_TOPIC)
             )
 
         if results_netprobe:

@@ -1,13 +1,9 @@
 ---
-netprobe:
+probe:
+  enabled: yes
+  interval: 30
+  count: 50
   device_id: "netprobe"
-  logging:
-    level: "INFO"
-    format: "%(asctime)s %(levelname)s %(message)s"
-    dateFormat: "%Y-%m-%d %H:%M:%S"
-  probe:
-    interval: 30
-    count: 50
   sites:
     - name: Google
       url: https://google.com
@@ -31,41 +27,88 @@ netprobe:
     local:
       - name: Router
         ip: '192.168.2.1'
-      - name: Bataal
-        ip: '192.168.2.7'
-      - name: Congus
-        ip: '192.168.2.4'
-  health:
-    # Health Score Weights
-    # - These are the relative weights used to calculate your 'Internet Quality Score', they can be modified but must add up to 1.0
-    weights:
-      loss: 0.6 # Loss is 60% of score
-      latency: 0.15 # Latency is 15% of score
-      jitter: 0.2 # Jitter is 20% of score
-      external_dns_latency: 0.05 # DNS latency is 5% of score
-      internal_dns_latency: 0.0 # Internal DNS latency is 0% of score
+      # - name: Bataal
+      #   ip: '192.168.2.7'
+      # - name: Congus
+      #   ip: '192.168.2.4'
 
-    # Health Score Thresholds
-    # - These threshold values are used in the calculation of your 'Internet Quality Score', they can be modified if required
-    thresholds:
-      loss: 5 # 5% loss threshold as max
-      latency: 100 # 100ms latency threshold as max
-      jitter: 30 # 30ms jitter threshold as max
-      dns_latency: 100 # 100ms dns latency threshold as max
-# Speetest configuration (be very careful when running on a metered connection!)
-# - This configuration is for setting up a "speed test" or rather a test of your internet bandwidth.
-# - In order to test your upload and download bandwidth we use speedtest.net as source. So your client will connect there and upload and download some data.
-# - That also means that a random server is selected for the test (usually the nearest one)
-# - Setting the SPEEDTEST_INTERVAL too agressively will cause speedtest.net to block your requests, recommend 15 minutes (900 seconds) and above
-speedtest:
-  enabled: no # set this to "True" to enable speed test function
-  interval: 937 # interval on which the speedtest will run, in seconds - note using a prime number helps reduce the number of collisions between netprobe and speed tests
+datastore:
+  probe:
+    type: FILE
+    topic: netprobe/probe
+  speedtest:
+    type: MQTT
+    topic: prometheus/internet
+
+  mqtt:
+    host: 'localhost'
+    port: 1883
+    username: ''
+    password: ''
+    # client_id: 'netprobe'
+    # keepalive: 60
+    # qos: 0
+    # retain: no
+  file:
+    path: /data/cache
+  redis:
+    host: 'localhost'
+    port: 6379
+    db: 0
+    password: ''
+  mongodb:
+    url: 'mongodb://localhost:27017/admin'
+    db: 'netprobe'
+    collection: 'netprobe'
+  http:
+    verify_ssl: no
+    read:
+      url: 'http://localhost:8080/netprobe/data/:topic'
+      method: 'GET'
+      timeout: 5
+      headers: {}
+      cookies: {}
+      params: {}
+      auth: {}
+    write:
+      url: 'http://localhost:8080/netprobe/data/:topic'
+      method: 'POST'
+      timeout: 5
+      headers: {}
+      cookies: {}
+      params: {}
+      auth: {}
+
+logging:
+  level: "DEBUG"
+  format: "%(asctime)s [%(levelname)s] [%(name)s] %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
 
 presentation:
   port: 5000
   interface: '0.0.0.0'
 
-redis:
-  host: netprobe-redis
-  port: 6379
-  password: ''
+speedtest:
+  enabled: no
+  interval: 937
+
+health:
+  weights:
+    loss: 0.4
+    latency: 0.15
+    jitter: 0.2
+    external_dns_latency: 0.01
+    internal_dns_latency: 0.4
+    speedtest_download: 0.1
+    speedtest_upload: 0.1
+
+    speedtest_rebalance: no
+    speedtest_enforce: yes
+  thresholds:
+    loss: 5
+    latency: 100
+    jitter: 30
+    external_dns_latency: 100
+    internal_dns_latency: 100
+    speedtest_download: 200
+    speedtest_upload: 200

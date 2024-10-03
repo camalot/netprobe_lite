@@ -1,4 +1,4 @@
-from config import Configuration
+from config import ApplicationConfiguration
 from lib.collectors.networkcollector import NetworkCollector
 from lib.enums.ConfigurationDefaults import ConfigurationDefaults
 from lib.probes.baseprobe import BaseProbe, BaseProbeConfiguration
@@ -6,7 +6,7 @@ from lib.probes.baseprobe import BaseProbe, BaseProbeConfiguration
 
 class NetworkProbe(BaseProbe):
     def __init__(self):
-        self.app_config = Configuration()
+        self.app_config = ApplicationConfiguration
         probe_count = self.app_config.probe.count
         sites = self.app_config.probe.sites
         dns_test_site = self.app_config.probe.dns_test_site
@@ -17,8 +17,8 @@ class NetworkProbe(BaseProbe):
             BaseProbeConfiguration(
                 enabled=self.app_config.probe.enabled,
                 interval=self.app_config.probe.interval,
-                topic=self.app_config.datastore.netprobe.get('topic', ConfigurationDefaults.DATASTORE_TOPIC_PROBE),
-                datastore=self.app_config.datastore.netprobe.get('type', ConfigurationDefaults.DATASTORE_TYPE_PROBE),
+                topic=self.app_config.datastore.netprobe.get('topic', ConfigurationDefaults.DATASTORE_PROBE_TOPIC),
+                datastore=self.app_config.datastore.netprobe.get('type', ConfigurationDefaults.DATASTORE_PROBE_TYPE),
             ),
             NetworkCollector(sites, probe_count, dns_test_site, nameservers),
         )
@@ -90,7 +90,7 @@ class NetworkProbe(BaseProbe):
     #         try:
     #             data_store = DatastoreFactory().create(self.config.datastore.netprobe.get('type', DataStoreTypes.NONE))
     #             cache_interval = self.interval + 15  # Set the cache TTL slightly longer than the probe interval
-    #             topic = self.config.datastore.netprobe.get('topic', ConfigurationDefaults.DATASTORE_TOPIC_PROBE)
+    #             topic = self.config.datastore.netprobe.get('topic', ConfigurationDefaults.DATASTORE_PROBE_TOPIC)
     #             data_store.write(topic, stats, cache_interval)
     #             self.logger.debug("Stats successfully written to data store")
     #         except Exception as e:

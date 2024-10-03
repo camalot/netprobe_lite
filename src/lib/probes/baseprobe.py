@@ -2,6 +2,7 @@ import signal
 import time
 import traceback
 
+from config import ApplicationConfiguration
 from lib.collectors.basecollector import BaseCollector
 from lib.datastores.factory import DatastoreFactory
 from lib.logging import setup_logging
@@ -10,7 +11,8 @@ from lib.probes.BaseProbeConfiguration import BaseProbeConfiguration
 
 class BaseProbe:
     def __init__(self, configuration: BaseProbeConfiguration, collector: BaseCollector):
-        self.logger = setup_logging(self.__class__.__name__)
+        config = ApplicationConfiguration
+        self.logger = setup_logging(self.__class__.__name__, config.logging)
         self.config = configuration
         self.enabled = self.config.enabled
         self.interval = self.config.interval

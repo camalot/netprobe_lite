@@ -1,6 +1,6 @@
 import typing
 
-from config import MongoDBDataStoreConfiguration
+from config import ApplicationConfiguration
 from lib.datastores.datastore import DataStore
 from pymongo import MongoClient
 
@@ -8,7 +8,8 @@ from pymongo import MongoClient
 class MongoDBDatastore(DataStore):
     def __init__(self):
         super().__init__()
-        self.config = MongoDBDataStoreConfiguration()
+        self.base_config = ApplicationConfiguration
+        self.config = self.base_config.datastore.mongodb
         self.client = MongoClient(self.config.url)
         self.db = self.client[self.config.db]
         self.collection = self.db[self.config.collection]

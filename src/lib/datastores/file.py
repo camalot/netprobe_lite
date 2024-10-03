@@ -3,15 +3,15 @@ import os
 import time
 import typing
 
-from config import FileDataStoreConfiguration
+from config import ApplicationConfiguration
 from lib.datastores.datastore import DataStore
 
 
 class FileDataStore(DataStore):
     def __init__(self):
         super().__init__()
-        self.config = FileDataStoreConfiguration()
-        data_path = self.config.path
+        self.config = ApplicationConfiguration
+        data_path = self.config.datastore.file.path
         # if data_path is empty, set it to the current directory
         if not data_path:
             data_path = os.getcwd()

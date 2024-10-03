@@ -3,14 +3,15 @@ import json
 import typing
 
 import requests
-from config import HttpDataStoreConfiguration
+from config import ApplicationConfiguration
 from lib.datastores.datastore import DataStore
 
 
 class HttpDataStore(DataStore):
     def __init__(self):
         super().__init__()
-        self.config = HttpDataStoreConfiguration()
+        self.base_config = ApplicationConfiguration
+        self.config = self.base_config.datastore.http
 
     def checksum(self, data: dict) -> str:
         # calculate md5 checksum of the data

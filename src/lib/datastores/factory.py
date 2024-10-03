@@ -1,3 +1,4 @@
+from config import ApplicationConfiguration
 from lib.enums.DataStoreTypes import DataStoreTypes
 from lib.logging import setup_logging
 
@@ -7,7 +8,8 @@ class DatastoreFactory:
         pass
 
     def create(self, type: DataStoreTypes):
-        logger = setup_logging(self.__class__.__name__)
+        config = ApplicationConfiguration
+        logger = setup_logging(self.__class__.__name__, config.logging)
         if type == DataStoreTypes.REDIS:
             logger.debug("Creating Redis Datastore")
             from lib.datastores.redis import RedisDataStore

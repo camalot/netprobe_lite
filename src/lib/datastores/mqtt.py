@@ -3,7 +3,7 @@ import time
 import typing
 
 import paho.mqtt.client as mqtt
-from config import MqttDataStoreConfiguration
+from config import ApplicationConfiguration
 from lib.datastores.datastore import DataStore
 
 
@@ -12,8 +12,11 @@ class MqttDataStore(DataStore):
         super().__init__()
         self.messages = {}
 
-        self.config = MqttDataStoreConfiguration()
-        self.logger.debug(f"Initializing MQTT Data Store with broker {self.config.host}:{self.config.port}")
+        self.base_config = ApplicationConfiguration
+        self.config = self.base_config.datastore.mqtt
+        self.logger.debug(
+            f"Initializing MQTT Data Store with broker {self.config.host}:{self.config.port}"
+        )
         self.client = self.create()
         self.client.loop_start()
         count = 0

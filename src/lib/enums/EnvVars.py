@@ -4,10 +4,12 @@ from enum import Enum
 
 
 class EnvVars(Enum):
+    CONFIG_FILE = "NP_CONFIG_FILE"
+
     DATASTORE_PROBE_TYPE = "NP_DATASTORE_PROBE_TYPE"
     DATASTORE_SPEEDTEST_TYPE = "NP_DATASTORE_SPEEDTEST_TYPE"
-    DATASTORE_TOPIC_PROBE = "NP_DATASTORE_TOPIC_NETPROBE"
-    DATASTORE_TOPIC_SPEEDTEST = "NP_DATASTORE_TOPIC_SPEEDTEST"
+    DATASTORE_PROBE_TOPIC = "NP_DATASTORE_NETPROBE_TOPIC"
+    DATASTORE_SPEEDTEST_TOPIC = "NP_DATASTOR_SPEEDTESTE_TOPIC"
 
     FILE_DATASTORE_PATH = "NP_FILE_DATASTORE_PATH"
 
@@ -29,6 +31,7 @@ class EnvVars(Enum):
 
     LOG_LEVEL = "NP_LOG_LEVEL"
     LOG_FORMAT = "NP_LOG_FORMAT"
+    LOG_DATEFORMAT = "NP_LOG_DATE_FORMAT"
 
     MQTT_HOST = "NP_MQTT_HOST"
     MQTT_PORT = "NP_MQTT_PORT"
@@ -79,6 +82,7 @@ class EnvVars(Enum):
 
     def expand(self, default: typing.Any = None) -> str:
         result = EnvVars.unquote(os.getenv(self.value, default))
+
         return result
 
     def boolean(self, default: bool) -> bool:
@@ -117,6 +121,12 @@ class EnvVars(Enum):
                 for x in self.expand(separator.join(default)).split(separator)
             }
         return None
+
+    def file(self, default: str = '') -> str:
+        fp = self.string(default)
+        if not os.path.exists(fp) and default and not os.path.exists(default):
+            raise FileNotFoundError(f"File '{fp}' not found")
+        return fp
 
     @staticmethod
     def unquote(value: typing.Optional[str]) -> typing.Any:

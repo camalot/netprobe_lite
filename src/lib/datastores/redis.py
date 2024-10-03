@@ -1,7 +1,7 @@
 import json
 import typing
 
-from config import RedisDataStoreConfiguration
+from config import ApplicationConfiguration
 from lib.datastores.datastore import DataStore
 from redis import Redis
 
@@ -9,7 +9,8 @@ from redis import Redis
 class RedisDataStore(DataStore):
     def __init__(self):
         super().__init__()
-        self.config = RedisDataStoreConfiguration()
+        self.base_config = ApplicationConfiguration
+        self.config = self.base_config.datastore.redis
         # Load global variables
         self.host = self.config.host
         self.port = self.config.port

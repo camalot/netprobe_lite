@@ -1,10 +1,10 @@
 class ConfigurationDefaults:
     CONFIG_FILE_PATH = "/app/config/netprobe.yaml"
 
-    DATASTORE_TOPIC_SPEEDTEST = "netprobe/speedtest"
-    DATASTORE_TOPIC_PROBE = "netprobe/probe"
-    DATASTORE_TYPE_SPEEDTEST = "FILE"
-    DATASTORE_TYPE_PROBE = "FILE"
+    DATASTORE_SPEEDTEST_TOPIC = "netprobe/speedtest"
+    DATASTORE_PROBE_TOPIC = "netprobe/probe"
+    DATASTORE_SPEEDTEST_TYPE = "FILE"
+    DATASTORE_PROBE_TYPE = "FILE"
 
     FILE_DATASTORE_PATH = "/data"
 
@@ -26,6 +26,7 @@ class ConfigurationDefaults:
 
     LOG_LEVEL = "INFO"
     LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    LOG_DATEFORMAT = "%Y-%m-%d %H:%M:%S"
 
     MONGODB_URL = "mongodb://localhost:27017/admin"
     MONGODB_DB = "netprobe"
