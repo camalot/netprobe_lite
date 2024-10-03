@@ -6,7 +6,7 @@ from config import LoggingConfiguration
 from lib.logging.ColorFormatter import ColorFormatter
 
 
-def setup_logging(name: typing.Optional[str] = None, config: LoggingConfiguration = None) -> logging.Logger: # type: ignore
+def setup_logging(name: typing.Optional[str] = None, config: LoggingConfiguration = None) -> logging.Logger:  # type: ignore
     logger = logging.getLogger("netprobe" if name is None else name)
 
     if config is None:

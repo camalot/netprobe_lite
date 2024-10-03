@@ -44,9 +44,27 @@ The collection of the metrics is stored in a Datastore to cache for use. There a
 
 Todo: describe a good way to define all the environment variables
 
+> [!NOTE]
+> The order of importance for configuration values is as follows:
+>
+> 1. Environment Variable Value
+> 1. Configuration File Value
+> 1. Default Value
+
 ### Configuration via file
 
-Todo: Not currently supported.
+A configuration file can be used. The default location is `/app/config/netprobe.yaml`.
+
+See [sample.netprobe.yaml](sample.netprobe.yaml) file for example configuration.
+
+`NP_CONFIG_FILE` environment variable can be set to change the path of the configuration file.
+
+> [!NOTE]
+> The order of importance for configuration values is as follows:
+>
+> 1. Environment Variable Value
+> 1. Configuration File Value
+> 1. Default Value
 
 ## Installation
 
@@ -82,6 +100,16 @@ NP_DNS_NAMESERVER_4_IP="8.8.8.8" # Replace this IP with the DNS server you use a
 
 Change 8.8.8.8 to the IP of the DNS server you use, then restart the application
 (docker compose down / docker compose up)
+
+## DASHBOARD
+
+The [dashboards](dashboard) path contains both a dashboard that makes use of the speed test in netprobe_lite and using speedtest exporter.
+
+![Dashboard 1](assets/dashboard1.png)
+![Dashboard 2](assets/dashboard2.png)
+![Dashboard 3](assets/dashboard3.png)
+![Dashboard 4](assets/dashboard4.png)
+![Dashboard 5](assets/dashboard5.png)
 
 ## License
 

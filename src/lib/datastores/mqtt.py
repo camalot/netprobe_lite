@@ -14,9 +14,7 @@ class MqttDataStore(DataStore):
 
         self.base_config = ApplicationConfiguration
         self.config = self.base_config.datastore.mqtt
-        self.logger.debug(
-            f"Initializing MQTT Data Store with broker {self.config.host}:{self.config.port}"
-        )
+        self.logger.debug(f"Initializing MQTT Data Store with broker {self.config.host}:{self.config.port}")
         self.client = self.create()
         self.client.loop_start()
         count = 0

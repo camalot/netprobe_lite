@@ -84,12 +84,12 @@ class YamlVars(Enum):
         try:
             # from yaml use the value of the key to query to expand the data value
             expression = YamlVars.__engine__(self.value)
-            result = expression.evaluate(data=data) # type: ignore
+            result = expression.evaluate(data=data)  # type: ignore
             if result is None:
                 print(f"Could not find value for {self.value}, using default value {default}")
                 return default
             return result
-        except KeyError as ke:
+        except KeyError:
             print(f"Could not find value for {self.value}, using default value {default}")
             return default
 

@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 import re
@@ -18,14 +17,14 @@ except:  # noqa: E722
     pass
 
 
-class Configuration():
+class Configuration:
     def __init__(self, file_path: typing.Optional[str] = ConfigurationDefaults.CONFIG_FILE_PATH):
         self.reload(file_path)
 
     def reload(self, file_path: typing.Optional[str] = ConfigurationDefaults.CONFIG_FILE_PATH):
         try:
             file_path = EnvVars.CONFIG_FILE.file(ConfigurationDefaults.CONFIG_FILE_PATH)
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             file_path = None
 
         if not file_path or not os.path.exists(file_path):
@@ -46,12 +45,8 @@ class Configuration():
 
 class MqttDataStoreConfiguration:
     def __init__(self, base: dict = {}, *args, **kwargs):
-        self.host = (
-            EnvVars.MQTT_HOST.string(YamlVars.MQTT_HOST.string(base, ConfigurationDefaults.MQTT_HOST))
-        )
-        self.port = (
-            EnvVars.MQTT_PORT.integer(YamlVars.MQTT_PORT.integer(base, ConfigurationDefaults.MQTT_PORT))
-        )
+        self.host = EnvVars.MQTT_HOST.string(YamlVars.MQTT_HOST.string(base, ConfigurationDefaults.MQTT_HOST))
+        self.port = EnvVars.MQTT_PORT.integer(YamlVars.MQTT_PORT.integer(base, ConfigurationDefaults.MQTT_PORT))
         self.username = EnvVars.MQTT_USERNAME.nullable(YamlVars.MQTT_USERNAME.nullable(base, None))
         self.password = EnvVars.MQTT_PASSWORD.nullable(YamlVars.MQTT_PASSWORD.nullable(base, None))
 
@@ -61,9 +56,7 @@ class MqttDataStoreConfiguration:
             np: dict = kwargs.get('netprobe')  # type: ignore
             np_type = np.get('type', None)
             np_topic = (
-                np.get('topic', ConfigurationDefaults.DATASTORE_PROBE_TOPIC)
-                if np_type == DataStoreTypes.MQTT
-                else None
+                np.get('topic', ConfigurationDefaults.DATASTORE_PROBE_TOPIC) if np_type == DataStoreTypes.MQTT else None
             )
         if 'speedtest' in kwargs:
             st: dict = kwargs.get('speedtest')  # type: ignore
@@ -88,10 +81,8 @@ class MongoDBDataStoreConfiguration:
     def __init__(self, base: dict = {}):
         self.url = EnvVars.MONGODB_URL.string(YamlVars.MONGODB_URL.string(base, ConfigurationDefaults.MONGODB_URL))
         self.db = EnvVars.MONGODB_DB.string(YamlVars.MONGODB_DB.string(base, ConfigurationDefaults.MONGODB_DB))
-        self.collection = (
-            EnvVars.MONGODB_COLLECTION.string(
-                YamlVars.MONGODB_COLLECTION.string(base, ConfigurationDefaults.MONGODB_COLLECTION)
-            )
+        self.collection = EnvVars.MONGODB_COLLECTION.string(
+            YamlVars.MONGODB_COLLECTION.string(base, ConfigurationDefaults.MONGODB_COLLECTION)
         )
 
     def merge(self, config: dict):
@@ -113,47 +104,30 @@ class LoggingConfiguration:
 
 class SpeedTestConfiguration:
     def __init__(self, base: dict = {}):
-        self.enabled = (
-            EnvVars.SPEEDTEST_ENABLED.boolean(
-                YamlVars.SPEEDTEST_ENABLED.boolean(base, ConfigurationDefaults.SPEEDTEST_ENABLED)
-            )
+        self.enabled = EnvVars.SPEEDTEST_ENABLED.boolean(
+            YamlVars.SPEEDTEST_ENABLED.boolean(base, ConfigurationDefaults.SPEEDTEST_ENABLED)
         )
-        self.interval = (
-            EnvVars.SPEEDTEST_INTERVAL.integer(
-                YamlVars.SPEEDTEST_INTERVAL.integer(base, ConfigurationDefaults.SPEEDTEST_INTERVAL)
-            )
+        self.interval = EnvVars.SPEEDTEST_INTERVAL.integer(
+            YamlVars.SPEEDTEST_INTERVAL.integer(base, ConfigurationDefaults.SPEEDTEST_INTERVAL)
         )
-        self.weight_rebalance = (
-            EnvVars.SPEEDTEST_WEIGHT_REBALANCE.boolean(
-                YamlVars.SPEEDTEST_WEIGHT_REBALANCE.boolean(base, ConfigurationDefaults.SPEEDTEST_WEIGHT_REBALANCE)
-            )
+        self.weight_rebalance = EnvVars.SPEEDTEST_WEIGHT_REBALANCE.boolean(
+            YamlVars.SPEEDTEST_WEIGHT_REBALANCE.boolean(base, ConfigurationDefaults.SPEEDTEST_WEIGHT_REBALANCE)
         )
-        self.enforce_weight = (
-            EnvVars.SPEEDTEST_WEIGHT_ENFORCE.boolean(
-                YamlVars.SPEEDTEST_WEIGHT_ENFORCE.boolean(base, ConfigurationDefaults.SPEEDTEST_WEIGHT_ENFORCE)
-            )
+        self.enforce_weight = EnvVars.SPEEDTEST_WEIGHT_ENFORCE.boolean(
+            YamlVars.SPEEDTEST_WEIGHT_ENFORCE.boolean(base, ConfigurationDefaults.SPEEDTEST_WEIGHT_ENFORCE)
         )
-        self.download_weight = (
-            EnvVars.WEIGHT_SPEEDTEST_DOWNLOAD.float(
-                YamlVars.WEIGHT_SPEEDTEST_DOWNLOAD.float(base, ConfigurationDefaults.WEIGHT_SPEEDTEST_DOWNLOAD)
-            )
+        self.download_weight = EnvVars.WEIGHT_SPEEDTEST_DOWNLOAD.float(
+            YamlVars.WEIGHT_SPEEDTEST_DOWNLOAD.float(base, ConfigurationDefaults.WEIGHT_SPEEDTEST_DOWNLOAD)
         )
-        self.upload_weight = (
-            EnvVars.WEIGHT_SPEEDTEST_UPLOAD.float(
-                YamlVars.WEIGHT_SPEEDTEST_UPLOAD.float(base, ConfigurationDefaults.WEIGHT_SPEEDTEST_UPLOAD)
-            )
+        self.upload_weight = EnvVars.WEIGHT_SPEEDTEST_UPLOAD.float(
+            YamlVars.WEIGHT_SPEEDTEST_UPLOAD.float(base, ConfigurationDefaults.WEIGHT_SPEEDTEST_UPLOAD)
         )
-        self.threshold_download = (
-            EnvVars.THRESHOLD_SPEEDTEST_DOWNLOAD.float(
-                YamlVars.THRESHOLD_SPEEDTEST_DOWNLOAD.float(base, ConfigurationDefaults.THRESHOLD_SPEEDTEST_DOWNLOAD)
-            )
+        self.threshold_download = EnvVars.THRESHOLD_SPEEDTEST_DOWNLOAD.float(
+            YamlVars.THRESHOLD_SPEEDTEST_DOWNLOAD.float(base, ConfigurationDefaults.THRESHOLD_SPEEDTEST_DOWNLOAD)
         )
-        self.threshold_upload = (
-            EnvVars.THRESHOLD_SPEEDTEST_UPLOAD.float(
-                YamlVars.THRESHOLD_SPEEDTEST_UPLOAD.float(base, ConfigurationDefaults.THRESHOLD_SPEEDTEST_UPLOAD)
-            )
+        self.threshold_upload = EnvVars.THRESHOLD_SPEEDTEST_UPLOAD.float(
+            YamlVars.THRESHOLD_SPEEDTEST_UPLOAD.float(base, ConfigurationDefaults.THRESHOLD_SPEEDTEST_UPLOAD)
         )
-
         self.enforce_or_enabled = self.enforce_weight or self.enabled
 
     def merge(self, config: dict):
@@ -203,11 +177,10 @@ class HttpRequestConfiguration:
 
 class HttpDataStoreConfiguration:
     def __init__(self, base: dict = {}):
-        self.verify_ssl = (
-            EnvVars.HTTP_VERIFY_SSL.boolean(
-                YamlVars.HTTP_VERIFY_SSL.boolean(base, ConfigurationDefaults.HTTP_VERIFY_SSL)
-            )
+        self.verify_ssl = EnvVars.HTTP_VERIFY_SSL.boolean(
+            YamlVars.HTTP_VERIFY_SSL.boolean(base, ConfigurationDefaults.HTTP_VERIFY_SSL)
         )
+
         self.read = HttpRequestConfiguration(
             url=(
                 EnvVars.HTTP_READ_URL.nullable(
@@ -289,31 +262,34 @@ class HttpDataStoreConfiguration:
 
 class NetProbeConfiguration:
     def __init__(self, base: dict = {}):
-        self.enabled = (
-            EnvVars.PROBE_ENABLED.boolean(YamlVars.PROBE_ENABLED.boolean(base, ConfigurationDefaults.PROBE_ENABLED))
+        self.enabled = EnvVars.PROBE_ENABLED.boolean(
+            YamlVars.PROBE_ENABLED.boolean(base, ConfigurationDefaults.PROBE_ENABLED)
         )
-        self.interval = (
-            EnvVars.PROBE_INTERVAL.integer(YamlVars.PROBE_INTERVAL.integer(base, ConfigurationDefaults.PROBE_INTERVAL))
+        self.interval = EnvVars.PROBE_INTERVAL.integer(
+            YamlVars.PROBE_INTERVAL.integer(base, ConfigurationDefaults.PROBE_INTERVAL)
         )
-        self.count = (
-            EnvVars.PROBE_COUNT.integer(YamlVars.PROBE_COUNT.integer(base, ConfigurationDefaults.PROBE_COUNT))
+        self.count = EnvVars.PROBE_COUNT.integer(
+            YamlVars.PROBE_COUNT.integer(base, ConfigurationDefaults.PROBE_COUNT)
         )
+
         sites = EnvVars.PROBE_SITES.list(',', list())
         if not sites or len(sites) == 0:
             sites = YamlVars.PROBE_SITES.list(base, ConfigurationDefaults.PROBE_SITES)
 
         self.sites = sites
-        self.dns_test_site = (
-            EnvVars.PROBE_DNS_TEST_SITE.string(
-                YamlVars.PROBE_DNS_TEST_SITE.string(base, ConfigurationDefaults.PROBE_DNS_TEST_SITE)
-            )
+        self.dns_test_site = EnvVars.PROBE_DNS_TEST_SITE.string(
+            YamlVars.PROBE_DNS_TEST_SITE.string(base, ConfigurationDefaults.PROBE_DNS_TEST_SITE)
         )
         self.device_id = (
             str(
                 EnvVars.PROBE_DEVICE_ID.string(
                     YamlVars.PROBE_DEVICE_ID.string(base, ConfigurationDefaults.PROBE_DEVICE_ID)
                 )
-            ).replace(' ', '_').replace('.', '_').replace('-', '_').lower()
+            )
+            .replace(' ', '_')
+            .replace('.', '_')
+            .replace('-', '_')
+            .lower()
         )
 
         # get all environment variables that match the pattern DNS_NAMESERVER_\d{1,}
@@ -379,52 +355,45 @@ class RedisDataStoreConfiguration:
 
 class FileDataStoreConfiguration:
     def __init__(self, base: dict = {}):
-        self.path = (
-            EnvVars.FILE_DATASTORE_PATH.string(
-                YamlVars.FILE_DATASTORE_PATH.string(base, ConfigurationDefaults.FILE_DATASTORE_PATH)
-            )
+        self.path = EnvVars.FILE_DATASTORE_PATH.string(
+            YamlVars.FILE_DATASTORE_PATH.string(base, ConfigurationDefaults.FILE_DATASTORE_PATH)
         )
 
+
 class PresentationConfiguration:
-    def __init__(self, base: dict = {}, probe: NetProbeConfiguration = None, speedtest: SpeedTestConfiguration = None): # type: ignore
-        # config = ApplicationConfiguration
+    def __init__(self, base: dict = {}, probe: NetProbeConfiguration = None, speedtest: SpeedTestConfiguration = None):  # type: ignore
         if not probe:
             raise ValueError("Probe configuration is required")
         if not speedtest:
             raise ValueError("Speedtest configuration is required")
 
         self.speedtest = speedtest
-        # probe = config.probe
-        self.port = (
-            EnvVars.PRESENTATION_PORT.integer(
-                YamlVars.PRESENTATION_PORT.integer(base, ConfigurationDefaults.PRESENTATION_PORT)
-            )
+        self.port = EnvVars.PRESENTATION_PORT.integer(
+            YamlVars.PRESENTATION_PORT.integer(base, ConfigurationDefaults.PRESENTATION_PORT)
         )
-        self.interface = (
-            EnvVars.PRESENTATION_INTERFACE.string(
-                YamlVars.PRESENTATION_INTERFACE.string(base, ConfigurationDefaults.PRESENTATION_INTERFACE)
-            )
+        self.interface = EnvVars.PRESENTATION_INTERFACE.string(
+            YamlVars.PRESENTATION_INTERFACE.string(base, ConfigurationDefaults.PRESENTATION_INTERFACE)
         )
         self.device_id = probe.device_id
 
-        self.weight_loss = (
-            EnvVars.WEIGHT_LOSS.float(YamlVars.WEIGHT_LOSS.float(base, ConfigurationDefaults.WEIGHT_LOSS))
+        self.weight_loss = EnvVars.WEIGHT_LOSS.float(
+            YamlVars.WEIGHT_LOSS.float(base, ConfigurationDefaults.WEIGHT_LOSS)
         )
-        self.weight_latency = (
-            EnvVars.WEIGHT_LATENCY.float(YamlVars.WEIGHT_LATENCY.float(base, ConfigurationDefaults.WEIGHT_LATENCY))
+
+        self.weight_latency = EnvVars.WEIGHT_LATENCY.float(
+            YamlVars.WEIGHT_LATENCY.float(base, ConfigurationDefaults.WEIGHT_LATENCY)
         )
-        self.weight_jitter = (
-            EnvVars.WEIGHT_JITTER.float(YamlVars.WEIGHT_JITTER.float(base, ConfigurationDefaults.WEIGHT_JITTER))
+
+        self.weight_jitter = EnvVars.WEIGHT_JITTER.float(
+            YamlVars.WEIGHT_JITTER.float(base, ConfigurationDefaults.WEIGHT_JITTER)
         )
-        self.weight_internal_dns_latency = (
-            EnvVars.WEIGHT_INTERNAL_DNS_LATENCY.float(
-                YamlVars.WEIGHT_INTERNAL_DNS_LATENCY.float(base, ConfigurationDefaults.WEIGHT_INTERNAL_DNS_LATENCY)
-            )
+
+        self.weight_internal_dns_latency = EnvVars.WEIGHT_INTERNAL_DNS_LATENCY.float(
+            YamlVars.WEIGHT_INTERNAL_DNS_LATENCY.float(base, ConfigurationDefaults.WEIGHT_INTERNAL_DNS_LATENCY)
         )
-        self.weight_external_dns_latency = (
-            EnvVars.WEIGHT_EXTERNAL_DNS_LATENCY.float(
-                YamlVars.WEIGHT_EXTERNAL_DNS_LATENCY.float(base, ConfigurationDefaults.WEIGHT_EXTERNAL_DNS_LATENCY)
-            )
+
+        self.weight_external_dns_latency = EnvVars.WEIGHT_EXTERNAL_DNS_LATENCY.float(
+            YamlVars.WEIGHT_EXTERNAL_DNS_LATENCY.float(base, ConfigurationDefaults.WEIGHT_EXTERNAL_DNS_LATENCY)
         )
 
         self.total_weight = sum(
@@ -463,32 +432,18 @@ class PresentationConfiguration:
             ]
         )
 
-        self.threshold_loss = (
-            EnvVars.THRESHOLD_LOSS.integer(YamlVars.THRESHOLD_LOSS.integer(base, ConfigurationDefaults.THRESHOLD_LOSS))
+        self.threshold_loss = EnvVars.THRESHOLD_LOSS.integer(YamlVars.THRESHOLD_LOSS.integer(base, ConfigurationDefaults.THRESHOLD_LOSS))
+        self.threshold_latency = EnvVars.THRESHOLD_LATENCY.integer(
+            YamlVars.THRESHOLD_LATENCY.integer(base, ConfigurationDefaults.THRESHOLD_LATENCY)
         )
-        self.threshold_latency = (
-            EnvVars.THRESHOLD_LATENCY.integer(
-                YamlVars.THRESHOLD_LATENCY.integer(base, ConfigurationDefaults.THRESHOLD_LATENCY)
-            )
+        self.threshold_jitter = EnvVars.THRESHOLD_JITTER.integer(
+            YamlVars.THRESHOLD_JITTER.integer(base, ConfigurationDefaults.THRESHOLD_JITTER)
         )
-        self.threshold_jitter = (
-            EnvVars.THRESHOLD_JITTER.integer(
-                YamlVars.THRESHOLD_JITTER.integer(base, ConfigurationDefaults.THRESHOLD_JITTER)
-            )
+        self.threshold_internal_dns_latency = EnvVars.THRESHOLD_INTERNAL_DNS_LATENCY.integer(
+            YamlVars.THRESHOLD_INTERNAL_DNS_LATENCY.integer(base, ConfigurationDefaults.THRESHOLD_INTERNAL_DNS_LATENCY)
         )
-        self.threshold_internal_dns_latency = (
-            EnvVars.THRESHOLD_INTERNAL_DNS_LATENCY.integer(
-                YamlVars.THRESHOLD_INTERNAL_DNS_LATENCY.integer(
-                    base, ConfigurationDefaults.THRESHOLD_INTERNAL_DNS_LATENCY
-                ),
-            )
-        )
-        self.threshold_external_dns_latency = (
-            EnvVars.THRESHOLD_EXTERNAL_DNS_LATENCY.integer(
-                YamlVars.THRESHOLD_EXTERNAL_DNS_LATENCY.integer(
-                    base, ConfigurationDefaults.THRESHOLD_EXTERNAL_DNS_LATENCY
-                ),
-            )
+        self.threshold_external_dns_latency = EnvVars.THRESHOLD_EXTERNAL_DNS_LATENCY.integer(
+            YamlVars.THRESHOLD_EXTERNAL_DNS_LATENCY.integer(base, ConfigurationDefaults.THRESHOLD_EXTERNAL_DNS_LATENCY)
         )
 
         self.threshold_speedtest_download = 0
