@@ -80,7 +80,7 @@ class YamlVars(Enum):
     WEIGHT_SPEEDTEST_UPLOAD = "$.health.weights.speedtest_upload"
 
     __engine__ = yaql.factory.YaqlFactory().create()
-    
+
     def expand(self, data: dict, default: typing.Optional[typing.Any]) -> typing.Optional[typing.Any]:
         try:
             # from yaml use the value of the key to query to expand the data value
