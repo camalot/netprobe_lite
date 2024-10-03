@@ -103,7 +103,7 @@ Change 8.8.8.8 to the IP of the DNS server you use, then restart the application
 
 ## DASHBOARD
 
-The [dashboards](dashboard) path contains both a dashboard that makes use of the speed test in
+The [dashboards](dashboards) path contains both a dashboard that makes use of the speed test in
 netprobe_lite and using speedtest exporter.
 
 ![Dashboard 1](assets/dashboard1.png)
