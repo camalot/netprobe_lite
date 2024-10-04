@@ -1,5 +1,6 @@
 data/
 tester.py
+.netprobe.yaml
 
 # Distribution / packaging
 .Python

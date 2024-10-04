@@ -35,6 +35,7 @@ class Configuration:
         # if file_path exists and is not none, load the file
         if file_path and os.path.exists(file_path):
             with open(file_path, 'r') as file:
+                print(f"Loading configuration from {file_path}")
                 base_config = yaml.safe_load(file)
 
         self.probe = NetProbeConfiguration(base_config)

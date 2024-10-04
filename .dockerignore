@@ -1,3 +1,6 @@
+.env
+.netprobe.yaml
+
 # Git
 .git
 .gitignore

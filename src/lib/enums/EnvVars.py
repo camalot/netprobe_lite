@@ -101,8 +101,11 @@ class EnvVars(Enum):
         return float(self.expand(str(default)))
 
     def list(self, separator: str = ',', default: typing.List[str] = []) -> typing.List[str]:
-        # split and trim the values
-        return [x.strip() for x in self.expand(separator.join(default)).split(separator)]
+        value = self.expand(separator.join(default))
+        if value:
+            # split and trim the values
+            return [x.strip() for x in self.expand(separator.join(default)).split(separator)]
+        return default
 
     # take key=value pairs separated by a separator and return a dictionary
     def dict(self, separator: str = ";", default: typing.Dict[str, str] = {}) -> typing.Dict[str, str]:

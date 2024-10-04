@@ -5,14 +5,10 @@ probe:
   count: 50
   device_id: "netprobe"
   sites:
-    - name: Google
-      url: https://google.com
-    - name: Youtube
-      url: https://youtube.com
-    - name: Facebook
-      url: https://facebook.com
-    - name: Twitter
-      url: https://twitter.com
+    - google.com
+    - youtube.com
+    - facebook.com
+    - twitter.com
   dns:
     test: google.com
     nameservers:
@@ -27,18 +23,13 @@ probe:
     local:
       - name: Router
         ip: '192.168.2.1'
-      # - name: Bataal
-      #   ip: '192.168.2.7'
-      # - name: Congus
-      #   ip: '192.168.2.4'
-
 datastore:
   probe:
     type: FILE
     topic: netprobe/probe
   speedtest:
-    type: MQTT
-    topic: prometheus/internet
+    type: FILE
+    topic: netprobe/speedtest
 
   mqtt:
     host: 'localhost'
