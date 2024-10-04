@@ -110,10 +110,8 @@ Change 8.8.8.8 to the IP of the DNS server you use, then restart the application
 > to its mean. It's calculated by dividing the standard deviation by the mean, and is often expressed
 > as a percentage. The CV is used to compare data sets that have different units or means.
 
-``` mathml
-  $$
+``` math
   cv_loss=\frac{\langle loss \rangle}{loss_threshold}
-  $$
 ```
 
 ``` none
