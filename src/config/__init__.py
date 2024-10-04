@@ -150,14 +150,8 @@ class DataStoreConfiguration:
             YamlVars.DATASTORE_SPEEDTEST_TOPIC.string(base, ConfigurationDefaults.DATASTORE_SPEEDTEST_TOPIC)
         )
 
-        self.netprobe = {
-            'type': DataStoreTypes.from_str(probe_type),
-            'topic': probe_topic,
-        }
-        self.speedtest = {
-            'type': DataStoreTypes.from_str(speed_type),
-            'topic': speed_topic,
-        }
+        self.netprobe = {'type': DataStoreTypes.from_str(probe_type), 'topic': probe_topic}
+        self.speedtest = {'type': DataStoreTypes.from_str(speed_type), 'topic': speed_topic}
 
         self.file = FileDataStoreConfiguration(base)
         self.redis = RedisDataStoreConfiguration(base)
