@@ -136,19 +136,27 @@ class SpeedTestConfiguration:
 
 class DataStoreConfiguration:
     def __init__(self, base: dict = {}):
+
+        probe_type = EnvVars.DATASTORE_PROBE_TYPE.string(
+            YamlVars.DATASTORE_PROBE_TYPE.string(base, ConfigurationDefaults.DATASTORE_PROBE_TYPE)
+        ).upper()
+        probe_topic = EnvVars.DATASTORE_PROBE_TOPIC.string(
+            YamlVars.DATASTORE_PROBE_TOPIC.string(base, ConfigurationDefaults.DATASTORE_PROBE_TOPIC)
+        )
+        speed_type = EnvVars.DATASTORE_SPEEDTEST_TYPE.string(
+            YamlVars.DATASTORE_SPEEDTEST_TYPE.string(base, ConfigurationDefaults.DATASTORE_SPEEDTEST_TYPE)
+        ).upper()
+        speed_topic = EnvVars.DATASTORE_SPEEDTEST_TOPIC.string(
+            YamlVars.DATASTORE_SPEEDTEST_TOPIC.string(base, ConfigurationDefaults.DATASTORE_SPEEDTEST_TOPIC)
+        )
+
         self.netprobe = {
-            'type': DataStoreTypes.from_str(
-                EnvVars.DATASTORE_PROBE_TYPE.string(
-                    YamlVars.DATASTORE_PROBE_TYPE.string(base, ConfigurationDefaults.DATASTORE_PROBE_TYPE).upper()
-                )
-            ),
-            'topic': EnvVars.DATASTORE_PROBE_TOPIC.string(ConfigurationDefaults.DATASTORE_PROBE_TOPIC),
+            'type': DataStoreTypes.from_str(probe_type),
+            'topic': probe_topic,
         }
         self.speedtest = {
-            'type': DataStoreTypes.from_str(
-                EnvVars.DATASTORE_SPEEDTEST_TYPE.string(ConfigurationDefaults.DATASTORE_SPEEDTEST_TYPE).upper()
-            ),
-            'topic': EnvVars.DATASTORE_SPEEDTEST_TOPIC.string(ConfigurationDefaults.DATASTORE_SPEEDTEST_TOPIC),
+            'type': DataStoreTypes.from_str(speed_type),
+            'topic': speed_topic,
         }
 
         self.file = FileDataStoreConfiguration(base)

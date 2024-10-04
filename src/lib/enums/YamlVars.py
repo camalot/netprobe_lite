@@ -87,11 +87,11 @@ class YamlVars(Enum):
             expression = YamlVars.__engine__(self.value)
             result = expression.evaluate(data=data)  # type: ignore
             if result is None:
-                print(f"Could not find value for {self.value}, using default value {default}")
+                # print(f"Could not find value for {self.value}, using default value {default}")
                 return default
             return result
         except KeyError:
-            print(f"Could not find value for {self.value}, using default value {default}")
+            # print(f"Could not find value for {self.value}, using default value {default}")
             return default
 
     def nullable(self, data: dict, default: typing.Optional[typing.Any]) -> typing.Optional[typing.Any]:

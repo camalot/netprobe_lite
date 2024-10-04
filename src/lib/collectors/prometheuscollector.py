@@ -80,18 +80,27 @@ class PrometheusCollector(Collector):
         average_loss = 0
         average_latency = 0
 
-        latency_item_count = len(stats_netprobe['stats'])
-        loss_item_count = len(stats_netprobe['stats'])
-        jitter_item_count = len(stats_netprobe['stats'])
+        netprobe_stats = stats_netprobe.get("stats", [])  # stats_netprobe['stats'] if 'stats' in stats_netprobe else []
+        # get the number of items in the list that have a latency object
+        latency_item_count = len([item for item in netprobe_stats if 'latency' in item])
+        # get the number of items in the list that have a loss object
+        loss_item_count = len([item for item in netprobe_stats if 'loss' in item])
+        # get the number of items in the list that have a jitter object
+        jitter_item_count = len([item for item in netprobe_stats if 'jitter' in item])
 
-        for item in stats_netprobe['stats']:  # Expose each individual latency / loss metric for each site tested
-            g.add_metric(['latency', item['site']], item['latency'])
-            g.add_metric(['loss', item['site']], item['loss'])
-            g.add_metric(['jitter', item['site']], item['jitter'])
+        for item in netprobe_stats:  # Expose each individual latency / loss metric for each site tested
+            site = item.get('site', 'unknown')
+            latency = float(item.get('latency', 0))
+            loss = float(item.get('loss', 0))
+            jitter = float(item.get('jitter', 0))
 
-            total_latency += float(item['latency'])
-            total_loss += float(item['loss'])
-            total_jitter += float(item['jitter'])
+            g.add_metric(['latency', site], latency)
+            g.add_metric(['loss', site], loss)
+            g.add_metric(['jitter', site], jitter)
+
+            total_latency += latency
+            total_loss += loss
+            total_jitter += jitter
 
         # if stats_speedtest:
         #     for key in stats_speedtest.keys():
@@ -122,18 +131,26 @@ class PrometheusCollector(Collector):
             labels=['server', 'ip', 'type'],
         )
 
+        dns_stats = stats_netprobe.get('dns_stats', [])
         average_local_dns_latency = 0
         average_local_dns_latency = 0
         local_dns = []
         ext_dns = []
-        for item in stats_netprobe['dns_stats']:
-            labels = [item['nameserver'], item['nameserver_ip'], item['type']]
-            h.add_metric(labels, item['latency'])
+        for item in dns_stats:
+            if 'nameserver' not in item or 'nameserver_ip' not in item or 'type' not in item:
+                continue
+            ns_name = item.get('nameserver', None)
+            ns_ip = item.get('nameserver_ip', None)
+            ns_type = item.get('type', None)
+            ns_latency = float(item.get('latency', 0))
+
+            labels = [ns_name, ns_ip, ns_type]
+            h.add_metric(labels, item.get('latency', 0))
             # find them by type, and then get the average of the latency
-            if item['type'].lower() == 'internal':
-                local_dns.append(float(item['latency']))
+            if ns_type.lower() == 'internal':
+                local_dns.append(ns_latency)
             else:
-                ext_dns.append(float(item['latency']))
+                ext_dns.append(ns_latency)
 
         average_local_dns_latency = sum(local_dns) / len(local_dns)
         average_ext_dns_latency = sum(ext_dns) / len(ext_dns)
@@ -274,13 +291,13 @@ class PrometheusCollector(Collector):
         cv_download = 0
         cv_upload = 0
         if stats_speedtest:
-            download = stats_speedtest['download'] if stats_speedtest['download'] else 0
+            download = float(stats_speedtest.get('download', 0))
             if download >= 0:
                 cv_download = 1 - (
                     1 if download / threshold_speedtest_download >= 1 else (download / threshold_speedtest_download)
                 )
 
-            upload = stats_speedtest['upload'] if stats_speedtest['upload'] else 0
+            upload = float(stats_speedtest.get('upload', 0))
             if upload >= 0:
                 cv_upload = 1 - (
                     1 if upload / threshold_speedtest_upload >= 1 else (upload / threshold_speedtest_upload)
