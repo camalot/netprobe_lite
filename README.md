@@ -112,19 +112,31 @@ Change 8.8.8.8 to the IP of the DNS server you use, then restart the application
 
 ``` math
   cv\_loss=\frac{\langle loss \rangle}{loss\_threshold}
+```
 
+``` math
   cv\_jitter=\frac{\langle jitter \rangle}{jitter\_threshold}
+```
 
+``` math
   cv\_latency=\frac{\langle latency \rangle}{latency\_threshold}
+```
 
+``` math
   cv\_internal\_dns\_latency=\frac{\langle internal\_dns\_latency \rangle}{internal\_dns\_latency\_threshold}
+```
 
+``` math
   cv\_external\_dns\_latency=\frac{\langle external\_dns\_latency \rangle}{external\_dns\_latency\_threshold}
+```
 
+``` math
   cv\_download=\frac{download}{download\_threshold}
+```
 
+``` math
   cv\_upload=\frac{upload}{upload\_threshold}
-  
+
 ```
 
 ``` none
