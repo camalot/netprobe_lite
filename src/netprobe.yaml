@@ -89,7 +89,7 @@ health:
     latency: 0.15
     jitter: 0.2
     external_dns_latency: 0.01
-    internal_dns_latency: 0.4
+    internal_dns_latency: 0.04
     speedtest_download: 0.1
     speedtest_upload: 0.1
 
