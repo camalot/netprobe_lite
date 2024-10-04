@@ -274,17 +274,18 @@ class PrometheusCollector(Collector):
         cv_download = 0
         cv_upload = 0
         if stats_speedtest:
-            download = stats_speedtest['download'] if stats_speedtest['download'] else 0
-            if download >= 0:
-                cv_download = 1 - (
-                    1 if download / threshold_speedtest_download >= 1 else (download / threshold_speedtest_download)
-                )
-
-            upload = stats_speedtest['upload'] if stats_speedtest['upload'] else 0
-            if upload >= 0:
-                cv_upload = 1 - (
-                    1 if upload / threshold_speedtest_upload >= 1 else (upload / threshold_speedtest_upload)
-                )
+            if "download" in stats_speedtest:
+                download = stats_speedtest['download'] if stats_speedtest['download'] else 0
+                if download >= 0:
+                    cv_download = 1 - (
+                        1 if download / threshold_speedtest_download >= 1 else (download / threshold_speedtest_download)
+                    )
+            if "upload" in stats_speedtest:
+                upload = stats_speedtest['upload'] if stats_speedtest['upload'] else 0
+                if upload >= 0:
+                    cv_upload = 1 - (
+                        1 if upload / threshold_speedtest_upload >= 1 else (upload / threshold_speedtest_upload)
+                    )
 
         self.logger.info(f"\tSpeedtest Download Coefficient: {cv_download}")
         self.logger.info(f"\tSpeedtest Upload Coefficient: {cv_upload}")

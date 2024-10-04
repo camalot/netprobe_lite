@@ -82,7 +82,7 @@ class YamlVars(Enum):
     __engine__ = yaql.factory.YaqlFactory().create()
 
     def expand(self, data: dict, default: typing.Optional[typing.Any]) -> typing.Optional[typing.Any]:
-        return default
+        # return default
         try:
             # from yaml use the value of the key to query to expand the data value
             expression = YamlVars.__engine__(self.value)
