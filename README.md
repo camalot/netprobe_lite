@@ -101,6 +101,33 @@ NP_DNS_NAMESERVER_4_IP="8.8.8.8" # Replace this IP with the DNS server you use a
 Change 8.8.8.8 to the IP of the DNS server you use, then restart the application
 (docker compose down / docker compose up)
 
+## CALCULATIONS
+
+###
+
+> [!NOTE]
+> The coefficient of variation (CV) is a statistic that compares the standard deviation of a data set
+> to its mean. It's calculated by dividing the standard deviation by the mean, and is often expressed
+> as a percentage. The CV is used to compare data sets that have different units or means.
+
+``` mathml
+  $$
+  cv_loss=\frac{\langle loss \rangle}{loss_threshold}
+  $$
+```
+
+``` none
+  overall_score = (
+    (1 - weight_loss * cv_loss)
+    - (weight_jitter * cv_jitter)
+    - (weight_latency * cv_latency)
+    - (weight_internal_dns_latency * cv_internal_dns_latency)
+    - (weight_external_dns_latency * cv_external_dns_latency)
+    - (weight_speedtest_download * cv_download)
+    - (weight_speedtest_upload * cv_upload)
+  )
+```
+
 ## DASHBOARD
 
 The [dashboards](dashboards) path contains both a dashboard that makes use of the speed test in
