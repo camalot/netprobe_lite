@@ -139,16 +139,17 @@ Change 8.8.8.8 to the IP of the DNS server you use, then restart the application
 
 ```
 
-``` none
-  overall_score = (
-    (1 - weight_loss * cv_loss)
-    - (weight_jitter * cv_jitter)
-    - (weight_latency * cv_latency)
-    - (weight_internal_dns_latency * cv_internal_dns_latency)
-    - (weight_external_dns_latency * cv_external_dns_latency)
-    - (weight_speedtest_download * cv_download)
-    - (weight_speedtest_upload * cv_upload)
-  )
+---
+
+Final Score:
+
+``` math
+  overall\_score=\left(1-weight_loss \times cv_loss\right)-\left(weight_jitter \times cv_jitter\right)
+    - \left(weight_latency \times cv_latency\right)
+    - \left(weight_internal_dns_latency \times cv_internal_dns_latency\right)
+    - \left(weight_external_dns_latency \times cv_external_dns_latency\right)
+    - \left(weight_speedtest_download \times cv_download\right)
+    - \left(weight_speedtest_upload \times cv_upload\right)
 ```
 
 ## DASHBOARD
