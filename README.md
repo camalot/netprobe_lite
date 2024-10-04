@@ -111,30 +111,18 @@ Change 8.8.8.8 to the IP of the DNS server you use, then restart the application
 > as a percentage. The CV is used to compare data sets that have different units or means.
 
 ``` math
-  cv\_loss=\frac{\langle loss \rangle}{loss\_threshold}
-```
+  cv\_loss=\frac{\langle loss \rangle}{loss\_threshold}\\
 
-``` math
-  cv\_jitter=\frac{\langle jitter \rangle}{jitter\_threshold}
-```
+  cv\_jitter=\frac{\langle jitter \rangle}{jitter\_threshold}\\
 
-``` math
-  cv\_latency=\frac{\langle latency \rangle}{latency\_threshold}
-```
+  cv\_latency=\frac{\langle latency \rangle}{latency\_threshold}\\
 
-``` math
-  cv\_internal\_dns\_latency=\frac{\langle internal\_dns\_latency \rangle}{internal\_dns\_latency\_threshold}
-```
+  cv\_internal\_dns\_latency=\frac{\langle internal\_dns\_latency \rangle}{internal\_dns\_latency\_threshold}\\
 
-``` math
-  cv\_external\_dns\_latency=\frac{\langle external\_dns\_latency \rangle}{external\_dns\_latency\_threshold}
-```
+  cv\_external\_dns\_latency=\frac{\langle external\_dns\_latency \rangle}{external\_dns\_latency\_threshold}\\
 
-``` math
-  cv\_download=\frac{download}{download\_threshold}
-```
+  cv\_download=\frac{download}{download\_threshold}\\
 
-``` math
   cv\_upload=\frac{upload}{upload\_threshold}
 
 ```
@@ -144,12 +132,12 @@ Change 8.8.8.8 to the IP of the DNS server you use, then restart the application
 Final Score:
 
 ``` math
-  overall\_score=\left(1-weight_loss \times cv_loss\right)-\left(weight_jitter \times cv_jitter\right)
-    - \left(weight_latency \times cv_latency\right)
-    - \left(weight_internal_dns_latency \times cv_internal_dns_latency\right)
-    - \left(weight_external_dns_latency \times cv_external_dns_latency\right)
-    - \left(weight_speedtest_download \times cv_download\right)
-    - \left(weight_speedtest_upload \times cv_upload\right)
+  overall\_score=\left(1-weight\_loss \times cv\_loss\right)-\left(weight\_jitter \times cv\_jitter\right)\\
+    - \left(weight\_latency \times cv\_latency\right)\\
+    - \left(weight\_internal_dns\_latency \times cv\_internal_dns_latency\right)\\
+    - \left(weight\_external_dns\_latency \times cv\_external_dns_latency\right)\\
+    - \left(weight\_speedtest\_download \times cv\_download\right)\\
+    - \left(weight\_speedtest\_upload \times cv\_upload\right)
 ```
 
 ## DASHBOARD
