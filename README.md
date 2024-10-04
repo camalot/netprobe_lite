@@ -111,7 +111,13 @@ Change 8.8.8.8 to the IP of the DNS server you use, then restart the application
 > as a percentage. The CV is used to compare data sets that have different units or means.
 
 ``` math
-  cv_loss=\frac{\langle loss \rangle}{loss_threshold}
+  cv\_loss=\frac{\langle loss \rangle}{loss\_threshold}
+  cv\_jitter=\frac{\langle jitter \rangle}{jitter\_threshold}
+  cv\_latency=\frac{\langle latency \rangle}{latency\_threshold}
+  cv\_internal\_dns\_latency=\frac{\langle internal\_dns\_latency \rangle}{internal\_dns\_latency\_threshold}
+  cv\_external\_dns\_latency=\frac{\langle external\_dns\_latency \rangle}{external\_dns\_latency\_threshold}
+  cv\_download=\frac{download}{download\_threshold}
+  cv\_upload=\frac{upload}{upload\_threshold}
 ```
 
 ``` none
