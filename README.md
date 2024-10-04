@@ -42,8 +42,6 @@ The collection of the metrics is stored in a Datastore to cache for use. There a
 
 ### Environment Variables
 
-Todo: describe a good way to define all the environment variables
-
 > [!NOTE]
 > The order of importance for configuration values is as follows:
 >
@@ -51,9 +49,29 @@ Todo: describe a good way to define all the environment variables
 > 1. Configuration File Value
 > 1. Default Value
 
+<!-- markdownlint-disable MD013 -->
+| NAME | DESCRIPTION | YAML PATH | TYPE | DEFAULT |
+|----------|----------|----------|------|---------|
+| `NP_CONFIG_FILE`               | The path to the yaml config file |                               | `string` | `/config/netprobe.yaml` |
+| `NP_DATASTORE_PROBE_TYPE`      | The PROBE datastore type         | `$.datastore.probe.type`      | `string` | `FILE`                  |
+| `NP_DATASTORE_SPEEDTEST_TYPE`  | The SPEEDTEST datastore type     | `$.datastore.speedtest.type`  | `string` | `FILE`                  |
+| `NP_DATASTORE_NETPROBE_TOPIC`  | Datastore PROBE topic name       | `$.datastore.probe.topic`     | `string` | `netprobe/probe`        |
+| `NP_DATASTORE_SPEEDTEST_TOPIC` | Datastore SPEEDTEST topic name   | `$.datastore.speedtest.topic` | `string` | `netprobe/speedtest`    |
+| `NP_FILE_DATASTORE_PATH`       | Root path for the file datastore | `$.datastore.file.path`       | `string` | `/data/cache`           |
+| `HTTP_READ_URL`                | HTTP datastore read url          | `$.datastore.http.read.url`   | `string` | `''`                    |
+| `HTTP_WRITE_URL`               | HTTP datastore write url         | `$.datastore.http.write.url`  | `string` | `''`                    |
+| `NP_LOG_LEVEL`                 | Minimum output log level         | `$.logging.level`             | `string` | `INFO`                  |
+| `NP_LOG_FORMAT`                | Log output format                | `$.logging.format`            | `string` | `%(asctime)s [%(levelname)s] [%(name)s] %(message)s` |
+| `NP_LOG_DATE_FORMAT`           | Log date format                  | `$.logging.date_format`       | `string` | `%Y-%m-%d %H:%M:%S`     |
+
+| `NP_SPEEDTEST_ENABLED`         | Enable or disable speed test     | `$.speedtest.enabled`         | `bool`   | `False`                 |
+| `NP_SPEEDTEST_INTERVAL`        | Interval between speed tests     | `$.speedtest.interval`        | `int`    | `3600`                  |
+| `NP_DNS_NAMESERVER_4_IP`       | IPv4 address of DNS server       | `$.dns.nameserver_4_ip`       | `string` | `8.8.8.8`               |
+| `NP_DNS_NAMESERVER_6_IP`       | IPv6 address of DNS server       | `$.dns.nameserver_6_ip`       | `string` | `2001:4860:4860::8888`  |
+<!-- markdownlint-enable MD013 -->
 ### Configuration via file
 
-A configuration file can be used. The default location is `/app/config/netprobe.yaml`.
+A configuration file can be used. The default location is `/config/netprobe.yaml`.
 
 See [sample.netprobe.yaml](sample.netprobe.yaml) file for example configuration.
 
