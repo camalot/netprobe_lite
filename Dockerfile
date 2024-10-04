@@ -3,26 +3,48 @@
 
 # Default to amd64 if no build argument is provided
 ARG BASE_IMAGE_ARCH=amd64
-
 # Default to Python 3.12 if no build argument is provided
 ARG PYTHON_VERSION=3.12
 
-FROM ${BASE_IMAGE_ARCH}/python:${PYTHON_VERSION}-slim-bookworm
+ARG BRANCH="develop"
+ARG BUILD_VERSION="1.0.0-snapshot"
+ARG PROJECT_NAME=netprobe_lite
 
-WORKDIR /netprobe_lite
+# slim-bookworm
+FROM ${BASE_IMAGE_ARCH}/python:${PYTHON_VERSION}-alpine
 
-# Copy application code
-COPY src/ /netprobe_lite/
-FROM python:3.11-slim-bookworm
-
-COPY requirements.txt /netprobe_lite/requirements.txt
-
-# Install python/pip
 ENV PYTHONUNBUFFERED=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=on
+ENV NP_MODULE=FULL
 
-RUN apt-get update && apt-get install -y iputils-ping && apt-get install -y traceroute && apt-get clean \
-    && pip install -r /netprobe_lite/requirements.txt --break-system-packages && rm -rf /root/.cache/pip \
-    && chmod +x /netprobe_lite/entrypoint.sh
+LABEL VERSION="${BUILD_VERSION}"
+LABEL BRANCH="${BRANCH}"
+LABEL PROJECT_NAME="${PROJECT_NAME}"
 
-ENTRYPOINT [ "/bin/bash", "/netprobe_lite/entrypoint.sh" ]
+USER root:root
+
+WORKDIR /app
+
+# Copy application code
+COPY ./src/ /app/
+
+RUN \
+    apk update \
+    && apk add --no-cache bash git curl build-base tcl tk iputils-ping \
+    && mkdir -p /data /config /app/logs \
+    && pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r /app/setup/requirements.txt \
+    && apk del git build-base \
+    && rm -rf /app/setup \
+    && ln -s /app/logs /logs \
+    && chown -R 1000:1000 /app /data /logs /config
+
+EXPOSE 5000
+
+VOLUME [ "/data" ]
+VOLUME [ "/config" ]
+VOLUME [ "/logs" ]
+
+USER 1000:1000
+
+ENTRYPOINT [ "python3", "/app/main.py" ]

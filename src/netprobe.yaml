@@ -1,0 +1,114 @@
+---
+probe:
+  enabled: yes
+  interval: 30
+  count: 50
+  device_id: "netprobe"
+  sites:
+    - name: Google
+      url: https://google.com
+    - name: Youtube
+      url: https://youtube.com
+    - name: Facebook
+      url: https://facebook.com
+    - name: Twitter
+      url: https://twitter.com
+  dns:
+    test: google.com
+    nameservers:
+      - name: Google (Primary)
+        ip: '8.8.8.8'
+      - name: Cloudflare (Primary)
+        ip: '1.1.1.1'
+      - name: Google (Secondary)
+        ip: '8.8.4.4'
+      - name: Cloudflare (Secondary)
+        ip: '1.0.0.1'
+    local:
+      - name: Router
+        ip: '192.168.2.1'
+      # - name: Bataal
+      #   ip: '192.168.2.7'
+      # - name: Congus
+      #   ip: '192.168.2.4'
+
+datastore:
+  probe:
+    type: FILE
+    topic: netprobe/probe
+  speedtest:
+    type: MQTT
+    topic: prometheus/internet
+
+  mqtt:
+    host: 'localhost'
+    port: 1883
+    username: ''
+    password: ''
+    # client_id: 'netprobe'
+    # keepalive: 60
+    # qos: 0
+    # retain: no
+  file:
+    path: /data/cache
+  redis:
+    host: 'localhost'
+    port: 6379
+    db: 0
+    password: ''
+  mongodb:
+    url: 'mongodb://localhost:27017/admin'
+    db: 'netprobe'
+    collection: 'netprobe'
+  http:
+    verify_ssl: no
+    read:
+      url: 'http://localhost:8080/netprobe/data/:topic'
+      method: 'GET'
+      timeout: 5
+      headers: {}
+      cookies: {}
+      params: {}
+      auth: {}
+    write:
+      url: 'http://localhost:8080/netprobe/data/:topic'
+      method: 'POST'
+      timeout: 5
+      headers: {}
+      cookies: {}
+      params: {}
+      auth: {}
+
+logging:
+  level: "DEBUG"
+  format: "%(asctime)s [%(levelname)s] [%(name)s] %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
+
+presentation:
+  port: 5000
+  interface: '0.0.0.0'
+
+speedtest:
+  enabled: no
+  interval: 937
+
+health:
+  weights:
+    loss: 0.4
+    latency: 0.15
+    jitter: 0.2
+    external_dns_latency: 0.01
+    internal_dns_latency: 0.4
+    speedtest_download: 0.1
+    speedtest_upload: 0.1
+
+    speedtest_rebalance: no
+    speedtest_enforce: yes
+  thresholds:
+    loss: 5
+    latency: 100
+    jitter: 30
+    external_dns_latency: 100
+    internal_dns_latency: 100
+    speedtest_download: 200
+    speedtest_upload: 200

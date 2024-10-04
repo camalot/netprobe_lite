@@ -1,96 +1,48 @@
+---
 # Docker compose file for netprobe
 # https://github.com/plaintextpackets/netprobe_lite
 name: netprobe
 
 networks:
-  netprobe-net:
+  netprobe:
 
 services:
-  redis:
-    restart: always
-    container_name: netprobe-redis
-    image: "redis:latest"
-    volumes:
-      - ${CONFIG_PATH}/redis/redis.conf:/etc/redis/redis.conf
-    networks:
-      - netprobe-net
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
-
   netprobe:
     restart: always
     container_name: netprobe-probe
-    image: "plaintextpackets/netprobe:latest"
+    image: "ghcr.io/camalot/netprobe_lite:latest"
     pull_policy: always
     environment:
-      MODULE: "NETPROBE"
-    networks:
-      - netprobe-net
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
+      NP_SITES: "google.com,facebook.com,twitter.com,youtube.com"
+      NP_DNS_TEST_SITE: "google.com"
 
-  speedtest:
-    restart: always
-    container_name: netprobe-speedtest
-    image: "plaintextpackets/netprobe:latest"
-    pull_policy: always
-    environment:
-      MODULE: "SPEEDTEST"
-    networks:
-      - netprobe-net
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
+      NP_DNS_NAMESERVER_1: "Google (Primary)"
+      NP_DNS_NAMESERVER_1_IP: "8.8.8.8"
+      NP_DNS_NAMESERVER_2: "Google (Secondary)"
+      NP_DNS_NAMESERVER_2_IP: "8.8.4.4"
+      NP_DNS_NAMESERVER_3: "Cloudflare (Primary)"
+      NP_DNS_NAMESERVER_3_IP: "1.1.1.1"
+      NP_DNS_NAMESERVER_4: "Cloudflare (Secondary)"
+      NP_DNS_NAMESERVER_4_IP: "1.0.0.1"
 
-  presentation:
-    restart: always
-    container_name: netprobe-presentation
-    image: "plaintextpackets/netprobe:latest"
-    pull_policy: always
-    environment:
-      MODULE: "PRESENTATION"
-    networks:
-      - netprobe-net
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
+      NP_LOCAL_DNS_NAMESERVER_1: "Router"
+      NP_LOCAL_DNS_NAMESERVER_1_IP: "192.168.2.1"
 
-  prometheus:
-    restart: always
-    container_name: netprobe-prometheus
-    image: "prom/prometheus"
-    volumes:
-      - ${CONFIG_PATH}/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus  # Persistent local storage for Prometheus data
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-    networks:
-      - netprobe-net
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
+      NP_SPEEDTEST_ENABLED: "false"
+      NP_SPEEDTEST_INTERVAL: "937"
 
-  grafana:
-    restart: always
-    image: grafana/grafana-enterprise
-    container_name: netprobe-grafana
-    volumes:
-      - ${CONFIG_PATH}/grafana/datasources/automatic.yml:/etc/grafana/provisioning/datasources/automatic.yml
-      - ${CONFIG_PATH}/grafana/dashboards/main.yml:/etc/grafana/provisioning/dashboards/main.yml
-      - ${CONFIG_PATH}/grafana/dashboards/netprobe.json:/var/lib/grafana/dashboards/netprobe.json
-      - grafana_data:/var/lib/grafana
+      NP_REDIS_HOST: "redis"
+      NP_REDIS_PORT: "6379"
+      NP_REDIS_DB: "0"
+      # this should only be set if you have a password set on your redis server
+      NP_REDIS_PASSWORD: ""
+
+      NP_PRESENTATION_PORT: "5000"
+      NP_PRESENTATION_INTERFACE: "0.0.0.0"
     ports:
-      - '3001:3000'
+      - "5000:5000"
     networks:
-      - netprobe-net
+      - netprobe
     dns:
       - 8.8.8.8
       - 8.8.4.4
-      
-volumes:
-  prometheus_data:
-  grafana_data:
-  
