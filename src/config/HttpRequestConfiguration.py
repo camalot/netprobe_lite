@@ -1,4 +1,3 @@
-
 class HttpRequestConfiguration:
     def __init__(self, *args, **kwargs):
         self.url = kwargs.get('url', None)

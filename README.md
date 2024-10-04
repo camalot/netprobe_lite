@@ -103,8 +103,6 @@ Change 8.8.8.8 to the IP of the DNS server you use, then restart the application
 
 ## CALCULATIONS
 
-###
-
 > [!NOTE]
 > The coefficient of variation (CV) is a statistic that compares the standard deviation of a data set
 > to its mean. It's calculated by dividing the standard deviation by the mean, and is often expressed
