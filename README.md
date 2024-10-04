@@ -144,27 +144,27 @@ Change 8.8.8.8 to the IP of the DNS server you use, then restart the application
 Final Score:
 
 ``` math
-overall\_score=\left(1-weight\_loss \times cv\_loss\right)-\left(weight\_jitter \times cv\_jitter\right)
+overall\_score=\left(1-weight\_loss \ast cv\_loss\right)-\left(weight\_jitter \ast cv\_jitter\right)
 ```
 
 ``` math
--\left(weight\_latency \times cv\_latency\right)
+-\left(weight\_latency \ast cv\_latency\right)
 ```
 
 ``` math
--\left(weight\_internal_dns\_latency \times cv\_internal\_dns\_latency\right)
+-\left(weight\_internal_dns\_latency \ast cv\_internal\_dns\_latency\right)
 ```
 
 ``` math
--\left(weight\_external_dns\_latency \times cv\_external\_dns\_latency\right)
+-\left(weight\_external_dns\_latency \ast cv\_external\_dns\_latency\right)
 ```
 
 ``` math
--\left(weight\_speedtest\_download \times cv\_download\right)
+-\left(weight\_speedtest\_download \ast cv\_download\right)
 ```
 
 ``` math
--\left(weight\_speedtest\_upload \times cv\_upload\right)
+-\left(weight\_speedtest\_upload \ast cv\_upload\right)
 ```
 
 ## DASHBOARD
