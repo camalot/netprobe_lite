@@ -48,60 +48,85 @@ The collection of the metrics is stored in a Datastore to cache for use. There a
 > 1. Environment Variable Value
 > 1. Configuration File Value
 > 1. Default Value
-
+<!-- editorconfig-checker-disable -->
 <!-- markdownlint-disable MD013 -->
 | NAME | DESCRIPTION | YAML PATH | TYPE | DEFAULT |
 |----------|----------|----------|------|---------|
-| `NP_CONFIG_FILE`               | The path to the yaml config file        |                                  | `string`    | `/config/netprobe.yaml` |
-| `NP_DATASTORE_PROBE_TYPE`      | The PROBE datastore type                | `$.datastore.probe.type`         | `string`    | `FILE`                  |
-| `NP_DATASTORE_SPEEDTEST_TYPE`  | The SPEEDTEST datastore type            | `$.datastore.speedtest.type`     | `string`    | `FILE`                  |
-| `NP_DATASTORE_NETPROBE_TOPIC`  | Datastore PROBE topic name              | `$.datastore.probe.topic`        | `string`    | `netprobe/probe`        |
-| `NP_DATASTORE_SPEEDTEST_TOPIC` | Datastore SPEEDTEST topic name          | `$.datastore.speedtest.topic`    | `string`    | `netprobe/speedtest`    |
-| `NP_FILE_DATASTORE_PATH`       | Root path for the file datastore        | `$.datastore.file.path`          | `string`    | `/data/cache`           |
-| `NP_HTTP_READ_URL`             | read URL                                | `$.datastore.http.read.url`      | `string`    | `''`                    |
-| `NP_HTTP_WRITE_URL`            | write URL                               | `$.datastore.http.write.url`     | `string`    | `''`                    |
-| `NP_HTTP_READ_METHOD`          | read method                             | `$.datastore.http.read.method`   | `string`    | `GET`                   |
-| `NP_HTTP_WRITE_METHOD`         | write method                            | `$.datastore.http.write.method`  | `string`    | `POST`                  |
-| `NP_HTTP_READ_HEADERS`         | headers                                 | `$.datastore.http.read.headers`  | `dict`      | `{}`                    |
-| `NP_HTTP_WRITE_HEADERS`        | headers                                 | `$.datastore.http.write.headers` | `dict`      | `{}`                    |
-| `NP_HTTP_READ_TIMEOUT`         | timeout                                 | `$.datastore.http.read.timeout`  | `int`       | `5`                     |
-| `NP_HTTP_WRITE_TIMEOUT`        | timeout                                 | `$.datastore.http.write.timeout` | `int`       | `5`                     |
-| `NP_HTTP_READ_AUTH`            | auth object                             | `$.datastore.http.read.auth`     | `dict`      | `{}`                    |
-| `NP_HTTP_WRITE_AUTH`           | auth object                             | `$.datastore.http.write.auth`    | `dict`      | `{}`                    |
-| `NP_HTTP_READ_COOKIES`         | cookies object                          | `$.datastore.http.read.cookies`  | `dict`      | `{}`                    |
-| `NP_HTTP_WRITE_COOKIES`        | cookies object                          | `$.datastore.http.write.cookies` | `dict`      | `{}`                    |
-| `NP_HTTP_READ_PARAMS`          | params                                  | `$.datastore.http.read.params`   | `dict`      | `{}`                    |
-| `NP_HTTP_WRITE_PARAMS`         | params                                  | `$.datastore.http.write.params`  | `dict`      | `{}`                    |
-| `NP_HTTP_VERIFY_SSL`           | flag for validating ssl                 | `$.datastore.http.verify_ssl`    | `bool`      | `true`                  |
-| `NP_LOG_LEVEL`                 | Minimum output log level                | `$.logging.level`                | `string`    | `INFO`                  |
-| `NP_LOG_FORMAT`                | Log output format                       | `$.logging.format`               | `string`    | `%(asctime)s [%(levelname)s] [%(name)s] %(message)s` |
-| `NP_LOG_DATE_FORMAT`           | Log date format                         | `$.logging.date_format`          | `string`    | `%Y-%m-%d %H:%M:%S`     |
-| `NP_MQTT_HOST`                 | MQTT hostname                           | `$.datastore.mqtt.host`          | `string`    | `localhost`             |
-| `NP_MQTT_PORT`                 | MQTT port                               | `$.datastore.mqtt.port`          | `int`       | `1833`                  |
-| `NP_MQTT_USERNAME`             | MQTT auth username                      | `$.datastore.mqtt.username`      | `string`    | `''`                    |
-| `NP_MQTT_PASSWORD`             | MQTT auth password                      | `$.datastore.mqtt.password`      | `string`    | `''`                    |
-| `NP_MONGODB_URL`               | Mongodb URL                             | `$.datastore.mongodb.url`        | `string`    | `mongodb://localhost:27017/admin` |
-| `NP_MONGODB_DB`                | Mongodb database name                   | `$.datastore.mongodb.db`         | `string`    | `netprobe`              |
-| `NP_MONGODB_COLLECTION`        | Mongodb database collection             | `$.datastore.mongodb.collection` | `string`    | `netprobe`              |
-| `NP_PRESENTATION_PORT`         | Listen port for metrics server          | `$.presentation.port`            | `int`       | `5000`                  |
-| `NP_PRESENTATION_INTERFACE`    | Interface to bind for listening         | `$.presentation.interface`       | `string`    | `0.0.0.0`               |
-| `NP_PROBE_ENABLED`             | Enable the network probe                | `$.probe.enabled`                | `bool`      | `true`                  |
-| `NP_PROBE_COUNT`               | Number of probes to execute             | `$.probe.count`                  | `int`       | `50`                    |
-| `NP_DEVICE_ID`                 | Name used as namespace for metrics      | `$.probe.device_id`              | `string`    | `netprobe`              |
-| `NP_PROBE_DNS_TEST_SITE`       | Domain to perform DNS resolve           | `$.probe.dns.test`               | `string`    | `google.com`            |
-| `NP_PROBE_INTERVAL`            | How often to execute probe (seconds)    | `$.probe.interval`               | `int`       | `30`                    |
-| `NP_SITES`                     | Comma separated list of domains to test | `$.probe.sites`                  | `list[str]` |                         |
-| `NP_REDIS_HOST`                | Redis hostname                          | `$.datastore.redis.host`         | `string`    | `localhost`             |
-| `NP_SPEEDTEST_ENABLED`         | Enable or disable speed test            | `$.speedtest.enabled`            | `bool`      | `False`                 |
-| `NP_SPEEDTEST_INTERVAL`        | Interval between speed tests            | `$.speedtest.interval`           | `int`       | `3600`                  |
-| `NP_DNS_NAMESERVER_4_IP`       | IPv4 address of DNS server              | `$.dns.nameserver_4_ip`          | `string`    | `8.8.8.8`               |
-| `NP_DNS_NAMESERVER_6_IP`       | IPv6 address of DNS server              | `$.dns.nameserver_6_ip`          | `string`    | `2001:4860:4860::8888`  |
+| `NP_CONFIG_FILE` | The path to the yaml config file |  | `string` | `/config/netprobe.yaml` |
+| `NP_DATASTORE_PROBE_TYPE` | The PROBE datastore type | `$.datastore.probe.type` | `string` | `FILE` |
+| `NP_DATASTORE_SPEEDTEST_TYPE` | The SPEEDTEST datastore type | `$.datastore.speedtest.type` | `string` | `FILE` |
+| `NP_DATASTORE_NETPROBE_TOPIC` | Datastore PROBE topic name | `$.datastore.probe.topic` | `string` | `netprobe/probe` |
+| `NP_DATASTORE_SPEEDTEST_TOPIC` | Datastore SPEEDTEST topic name | `$.datastore.speedtest.topic` | `string` | `netprobe/speedtest` |
+| `NP_FILE_DATASTORE_PATH` | Root path for the file datastore | `$.datastore.file.path` | `string` | `/data/cache` |
+| `NP_HTTP_READ_URL` | read URL | `$.datastore.http.read.url` | `string` | `''` |
+| `NP_HTTP_WRITE_URL` | write URL | `$.datastore.http.write.url`  | `string` | `''` |
+| `NP_HTTP_READ_METHOD` | read method | `$.datastore.http.read.method` | `string` | `GET` |
+| `NP_HTTP_WRITE_METHOD` | write method | `$.datastore.http.write.method` | `string` | `POST` |
+| `NP_HTTP_READ_HEADERS` | headers | `$.datastore.http.read.headers` | `dict` | `{}` |
+| `NP_HTTP_WRITE_HEADERS` | headers | `$.datastore.http.write.headers` | `dict` | `{}` |
+| `NP_HTTP_READ_TIMEOUT` | timeout | `$.datastore.http.read.timeout` | `int` | `5` |
+| `NP_HTTP_WRITE_TIMEOUT` | timeout | `$.datastore.http.write.timeout` | `int` | `5` |
+| `NP_HTTP_READ_AUTH` | auth object | `$.datastore.http.read.auth` | `dict` | `{}` |
+| `NP_HTTP_WRITE_AUTH` | auth object | `$.datastore.http.write.auth` | `dict` | `{}` |
+| `NP_HTTP_READ_COOKIES` | cookies object | `$.datastore.http.read.cookies` | `dict` | `{}` |
+| `NP_HTTP_WRITE_COOKIES` | cookies object | `$.datastore.http.write.cookies` | `dict` | `{}` |
+| `NP_HTTP_READ_PARAMS` | params | `$.datastore.http.read.params` | `dict` | `{}` |
+| `NP_HTTP_WRITE_PARAMS` | params | `$.datastore.http.write.params` | `dict` | `{}` |
+| `NP_HTTP_VERIFY_SSL` | flag for validating ssl | `$.datastore.http.verify_ssl` | `bool` | `true` |
+| `NP_LOG_LEVEL` | Minimum output log level | `$.logging.level` | `string` | `INFO` |
+| `NP_LOG_FORMAT` | Log output format | `$.logging.format` | `string` | `%(asctime)s [%(levelname)s] [%(name)s] %(message)s` |
+| `NP_LOG_DATE_FORMAT` | Log date format | `$.logging.date_format` | `string` | `%Y-%m-%d %H:%M:%S` |
+| `NP_MQTT_HOST` | MQTT hostname | `$.datastore.mqtt.host` | `string` | `localhost` |
+| `NP_MQTT_PORT` | MQTT port | `$.datastore.mqtt.port` | `int` | `1833` |
+| `NP_MQTT_USERNAME` | MQTT auth username | `$.datastore.mqtt.username` | `string` | `''` |
+| `NP_MQTT_PASSWORD` | MQTT auth password | `$.datastore.mqtt.password` | `string` | `''` |
+| `NP_MONGODB_URL` | Mongodb URL | `$.datastore.mongodb.url` | `string` | `mongodb://localhost:27017/admin` |
+| `NP_MONGODB_DB` | Mongodb database name | `$.datastore.mongodb.db` | `string` | `netprobe` |
+| `NP_MONGODB_COLLECTION` | Mongodb database collection | `$.datastore.mongodb.collection` | `string` | `netprobe` |
+| `NP_PRESENTATION_PORT` | Listen port for metrics server | `$.presentation.port` | `int` | `5000` |
+| `NP_PRESENTATION_INTERFACE` | Interface to bind for listening | `$.presentation.interface` | `string` | `0.0.0.0` |
+| `NP_PROBE_ENABLED` | Enable the network probe | `$.probe.enabled` | `bool` | `true` |
+| `NP_PROBE_COUNT` | Number of probes to execute | `$.probe.count` | `int` | `50` |
+| `NP_DEVICE_ID` | Name used as namespace for metrics | `$.probe.device_id` | `string` | `netprobe` |
+| `NP_PROBE_DNS_TEST_SITE` | Domain to perform DNS resolve | `$.probe.dns.test` | `string` | `google.com` |
+| `NP_PROBE_INTERVAL` | How often to execute probe (seconds) | `$.probe.interval` | `int` | `30` |
+| `NP_SITES` | Comma separated list of domains to test | `$.probe.sites` | `list[str]` |  |
+| `NP_REDIS_HOST` | Redis datastore hostname | `$.datastore.redis.host` | `string` | `localhost` |
+| `NP_REDIS_PORT` | Redis datastore port | `$.datastore.redis.port` | `int` | `6379` |
+| `NP_REDIS_DB` | Redis datastore db | `$.datastore.redis.db` | `string` | `0` |
+| `NP_REDIS_PASSWORD`  | Redis datastore password | `$.datastore.redis.password` | `string` | `''` |
+| `NP_SPEEDTEST_ENABLED` | Enable or disable speed test | `$.speedtest.enabled` | `bool` | `false` |
+| `NP_SPEEDTEST_INTERVAL` | Interval between speed tests | `$.speedtest.interval` | `int` | `923` |
+| `NP_SPEEDTEST_WEIGHT_REBALANCE` | Should the weight rebalance | `$.health.weights.speedtest_rebalance` | `bool` | `true` |
+| `NP_SPEEDTEST_WEIGHT_ENFORCE` | Keep the weight even if disabled | `$.health.weights.speedtest_enforce` | `bool` | `false` |
+| `NP_THRESHOLD_EXTERNAL_DNS_LATENCY` | External DNS Latency Threshold | `$.health.thresholds.external_dns_latency` | `int` | `100` |
+| `NP_THRESHOLD_INTERNAL_DNS_LATENCY` | Internal DNS Latency Threshold | `$.health.thresholds.internal_dns_latency` | `int` | `100` |
+| `NP_THRESHOLD_JITTER` | Jitter threshold | `$.health.thresholds.jitter` | `int` | `40` |
+| `NP_THRESHOLD_LATENCY` | Latency threshold | `$.health.thresholds.latency` | `int` | `100` |
+| `NP_THRESHOLD_LOSS` | Packet loss threshold | `$.health.thresholds.loss` | `int` | `5` |
+| `NP_THRESHOLD_SPEEDTEST_DOWNLOAD` | Download speed threshold | `$.health.thresholds.speedtest_download` | `float` | `200` |
+| `NP_THRESHOLD_SPEEDTEST_UPLOAD` | Upload speed threshold | `$.health.thresholds.speedtest_upload` | `float` | `200` |
+| `NP_WEIGHT_EXTERNAL_DNS_LATENCY` | External DNS Latency Score Weight | `$.health.weights.external_dns_latency` | `float` | `0.025` |
+| `NP_WEIGHT_INTERNAL_DNS_LATENCY` | Internal DNS Latency Score Weight | `$.health.weights.internal_dns_latency` | `float` | `0.025` |
+| `NP_WEIGHT_JITTER` | Jitter Score Weight | `$.health.weights.jitter` | `float` | `0.2` |
+| `NP_WEIGHT_LATENCY` | Latency Score Weight | `$.health.weights.latency` | `float` | `0.15` |
+| `NP_WEIGHT_LOSS` | Packet Loss Score Weight | `$.health.weights.loss` | `float` | `0.4` |
+| `NP_WEIGHT_SPEEDTEST_DOWNLOAD` | Download Speed Score Weight | `$.health.weights.speedtest_download` | `float` | `0.1` |
+| `NP_WEIGHT_SPEEDTEST_UPLOAD` | Upload Speed Score Weight | `$.health.weights.speedtest_upload` | `float` | `0.1` |
+| `NP_DNS_NAMESERVER_{INDEX}` | Define name of external DNS | `$.probe.dns.nameservers[].name` | `string` |  |
+| `NP_DNS_NAMESERVER_{INDEX}_IP` | Define IP of external DNS | `$.probe.dns.nameservers[].ip` | `string` |  |
+| `NP_LOCAL_DNS_NAMESERVER_{INDEX}` | Define name of internal DNS | `$.probe.dns.local[].name` | `string` |  |
+| `NP_LOCAL_DNS_NAMESERVER_{INDEX}_IP` | Define IP of internal DNS | `$.probe.dns.local[].ip` | `string` |  |
+| `NP_LOCAL_DNS` | Define name of a single internal DNS | `$.probe.dns.local[].name` | `string` |  |
+| `NP_LOCAL_DNS_IP` | Define IP of a single internal DNS | `$.probe.dns.local[].ip` | `string` |  |
+
+<!-- editorconfig-checker-enable -->
 <!-- markdownlint-enable MD013 -->
 ### Configuration via file
 
 A configuration file can be used. The default location is `/config/netprobe.yaml`.
 
-See [sample.netprobe.yaml](sample.netprobe.yaml) file for example configuration.
+See [netprobe.yaml](netprobe.yaml) file for example configuration.
 
 `NP_CONFIG_FILE` environment variable can be set to change the path of the configuration file.
 
@@ -111,6 +136,8 @@ See [sample.netprobe.yaml](sample.netprobe.yaml) file for example configuration.
 > 1. Environment Variable Value
 > 1. Configuration File Value
 > 1. Default Value
+
+Values are pulled from the yaml file using `YAQL`. The YAQL Path for each configuration value are defined in the environment variables section above.
 
 ## Installation
 
