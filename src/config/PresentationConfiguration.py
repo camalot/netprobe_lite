@@ -6,7 +6,12 @@ from lib.enums.YamlVars import YamlVars
 
 
 class PresentationConfiguration:
-    def __init__(self, base: dict = {}, probe: NetProbeConfiguration = None, speedtest: SpeedTestConfiguration = None):  # type: ignore
+    def __init__(
+        self,
+        base: dict = {},
+        probe: NetProbeConfiguration = None,  # type: ignore
+        speedtest: SpeedTestConfiguration = None,  # type: ignore
+    ):
         if not probe:
             raise ValueError("Probe configuration is required")
         if not speedtest:

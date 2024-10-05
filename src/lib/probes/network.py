@@ -75,27 +75,3 @@ class NetworkProbe(BaseProbe):
             f"SPEEDTEST DOWNLOAD THRESHOLD: {self.app_config.presentation.threshold_speedtest_download}Mbp/s"
         )
         self.logger.info(f"SPEEDTEST UPLOAD THRESHOLD: {self.app_config.presentation.threshold_speedtest_upload}Mbp/s")
-
-    # def run(self):
-    #     while True:
-    #         try:
-    #             self.logger.debug("Testing network")
-    #             stats = self.collector.collect()
-    #         except Exception as e:
-    #             self.logger.error("Error testing network")
-    #             self.logger.error(e)
-    #             self.logger.error(traceback.format_exc())
-    #             continue
-    #         # Connect to Datastore
-    #         try:
-    #             data_store = DatastoreFactory().create(self.config.datastore.netprobe.get('type', DataStoreTypes.NONE))
-    #             cache_interval = self.interval + 15  # Set the cache TTL slightly longer than the probe interval
-    #             topic = self.config.datastore.netprobe.get('topic', ConfigurationDefaults.DATASTORE_PROBE_TOPIC)
-    #             data_store.write(topic, stats, cache_interval)
-    #             self.logger.debug("Stats successfully written to data store")
-    #         except Exception as e:
-    #             self.logger.error("Could not connect to data store")
-    #             self.logger.error(e)
-    #             self.logger.error(traceback.format_exc())
-    #         self.logger.debug(f'Probe sleeping for {self.interval} seconds')
-    #         time.sleep(self.interval)

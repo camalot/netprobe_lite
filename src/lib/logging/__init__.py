@@ -6,7 +6,9 @@ from config.LoggingConfiguration import LoggingConfiguration
 from lib.logging.ColorFormatter import ColorFormatter
 
 
-def setup_logging(name: typing.Optional[str] = None, config: LoggingConfiguration = None) -> logging.Logger:  # type: ignore
+def setup_logging(
+    name: typing.Optional[str] = None, config: LoggingConfiguration = None  # type: ignore
+) -> logging.Logger:
     logger = logging.getLogger("netprobe" if name is None else name)
     log_config: LoggingConfiguration = config
     if log_config is None:
@@ -15,10 +17,7 @@ def setup_logging(name: typing.Optional[str] = None, config: LoggingConfiguratio
     logger.setLevel(level=log_config.level or logging.INFO)
 
     # Set formatter
-    logColorFormatter = ColorFormatter(
-        # fmt="%(asctime)s [%(levelname)s] [%(name)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
-        fmt=log_config.format, datefmt=log_config.date_format
-    )
+    logColorFormatter = ColorFormatter(fmt=log_config.format, datefmt=log_config.date_format)
 
     stdoutHandler = logging.StreamHandler(sys.stdout)
     stdoutHandler.name = "stdout"

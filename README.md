@@ -52,7 +52,7 @@ The collection of the metrics is stored in a Datastore to cache for use. There a
 <!-- markdownlint-disable MD013 -->
 | NAME | DESCRIPTION | YAML PATH | TYPE | DEFAULT |
 |----------|----------|----------|------|---------|
-| `NP_CONFIG_FILE` | The path to the yaml config file |  | `string` | `/config/netprobe.yaml` |
+| `NP_CONFIG_FILE` | The path to the YAML config file |  | `string` | `/config/netprobe.yaml` |
 | `NP_DATASTORE_PROBE_TYPE` | The PROBE datastore type | `$.datastore.probe.type` | `string` | `FILE` |
 | `NP_DATASTORE_SPEEDTEST_TYPE` | The SPEEDTEST datastore type | `$.datastore.speedtest.type` | `string` | `FILE` |
 | `NP_DATASTORE_NETPROBE_TOPIC` | Datastore PROBE topic name | `$.datastore.probe.topic` | `string` | `netprobe/probe` |
@@ -137,7 +137,7 @@ See [netprobe.yaml](netprobe.yaml) file for example configuration.
 > 1. Configuration File Value
 > 1. Default Value
 
-Values are pulled from the yaml file using `YAQL`. The YAQL Path for each configuration value are defined in the environment variables section above.
+Values are pulled from the YAML file using `YAQL`. The YAQL Path for each configuration value are defined in the environment variables section above.
 
 ## Installation
 
