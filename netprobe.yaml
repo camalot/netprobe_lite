@@ -109,7 +109,8 @@ speedtest:
 
 health:
   weights:
-    # These are the relative weights used to calculate your 'Internet Quality Score', they can be modified but must add up to 1.0
+    # These are the relative weights used to calculate your 'Internet Quality Score', they can be modified but
+    # must add up to 1.0
     loss: 0.4
     latency: 0.15
     jitter: 0.2
@@ -121,7 +122,7 @@ health:
     # by the speedtest_download and speedtest_upload weights
     # if rebalance is yes, and enforce is yes, then it will not rebalance the weights of the speedtest
     # if rebalance is yes, and enforce is no, then it will rebalance the weights of the speedtest
-    # by applying the weights of the speedtest_download and speedtest_upload to the loss. 
+    # by applying the weights of the speedtest_download and speedtest_upload to the loss.
     speedtest_rebalance: no
     speedtest_enforce: yes
   thresholds:
