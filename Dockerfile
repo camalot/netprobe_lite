@@ -6,12 +6,12 @@ ARG BASE_IMAGE_ARCH=amd64
 # Default to Python 3.12 if no build argument is provided
 ARG PYTHON_VERSION=3.12
 
+# slim-bookworm
+FROM ${BASE_IMAGE_ARCH}/python:${PYTHON_VERSION}-alpine
+
 ARG BRANCH="develop"
 ARG BUILD_VERSION="1.0.0-snapshot"
 ARG PROJECT_NAME=netprobe_lite
-
-# slim-bookworm
-FROM ${BASE_IMAGE_ARCH}/python:${PYTHON_VERSION}-alpine
 
 ENV PYTHONUNBUFFERED=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=on
@@ -27,6 +27,8 @@ WORKDIR /app
 
 # Copy application code
 COPY ./src/ /app/
+# copy default configuration file
+COPY ./netprobe.yaml /config/netprobe.yaml
 
 RUN \
     apk update \
